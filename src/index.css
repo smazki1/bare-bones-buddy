@@ -118,4 +118,28 @@
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
   }
+
+  /* Scrollbar Hide Utility */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Smooth scroll behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* High contrast accessibility */
+  @media (prefers-contrast: high) {
+    :root {
+      --primary: 341 80% 25%;
+      --secondary: 19 100% 45%;
+      --foreground: 0 0% 10%;
+    }
+  }
 }
