@@ -1,98 +1,83 @@
 import { motion } from 'framer-motion';
-import { Button } from './ui/button';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 
 const FeatureWorkSection = () => {
   const { ref, isIntersecting } = useIntersectionObserver({ threshold: 0.2 });
 
-  const featureItems = [
+  const businessSolutions = [
     {
       id: 1,
-      title: 'ספקי מזון',
-      description: 'פתרונות לאירועים',
-      image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      category: 'suppliers'
+      title: 'מסעדות',
+      image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      href: '#restaurants'
     },
     {
       id: 2,
-      title: 'מסעדות',
-      description: 'תפריטים מושלמים',
-      image: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      category: 'restaurants'
+      title: 'מאפיות וקונדיטוריות',
+      image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      href: '#bakeries'
     },
     {
       id: 3,
-      title: 'אוכל מהיר',
-      description: 'מהירות ושיווק',
-      image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      category: 'fast-food'
+      title: 'מטבחי רפאים ועסקי משלוחים',
+      image: 'https://images.unsplash.com/photo-1565299507177-b0ac66763828?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      href: '#delivery'
     },
     {
       id: 4,
-      title: 'מאפיות',
-      description: 'מסורת במראה חדש',
-      image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      category: 'bakeries'
+      title: 'יצרני מזון וסלסלות שי',
+      image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      href: '#producers'
     },
   ];
 
   return (
-    <section ref={ref} className="py-20 bg-background">
+    <section ref={ref} className="py-20 bg-background" dir="rtl">
       <div className="container mx-auto px-4">
+        {/* RTL Title */}
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={isIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-16"
+          className="text-right mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-assistant font-bold text-primary mb-4">
-            העבודות שלנו
+          <h2 className="text-4xl md:text-5xl font-assistant font-bold text-primary">
+            פתרונות מותאמים לכל עסק
           </h2>
-          <p className="text-xl text-muted-foreground font-open-sans max-w-2xl mx-auto">
-            גלה איך אנחנו מסייעים לעסקים שונים ליצור תמונות מקצועיות
-          </p>
         </motion.div>
 
-        {/* Horizontal Scroll Container */}
-        <div className="overflow-x-auto scrollbar-hide">
-          <div className="flex gap-8 pb-4" style={{ width: 'max-content' }}>
-            {featureItems.map((item, index) => (
-              <motion.div
-                key={item.id}
-                initial={{ opacity: 0, x: 100 }}
-                animate={isIntersecting ? { opacity: 1, x: 0 } : { opacity: 0, x: 100 }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
-                className="flex-shrink-0 w-80 group cursor-pointer"
-              >
-                <div className="relative overflow-hidden rounded-2xl shadow-elegant hover:shadow-warm transition-all duration-500 group-hover:scale-105">
-                  <div className="aspect-[4/3] relative">
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-                    
-                    <div className="absolute bottom-6 left-6 right-6 text-white">
-                      <h3 className="text-2xl font-assistant font-bold mb-2">
-                        {item.title}
-                      </h3>
-                      <p className="text-white/90 font-open-sans text-lg mb-4">
-                        {item.description}
-                      </p>
-                      <Button
-                        variant="outline"
-                        className="border-white/30 text-white hover:bg-white/10 font-assistant"
-                      >
-                        צפה בדוגמאות
-                      </Button>
-                    </div>
-                  </div>
+        {/* Responsive Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {businessSolutions.map((solution, index) => (
+            <motion.a
+              key={solution.id}
+              href={solution.href}
+              initial={{ opacity: 0, y: 50 }}
+              animate={isIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              className="group relative overflow-hidden rounded-2xl shadow-elegant hover:shadow-warm transition-all duration-500 cursor-pointer block"
+            >
+              <div className="aspect-[4/3] relative">
+                {/* Background Image */}
+                <img
+                  src={solution.image}
+                  alt={solution.title}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  loading="lazy"
+                />
+                
+                {/* Hover Overlay */}
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                {/* Title on Hover */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
+                  <h3 className="text-2xl md:text-3xl font-bold text-white text-center px-4" style={{ fontFamily: 'Assistant, sans-serif' }}>
+                    {solution.title}
+                  </h3>
                 </div>
-              </motion.div>
-            ))}
-          </div>
+              </div>
+            </motion.a>
+          ))}
         </div>
       </div>
     </section>
