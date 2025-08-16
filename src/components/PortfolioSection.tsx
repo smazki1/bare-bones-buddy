@@ -1,121 +1,182 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
-import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { Button } from './ui/button';
 
-interface PortfolioItem {
+interface ClientWork {
   id: number;
-  title: string;
-  category: string;
-  image: string;
-  tags: string[];
+  businessName: string;
+  businessType: string;
+  beforeImage: string;
+  afterImage: string;
+  dishName: string;
 }
 
 const PortfolioSection = () => {
   const { ref, isIntersecting } = useIntersectionObserver({ threshold: 0.1 });
-  const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
-  const [hasNextPage, setHasNextPage] = useState(true);
-  const [isFetching, setIsFetching] = useState(false);
-  const [page, setPage] = useState(1);
+  const [hoveredItem, setHoveredItem] = useState<number | null>(null);
 
-  // Mock data generator
-  const generatePortfolioItems = (pageNum: number) => {
-    const baseImages = [
-      'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-      'https://images.unsplash.com/photo-1546833999-b9f581a1996d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-      'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-      'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-      'https://images.unsplash.com/photo-1571091718767-18b5b1457add?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-      'https://images.unsplash.com/photo-1551782450-a2132b4ba21d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-    ];
-
-    const categories = ['מסעדות', 'מאפיות', 'אוכל מהיר', 'ספקי מזון'];
-    const dishes = ['פסטה', 'המבורגר', 'פיצה', 'סלט', 'דג', 'בשר', 'קינוח', 'חלה'];
-
-    return Array.from({ length: 15 }, (_, index) => {
-      const globalIndex = (pageNum - 1) * 15 + index;
-      return {
-        id: globalIndex + 1,
-        title: `${dishes[globalIndex % dishes.length]} מושלם`,
-        category: categories[globalIndex % categories.length],
-        image: baseImages[globalIndex % baseImages.length],
-        tags: ['AI מותאם', 'איכות גבוהה', 'מקצועי'],
-      };
-    });
-  };
-
-  const fetchNextPage = async () => {
-    if (isFetching) return;
-    
-    setIsFetching(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const newItems = generatePortfolioItems(page + 1);
-    setPortfolioItems(prev => [...prev, ...newItems]);
-    setPage(prev => prev + 1);
-    
-    // Stop infinite scroll after 5 pages
-    if (page >= 5) {
-      setHasNextPage(false);
+  const clientWorks: ClientWork[] = [
+    {
+      id: 1,
+      businessName: 'פיצה נאפולי',
+      businessType: 'מסעדה איטלקית',
+      dishName: 'פיצה מרגריטה',
+      beforeImage: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=60',
+      afterImage: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+    },
+    {
+      id: 2,
+      businessName: 'מאפיית הכפר',
+      businessType: 'מאפייה בוטיק',
+      dishName: 'קרואסון חמאה',
+      beforeImage: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=60',
+      afterImage: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+    },
+    {
+      id: 3,
+      businessName: 'בורגר סטיישן',
+      businessType: 'אוכל מהיר',
+      dishName: 'המבורגר קלאסי',
+      beforeImage: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=60',
+      afterImage: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+    },
+    {
+      id: 4,
+      businessName: 'גרין סלאד',
+      businessType: 'מסעדה בריאה',
+      dishName: 'סלט קיץ',
+      beforeImage: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=60',
+      afterImage: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+    },
+    {
+      id: 5,
+      businessName: 'שוקולד בריו',
+      businessType: 'קונדיטוריה',
+      dishName: 'עוגת שוקולד',
+      beforeImage: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=60',
+      afterImage: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+    },
+    {
+      id: 6,
+      businessName: 'סטייק האוס',
+      businessType: 'מסעדת בשרים',
+      dishName: 'ריב איי סטייק',
+      beforeImage: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=60',
+      afterImage: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+    },
+    {
+      id: 7,
+      businessName: 'פסטה מאמא',
+      businessType: 'מסעדה איטלקית',
+      dishName: 'פסטה ברוטב עגבניות',
+      beforeImage: 'https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=60',
+      afterImage: 'https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+    },
+    {
+      id: 8,
+      businessName: 'בר משקאות',
+      businessType: 'קוקטיילים',
+      dishName: 'קוקטיל קיץ',
+      beforeImage: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=60',
+      afterImage: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+    },
+    {
+      id: 9,
+      businessName: 'חומוס אבו גוש',
+      businessType: 'מסעדה ערבית',
+      dishName: 'חומוס טחינה',
+      beforeImage: 'https://images.unsplash.com/photo-1571197119717-7ba3d4b937ae?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=60',
+      afterImage: 'https://images.unsplash.com/photo-1571197119717-7ba3d4b937ae?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+    },
+    {
+      id: 10,
+      businessName: 'קפה לאטה',
+      businessType: 'בית קפה',
+      dishName: 'קפה עם לאטה ארט',
+      beforeImage: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=60',
+      afterImage: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+    },
+    {
+      id: 11,
+      businessName: 'עוגיות סבתא',
+      businessType: 'מאפייה ביתית',
+      dishName: 'עוגיות שוקולד צ\'יפס',
+      beforeImage: 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=60',
+      afterImage: 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
+    },
+    {
+      id: 12,
+      businessName: 'מרק הבית',
+      businessType: 'מסעדה ביתית',
+      dishName: 'מרק ירקות עם קצף',
+      beforeImage: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=60',
+      afterImage: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
     }
-    
-    setIsFetching(false);
-  };
-
-  useInfiniteScroll({ hasNextPage, fetchNextPage, isFetching });
-
-  useEffect(() => {
-    // Load initial items
-    const initialItems = generatePortfolioItems(1);
-    setPortfolioItems(initialItems);
-  }, []);
+  ];
 
   return (
-    <section ref={ref} className="py-20 bg-gradient-subtle">
+    <section ref={ref} className="py-20 bg-background" dir="rtl">
       <div className="container mx-auto px-4">
+        {/* RTL Title */}
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={isIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-16"
+          className="text-right mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-assistant font-bold text-primary mb-4">
-            תיק העבודות שלנו
+          <h2 className="text-4xl md:text-5xl font-assistant font-bold text-primary">
+            הלקוחות שלנו מדברים בעד עצמם
           </h2>
-          <p className="text-xl text-muted-foreground font-open-sans max-w-2xl mx-auto">
-            עיין בתמונות AI מקצועיות שיצרנו עבור מסעדות ועסקי מזון
-          </p>
         </motion.div>
 
-        {/* Portfolio Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {portfolioItems.map((item, index) => (
+        {/* Client Gallery Grid - 4x3 Desktop, 2xN Mobile */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-6xl mx-auto">
+          {clientWorks.map((work, index) => (
             <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: (index % 15) * 0.1 }}
-              className="group cursor-pointer"
+              key={work.id}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={isIntersecting ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              className="group relative overflow-hidden rounded-xl cursor-pointer"
+              onMouseEnter={() => setHoveredItem(work.id)}
+              onMouseLeave={() => setHoveredItem(null)}
             >
-              <div className="relative overflow-hidden rounded-2xl shadow-elegant hover:shadow-warm transition-all duration-500 group-hover:scale-105">
-                <div className="aspect-square relative">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  
-                  <div className="absolute bottom-4 left-4 right-4 text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 opacity-0 group-hover:opacity-100">
-                    <h3 className="text-lg font-assistant font-bold mb-1">
-                      {item.title}
+              <div className="w-full aspect-square relative">
+                {/* After Image (Default) */}
+                <img
+                  src={work.afterImage}
+                  alt={`${work.dishName} - לאחר`}
+                  className={`w-full h-full object-cover transition-opacity duration-500 ${
+                    hoveredItem === work.id ? 'opacity-0' : 'opacity-100'
+                  }`}
+                  loading="lazy"
+                />
+                
+                {/* Before Image (On Hover) */}
+                <img
+                  src={work.beforeImage}
+                  alt={`${work.dishName} - לפני`}
+                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+                    hoveredItem === work.id ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  loading="lazy"
+                />
+                
+                {/* Business Info Overlay */}
+                <div 
+                  className={`absolute inset-0 bg-black/60 flex flex-col justify-between p-4 transition-opacity duration-300 ${
+                    hoveredItem === work.id ? 'opacity-100' : 'opacity-0'
+                  }`}
+                >
+                  <div className="text-right">
+                    <h3 className="text-white font-assistant font-bold text-lg drop-shadow-lg">
+                      {work.businessName}
                     </h3>
-                    <p className="text-white/90 font-open-sans text-sm">
-                      {item.category}
+                  </div>
+                  <div className="text-right">
+                    <p className="text-white/90 font-open-sans text-sm drop-shadow-lg">
+                      {work.businessType}
                     </p>
                   </div>
                 </div>
@@ -124,28 +185,20 @@ const PortfolioSection = () => {
           ))}
         </div>
 
-        {/* Loading Indicator */}
-        {isFetching && (
-          <div className="flex justify-center mt-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        )}
-
-        {/* End Message */}
-        {!hasNextPage && portfolioItems.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center mt-12"
+        {/* See All Work Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+          className="text-center mt-16"
+        >
+          <Button 
+            size="lg"
+            className="bg-primary hover:bg-primary/90 text-white font-assistant font-semibold px-8 py-3"
           >
-            <p className="text-muted-foreground font-open-sans">
-              זה הכל לעכשיו! צור קשר כדי לראות עוד דוגמאות
-            </p>
-            <Button className="mt-4 bg-secondary hover:bg-secondary/90 font-assistant">
-              צור קשר לעוד דוגמאות
-            </Button>
-          </motion.div>
-        )}
+            צפה בכל העבודות
+          </Button>
+        </motion.div>
       </div>
     </section>
   );
