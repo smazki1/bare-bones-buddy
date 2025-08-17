@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+import { solutionsStore } from '@/data/solutionsStore';
+import { SolutionsConfig } from '@/types/solutions';
 
 type CardItem = {
   id: string;
@@ -130,7 +132,15 @@ const BusinessSolutionsCard = ({ item, index }: { item: CardItem; index: number 
 };
 
 const BusinessSolutionsSection = () => {
-  const enabledSolutions = BUSINESS_SOLUTIONS.filter(item => item.enabled);
+  const [config, setConfig] = useState<SolutionsConfig | null>(null);
+
+  useEffect(() => {
+    setConfig(solutionsStore.safeGetConfigOrDefaults());
+  }, []);
+
+  if (!config) return null;
+  
+  const enabledSolutions = config.items.filter(item => item.enabled).sort((a, b) => a.order - b.order);
 
   return (
     <section className="py-16 md:py-24 bg-background">
@@ -144,7 +154,7 @@ const BusinessSolutionsSection = () => {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            פתרונות מותאמים לכל עסק
+            {config.sectionTitle}
           </motion.h2>
           <motion.p
             className="text-lg md:text-xl text-muted-foreground font-open-sans leading-relaxed"
@@ -153,7 +163,7 @@ const BusinessSolutionsSection = () => {
             transition={{ duration: 0.6, delay: 0.1 }}
             viewport={{ once: true }}
           >
-            מתמחים ביצירת תוכן ויזואלי מקצועי שמתאים בדיוק לסגנון ולצרכים של העסק שלכם
+            {config.sectionSubtitle}
           </motion.p>
         </div>
 
