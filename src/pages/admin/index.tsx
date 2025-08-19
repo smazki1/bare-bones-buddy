@@ -69,12 +69,11 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
       color: 'text-blue-600'
     },
     {
-      title: 'ניהול לקוחות',
-      description: 'עדכון פרטי לקוחות והמלצות (בקרוב)',
+      title: 'ניהול שווקי מזון',
+      description: 'עריכת התגיות והקישורים של סקשן השווקים',
       icon: Users,
-      href: '#',
-      color: 'text-green-600',
-      disabled: true
+      href: '/admin/markets',
+      color: 'text-green-600'
     },
     {
       title: 'ניהול תוכן',

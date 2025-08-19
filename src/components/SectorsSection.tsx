@@ -1,18 +1,20 @@
 import { motion } from 'framer-motion';
-import { Button } from './ui/button';
+import { Link } from 'react-router-dom';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
+import { marketsStore } from '@/data/marketsStore';
+import { MarketTag } from '@/types/markets';
+import { useMemo } from 'react';
 
 const SectorsSection = () => {
   const { ref, isIntersecting } = useIntersectionObserver({ threshold: 0.3 });
-
-  const sectors = [
-    { id: 1, name: 'מנות מסעדות', href: '#portfolio?category=restaurants' },
-    { id: 2, name: 'מאפים', href: '#portfolio?category=bakeries' },
-    { id: 3, name: 'משקאות', href: '#portfolio?category=beverages' },
-    { id: 4, name: 'מגשי אירוח', href: '#portfolio?category=catering' },
-    { id: 5, name: 'מגשי פירות', href: '#portfolio?category=fruits' },
-    { id: 6, name: 'מוצרים ממותגים', href: '#portfolio?category=branded' },
-  ];
+  
+  const config = useMemo(() => marketsStore.safeGetConfigOrDefaults(), []);
+  const enabledMarkets = useMemo(() => 
+    config.items
+      .filter(item => item.enabled)
+      .sort((a, b) => a.order - b.order),
+    [config.items]
+  );
 
   return (
     <section ref={ref} className="py-20 bg-background">
@@ -23,32 +25,46 @@ const SectorsSection = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-assistant font-bold text-primary mb-4">
-            שווקים שאנו עובדים איתם
+          <h2 className="text-4xl md:text-5xl font-assistant font-bold text-primary mb-4 text-right">
+            {config.sectionTitle}
           </h2>
-          <p className="text-xl text-muted-foreground font-open-sans max-w-2xl mx-auto">
-            אנחנו מתמחים בסוגי מוצרים ושירותים מגוונים בתחום המזון
+          <p className="text-xl text-muted-foreground font-open-sans max-w-2xl mx-auto text-right">
+            {config.sectionSubtitle}
           </p>
         </motion.div>
 
         <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {sectors.map((sector, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
+            {enabledMarkets.map((market, index) => (
               <motion.div
-                key={sector.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={isIntersecting ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
+                key={market.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={isIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+                transition={{ 
+                  duration: 0.3, 
+                  delay: index * 0.08,
+                  ease: "easeOut"
+                }}
+                className="flex justify-center"
               >
-                <Button
-                  variant="outline"
-                  className="w-full h-16 text-lg font-assistant font-semibold border-2 border-border hover:border-primary hover:bg-primary hover:text-white transition-all duration-300 hover:scale-105"
-                  asChild
-                >
-                  <a href={sector.href}>
-                    {sector.name}
-                  </a>
-                </Button>
+                {market.slug ? (
+                  <Link
+                    to={`/portfolio?tag=${market.slug}`}
+                    aria-label={`פתיחת קטלוג מסונן: ${market.label}`}
+                    className="group"
+                  >
+                    <div className="bg-background border border-border rounded-full px-5 py-3 text-foreground font-assistant font-semibold text-base transition-all duration-200 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                      {market.label}
+                    </div>
+                  </Link>
+                ) : (
+                  <div 
+                    className="bg-background border border-border rounded-full px-5 py-3 text-muted-foreground font-assistant font-semibold text-base cursor-default"
+                    aria-disabled="true"
+                  >
+                    {market.label}
+                  </div>
+                )}
               </motion.div>
             ))}
           </div>
