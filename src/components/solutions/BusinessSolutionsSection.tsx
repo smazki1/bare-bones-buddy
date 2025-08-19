@@ -1,54 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { solutionsStore } from '@/data/solutionsStore';
-import { SolutionsConfig } from '@/types/solutions';
+import { SolutionsConfig, SolutionCard } from '@/types/solutions';
 
-type CardItem = {
-  id: string;
-  title: string;
-  imageSrc?: string;
-  videoSrc?: string;
-  tagSlug?: string;
-  href?: string | null;
-  enabled?: boolean;
-};
 
-const BUSINESS_SOLUTIONS: CardItem[] = [
-  {
-    id: 'restaurants',
-    title: 'מסעדות ובתי קפה',
-    videoSrc: 'https://videos.pexels.com/video-files/3196330/3196330-uhd_2560_1440_25fps.mp4',
-    tagSlug: 'restaurants',
-    href: '/portfolio?tag=restaurants',
-    enabled: true
-  },
-  {
-    id: 'bakeries',
-    title: 'מאפיות וקונדיטוריות',
-    imageSrc: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-    tagSlug: 'bakeries',
-    href: '/portfolio?tag=bakeries',
-    enabled: true
-  },
-  {
-    id: 'fast-food',
-    title: 'אוכל מהיר ורשתות',
-    imageSrc: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-    tagSlug: 'fast-food',
-    href: '/portfolio?tag=fast-food',
-    enabled: true
-  },
-  {
-    id: 'premium',
-    title: 'מוצרי יוקרה וקייטרינג',
-    imageSrc: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-    tagSlug: 'premium',
-    href: '/portfolio?tag=premium',
-    enabled: true
-  }
-];
 
-const BusinessSolutionsCard = ({ item, index }: { item: CardItem; index: number }) => {
+const BusinessSolutionsCard = ({ item, index }: { item: SolutionCard; index: number }) => {
   const [isInView, setIsInView] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -80,7 +38,7 @@ const BusinessSolutionsCard = ({ item, index }: { item: CardItem; index: number 
     }
   };
 
-  return (
+  const CardContent = () => (
     <motion.div
       ref={cardRef}
       variants={cardVariants}
@@ -91,12 +49,7 @@ const BusinessSolutionsCard = ({ item, index }: { item: CardItem; index: number 
         delay: index * 0.08,
         ease: "easeOut"
       }}
-      className="group relative aspect-[16/11] rounded-2xl overflow-hidden shadow-soft cursor-pointer transform transition-transform duration-200 hover:scale-105"
-      onClick={() => {
-        if (item.href) {
-          window.location.href = item.href;
-        }
-      }}
+      className="group relative aspect-[16/11] rounded-2xl overflow-hidden shadow-soft cursor-pointer transform transition-transform duration-200 hover:scale-105 min-w-[280px] md:min-w-0"
     >
       {/* Background Media */}
       {item.videoSrc ? (
@@ -129,13 +82,52 @@ const BusinessSolutionsCard = ({ item, index }: { item: CardItem; index: number 
       </div>
     </motion.div>
   );
+
+  // If the item has no href or tagSlug, render as non-clickable
+  if (!item.href && !item.tagSlug) {
+    return (
+      <div 
+        className="cursor-default"
+        aria-disabled="true"
+      >
+        <CardContent />
+      </div>
+    );
+  }
+
+  // Generate href if not provided but tagSlug exists
+  const href = item.href || (item.tagSlug ? `/portfolio?tag=${item.tagSlug}` : '');
+
+  return (
+    <Link 
+      to={href}
+      className="block"
+      aria-label={`פתיחת קטלוג מסונן: ${item.title}`}
+    >
+      <CardContent />
+    </Link>
+  );
 };
 
 const BusinessSolutionsSection = () => {
   const [config, setConfig] = useState<SolutionsConfig | null>(null);
 
   useEffect(() => {
-    setConfig(solutionsStore.safeGetConfigOrDefaults());
+    const updateConfig = () => {
+      setConfig(solutionsStore.safeGetConfigOrDefaults());
+    };
+    
+    updateConfig();
+    
+    // Listen for storage changes (for admin updates)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'aiMaster:solutions') {
+        updateConfig();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   if (!config) return null;
@@ -167,11 +159,42 @@ const BusinessSolutionsSection = () => {
           </motion.p>
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 md:gap-8">
+        {/* Grid - Desktop */}
+        <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 md:gap-8">
           {enabledSolutions.map((item, index) => (
             <BusinessSolutionsCard key={item.id} item={item} index={index} />
           ))}
+        </div>
+
+        {/* Horizontal Scroll - Mobile/Tablet */}
+        <div 
+          className="lg:hidden relative"
+          aria-label="פתרונות עסקיים - גלילה אופקית"
+        >
+          {/* Edge fade mask */}
+          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+          
+          <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4 -mx-4">
+            {enabledSolutions.map((item, index) => (
+              <div key={item.id} className="snap-center">
+                <BusinessSolutionsCard item={item} index={index} />
+              </div>
+            ))}
+          </div>
+
+          {/* Dots indicator */}
+          {enabledSolutions.length > 1 && (
+            <div className="flex justify-center mt-6 gap-2">
+              {enabledSolutions.map((_, index) => (
+                <div
+                  key={index}
+                  className="w-2 h-2 rounded-full bg-muted-foreground/30"
+                  aria-hidden="true"
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>

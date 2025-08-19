@@ -45,7 +45,16 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
   const isDirty = JSON.stringify(formData) !== JSON.stringify(card);
 
   const handleInputChange = (field: keyof SolutionCard, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => {
+      const updatedData = { ...prev, [field]: value };
+      
+      // Auto-generate href when tagSlug changes and href is empty
+      if (field === 'tagSlug' && value && !prev.href) {
+        updatedData.href = `/portfolio?tag=${value}`;
+      }
+      
+      return updatedData;
+    });
   };
 
   const handleImageUpload = async (file: File) => {
@@ -189,6 +198,9 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
                     placeholder="restaurants"
                     className="text-right"
                   />
+                  <p className="text-xs text-muted-foreground text-right">
+                    התג יקבע את הקישור לתיק העבודות (יצירה אוטומטית של href)
+                  </p>
                 </div>
 
                 <div className="flex items-center justify-between">
