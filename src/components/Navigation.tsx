@@ -17,10 +17,10 @@ const Navigation = () => {
   }, []);
 
   const navItems = [
-    { name: 'דוגמאות', href: '#portfolio' },
+    { name: 'דוגמאות', href: '/portfolio' },
     { name: 'שירותים', href: '#services' },
     { name: 'אודות', href: '#about' },
-    { name: 'צור קשר', href: '#contact' },
+    { name: 'צור קשר', href: '/contact' },
   ];
 
   return (
