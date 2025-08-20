@@ -49,8 +49,8 @@ const SectorsSection = () => {
               >
                 {market.slug ? (
                   <Link
-                    to={`/portfolio?tag=${market.slug}`}
-                    aria-label={`פתיחת קטלוג מסונן: ${market.label}`}
+                    to={`/category/${market.slug}`}
+                    aria-label={`פתיחת קטלוג קטגוריה: ${market.label}`}
                     className="group"
                   >
                     <div className="bg-background border border-border rounded-full px-5 py-3 text-foreground font-assistant font-semibold text-base transition-all duration-200 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">

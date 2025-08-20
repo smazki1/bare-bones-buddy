@@ -91,17 +91,17 @@ const PortfolioSection = () => {
         </motion.div>
 
         {/* Portfolio Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 justify-items-center">
           {portfolioItems.map((item, index) => (
             <motion.div
               key={item.id}
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: (index % 15) * 0.1 }}
-              className="group cursor-pointer"
+              className="group cursor-pointer w-full max-w-[150px] md:max-w-[280px]"
             >
               <div className="relative overflow-hidden rounded-2xl shadow-elegant hover:shadow-warm transition-all duration-500 group-hover:scale-105">
-                <div className="aspect-square relative">
+                <div className="aspect-[4/5] relative w-full">
                   <img
                     src={item.image}
                     alt={item.title}
@@ -111,10 +111,10 @@ const PortfolioSection = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   
                   <div className="absolute bottom-4 left-4 right-4 text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 opacity-0 group-hover:opacity-100">
-                    <h3 className="text-lg font-assistant font-bold mb-1">
+                    <h3 className="text-sm md:text-lg font-assistant font-bold mb-1">
                       {item.title}
                     </h3>
-                    <p className="text-white/90 font-open-sans text-sm">
+                    <p className="text-white/90 font-open-sans text-xs md:text-sm">
                       {item.category}
                     </p>
                   </div>

@@ -14,50 +14,78 @@ export type MarketsConfig = {
 };
 
 export const DEFAULT_MARKETS_CONFIG: MarketsConfig = {
-  sectionTitle: "שווקים שאנו עובדים איתם",
+  sectionTitle: "השווקים שאנחנו עובדים איתם",
   sectionSubtitle: "אנחנו מתמחים בסוגי מוצרים ושירותים מגוונים בתחום המזון",
   items: [
     {
       id: 'restaurants',
-      label: 'מנות מסעדות',
+      label: 'מסעדות',
       slug: 'restaurants',
       enabled: true,
       order: 0
     },
     {
       id: 'bakeries',
-      label: 'מאפים',
+      label: 'מאפיות',
       slug: 'bakeries',
       enabled: true,
       order: 1
     },
     {
-      id: 'drinks',
-      label: 'משקאות',
-      slug: 'drinks',
+      id: 'bars',
+      label: 'ברים',
+      slug: 'bars',
       enabled: true,
       order: 2
     },
     {
-      id: 'catering',
-      label: 'מגשי אירוח',
-      slug: 'catering',
+      id: 'cafes',
+      label: 'קפה ומשקאות',
+      slug: 'cafes',
       enabled: true,
       order: 3
     },
     {
-      id: 'fruit-platters',
-      label: 'מגשי פירות',
-      slug: 'fruit-platters',
+      id: 'fast-food',
+      label: 'אוכל מהיר',
+      slug: 'fast-food',
       enabled: true,
       order: 4
     },
     {
-      id: 'branded-products',
-      label: 'מוצרים ממותגים',
-      slug: 'branded-products',
+      id: 'confectioneries',
+      label: 'קונדיטוריות',
+      slug: 'confectioneries',
       enabled: true,
       order: 5
+    },
+    {
+      id: 'delicatessen',
+      label: 'מעדניות',
+      slug: 'delicatessen',
+      enabled: true,
+      order: 6
+    },
+    {
+      id: 'catering',
+      label: 'קייטרינג',
+      slug: 'catering',
+      enabled: true,
+      order: 7
+    },
+    {
+      id: 'premium',
+      label: 'מוצרי יוקרה',
+      slug: 'premium',
+      enabled: true,
+      order: 8
+    },
+    {
+      id: 'manufacturers',
+      label: 'יצרנים',
+      slug: 'manufacturers',
+      enabled: true,
+      order: 9
     }
   ],
   updatedAt: new Date().toISOString()
