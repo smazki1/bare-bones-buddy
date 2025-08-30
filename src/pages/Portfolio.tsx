@@ -11,7 +11,8 @@ import PortfolioCTA from '@/components/portfolio/PortfolioCTA';
 import { useInfiniteScrollPortfolio } from '@/utils/useInfiniteScrollPortfolio';
 import { fullPortfolioData, Project } from '@/data/portfolioMock';
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 12;
+const MAX_ITEMS_DISPLAY = 24;
 
 const Portfolio = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -28,8 +29,9 @@ const Portfolio = () => {
     return fullPortfolioData.filter(project => project.category === activeFilter);
   }, [activeFilter]);
 
-  // Check if there are more pages to load
-  const hasNextPage = currentPage * ITEMS_PER_PAGE < filteredProjects.length;
+  // Check if there are more pages to load and haven't reached max display limit
+  const hasReachedMaxItems = visibleProjects.length >= MAX_ITEMS_DISPLAY;
+  const hasNextPage = currentPage * ITEMS_PER_PAGE < filteredProjects.length && !hasReachedMaxItems;
 
   // Load next page of projects
   const fetchNextPage = async () => {
@@ -40,10 +42,13 @@ const Portfolio = () => {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    const nextPageProjects = filteredProjects.slice(
-      0, 
-      (currentPage + 1) * ITEMS_PER_PAGE
+    // Calculate next batch, ensuring we don't exceed MAX_ITEMS_DISPLAY
+    const nextItemsCount = Math.min(
+      (currentPage + 1) * ITEMS_PER_PAGE,
+      MAX_ITEMS_DISPLAY
     );
+    
+    const nextPageProjects = filteredProjects.slice(0, nextItemsCount);
     
     setVisibleProjects(nextPageProjects);
     setCurrentPage(prev => prev + 1);
@@ -74,8 +79,8 @@ const Portfolio = () => {
     
     // Load initial projects for new filter
     setTimeout(() => {
-      const initialProjects = (filter === 'all' ? fullPortfolioData : fullPortfolioData.filter(p => p.category === filter))
-        .slice(0, ITEMS_PER_PAGE);
+      const filteredData = filter === 'all' ? fullPortfolioData : fullPortfolioData.filter(p => p.category === filter);
+      const initialProjects = filteredData.slice(0, ITEMS_PER_PAGE);
       setVisibleProjects(initialProjects);
       setIsLoading(false);
     }, 300);
@@ -111,13 +116,14 @@ const Portfolio = () => {
             <MasonryGrid 
               projects={visibleProjects}
               isLoading={isLoading && visibleProjects.length === 0}
+              hasReachedMaxItems={hasReachedMaxItems}
             />
             
-            {/* Infinite scroll sentinel */}
-            <div ref={sentinelRef} className="h-10" />
+            {/* Infinite scroll sentinel - only show if haven't reached max items */}
+            {!hasReachedMaxItems && <div ref={sentinelRef} className="h-10" />}
             
             {/* Loading indicator for pagination */}
-            {isLoading && visibleProjects.length > 0 && (
+            {isLoading && visibleProjects.length > 0 && !hasReachedMaxItems && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -126,9 +132,56 @@ const Portfolio = () => {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </motion.div>
             )}
+
+            {/* Conversion CTA when reached max items */}
+            {hasReachedMaxItems && !isLoading && (
+              <motion.div
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+                className="mt-16 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-2xl p-8 md:p-12 text-center border border-primary/10"
+              >
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.5 }}
+                >
+                  <div className="text-6xl mb-6">✨</div>
+                  <h3 className="text-3xl md:text-4xl font-assistant font-bold text-primary mb-4">
+                    ראיתם את הטוב ביותר שלנו
+                  </h3>
+                  <p className="text-xl text-muted-foreground font-open-sans mb-8 max-w-2xl mx-auto">
+                    מוכנים ליצור ויזואלים מרהיבים למסעדה שלכם? בואו נדבר!
+                  </p>
+                  
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <motion.a
+                      href="/contact"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-assistant font-semibold px-8 py-4 text-lg rounded-xl shadow-warm hover:shadow-elegant transition-all duration-300 inline-flex items-center gap-2"
+                    >
+                      בואו ניצור קסם למסעדה שלכם
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </motion.a>
+                    
+                    <motion.a
+                      href="/contact"
+                      whileHover={{ scale: 1.02 }}
+                      className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-assistant font-semibold px-6 py-3 text-lg rounded-xl transition-all duration-300 inline-flex items-center gap-2"
+                    >
+                      רוצה לראות עוד דוגמאות?
+                    </motion.a>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
           </section>
           
-          <PortfolioCTA />
+          {/* Only show original CTA if haven't reached max items */}
+          {!hasReachedMaxItems && <PortfolioCTA />}
         </main>
         
         <Footer />

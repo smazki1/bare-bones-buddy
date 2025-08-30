@@ -6,9 +6,10 @@ import { Project } from '@/data/portfolioMock';
 interface MasonryGridProps {
   projects: Project[];
   isLoading: boolean;
+  hasReachedMaxItems?: boolean;
 }
 
-const MasonryGrid = ({ projects, isLoading }: MasonryGridProps) => {
+const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridProps) => {
   const renderSkeletons = () => {
     return Array.from({ length: 6 }, (_, index) => (
       <div key={`skeleton-${index}`} className="break-inside-avoid mb-5">
@@ -28,13 +29,28 @@ const MasonryGrid = ({ projects, isLoading }: MasonryGridProps) => {
         transition={{ duration: 0.6, delay: 0.4 }}
         className="columns-1 md:columns-2 lg:columns-3 gap-5 space-y-0"
       >
-        {projects.map((project, index) => (
-          <ProjectCard
-            key={project.id}
-            project={project}
-            index={index}
-          />
-        ))}
+        {projects.map((project, index) => {
+          // Apply fade effect to last 6 items when max reached
+          const isLastRow = hasReachedMaxItems && index >= projects.length - 6;
+          const fadeOpacity = isLastRow ? 0.4 : 1;
+          
+          return (
+            <motion.div
+              key={project.id}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: fadeOpacity }}
+              transition={{ 
+                duration: hasReachedMaxItems ? 1.2 : 0.6,
+                delay: hasReachedMaxItems && isLastRow ? (index - (projects.length - 6)) * 0.1 : 0
+              }}
+            >
+              <ProjectCard
+                project={project}
+                index={index}
+              />
+            </motion.div>
+          );
+        })}
         
         {/* Loading skeletons */}
         {isLoading && renderSkeletons()}
