@@ -100,64 +100,76 @@ const PackageCard = ({ package: pkg, onClick }: PackageCardProps) => {
           {/* Back Face (Desktop Hover Only) */}
           {canFlip && (
             <div 
-              className="absolute inset-0 w-full h-full bg-gradient-to-br from-primary/90 to-primary flex flex-col p-6"
+              className="absolute inset-0 w-full h-full bg-gradient-to-br from-primary/95 to-primary text-white flex flex-col"
               style={{ 
                 backfaceVisibility: 'hidden',
                 transform: 'rotateY(180deg)'
               }}
             >
-              {/* Header with Title and Icon */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
-                    <Camera className="w-5 h-5 text-white" />
+              {/* Header Section */}
+              <div className="p-6 pb-4">
+                <div className="flex items-center justify-center mb-3">
+                  <div className="w-12 h-12 rounded-full bg-white/15 flex items-center justify-center backdrop-blur-sm border border-white/20">
+                    <Camera className="w-6 h-6 text-white" />
                   </div>
-                  <div>
-                    <h3 className="text-lg font-assistant font-bold text-white">
-                      חבילת {pkg.name}
-                    </h3>
-                    <div className="flex items-center gap-1">
-                      <Star className="w-3 h-3 text-secondary fill-current" />
-                      <Star className="w-3 h-3 text-secondary fill-current" />
-                      <Star className="w-3 h-3 text-secondary fill-current" />
-                    </div>
-                  </div>
+                </div>
+                <h3 className="text-xl font-assistant font-bold text-center text-white mb-1">
+                  חבילת {pkg.name}
+                </h3>
+                <p className="text-center text-white/80 text-sm font-open-sans">
+                  {pkg.price}
+                </p>
+                <div className="flex items-center justify-center gap-1 mt-2">
+                  <Star className="w-3 h-3 text-secondary fill-current" />
+                  <Star className="w-3 h-3 text-secondary fill-current" />
+                  <Star className="w-3 h-3 text-secondary fill-current" />
+                  <Star className="w-3 h-3 text-secondary fill-current" />
+                  <Star className="w-3 h-3 text-secondary fill-current" />
                 </div>
               </div>
 
-              {/* Key Details */}
-              <div className="flex-1 flex flex-col justify-center">
-                <div className="space-y-4">
-                  {/* Price/Time Info */}
-                  <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Clock className="w-4 h-4 text-white/80" />
-                      <span className="text-white/90 text-xs font-open-sans">זמן אספקה</span>
-                    </div>
-                    <span className="text-white font-assistant font-semibold">48-72 שעות</span>
-                  </div>
+              {/* Decorative Divider */}
+              <div className="px-6">
+                <div className="w-full h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
+              </div>
 
-                  {/* Features List */}
-                  <div className="space-y-2">
-                    {pkg.features.slice(0, 3).map((feature, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-3 text-white/95"
-                      >
-                        <div className="w-5 h-5 rounded-full bg-secondary/80 flex items-center justify-center flex-shrink-0">
-                          <Check className="w-3 h-3 text-white" />
-                        </div>
-                        <span className="text-sm font-open-sans leading-relaxed">{feature}</span>
+              {/* Main Content */}
+              <div className="flex-1 px-6 py-4 flex flex-col justify-center">
+                {/* Delivery Info */}
+                <div className="bg-white/10 rounded-xl p-4 mb-4 backdrop-blur-sm border border-white/10">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-white/90" />
+                      <span className="text-white/90 text-sm font-open-sans">זמן אספקה</span>
+                    </div>
+                    <span className="text-white font-assistant font-bold text-sm">48-72 שעות</span>
+                  </div>
+                </div>
+
+                {/* Features List */}
+                <div className="space-y-3">
+                  {pkg.features.slice(0, 4).map((feature, index) => (
+                    <div
+                      key={index}
+                      className="flex items-start gap-3 text-white/95"
+                    >
+                      <div className="w-5 h-5 rounded-full bg-secondary/90 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+                        <Check className="w-3 h-3 text-white font-bold" />
                       </div>
-                    ))}
-                  </div>
+                      <span className="text-sm font-open-sans leading-relaxed flex-1">{feature}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              {/* Bottom CTA */}
-              <div className="mt-4 pt-4 border-t border-white/20">
+              {/* Footer Section */}
+              <div className="p-6 pt-2">
+                <div className="w-full h-px bg-gradient-to-r from-transparent via-white/30 to-transparent mb-4"></div>
                 <div className="text-center">
-                  <span className="text-white/80 text-xs font-open-sans">לחץ לפרטים נוספים</span>
+                  <div className="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-2 backdrop-blur-sm border border-white/20">
+                    <span className="text-white/90 text-xs font-open-sans">לחץ לפרטים נוספים</span>
+                    <div className="w-2 h-2 rounded-full bg-secondary animate-pulse"></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -167,64 +179,76 @@ const PackageCard = ({ package: pkg, onClick }: PackageCardProps) => {
         {/* Reduced Motion Fallback */}
         {canFlip && reducedMotion && (
           <motion.div
-            className="absolute inset-0 bg-gradient-to-br from-primary/90 to-primary p-6 flex flex-col"
+            className="absolute inset-0 bg-gradient-to-br from-primary/95 to-primary text-white flex flex-col"
             initial={{ opacity: 0 }}
             animate={{ opacity: isFlipped ? 1 : 0 }}
             transition={{ duration: 0.3 }}
             style={{ pointerEvents: isFlipped ? 'auto' : 'none' }}
           >
-            {/* Header with Title and Icon */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
-                  <Camera className="w-5 h-5 text-white" />
+            {/* Header Section */}
+            <div className="p-6 pb-4">
+              <div className="flex items-center justify-center mb-3">
+                <div className="w-12 h-12 rounded-full bg-white/15 flex items-center justify-center backdrop-blur-sm border border-white/20">
+                  <Camera className="w-6 h-6 text-white" />
                 </div>
-                <div>
-                  <h3 className="text-lg font-assistant font-bold text-white">
-                    חבילת {pkg.name}
-                  </h3>
-                  <div className="flex items-center gap-1">
-                    <Star className="w-3 h-3 text-secondary fill-current" />
-                    <Star className="w-3 h-3 text-secondary fill-current" />
-                    <Star className="w-3 h-3 text-secondary fill-current" />
-                  </div>
-                </div>
+              </div>
+              <h3 className="text-xl font-assistant font-bold text-center text-white mb-1">
+                חבילת {pkg.name}
+              </h3>
+              <p className="text-center text-white/80 text-sm font-open-sans">
+                {pkg.price}
+              </p>
+              <div className="flex items-center justify-center gap-1 mt-2">
+                <Star className="w-3 h-3 text-secondary fill-current" />
+                <Star className="w-3 h-3 text-secondary fill-current" />
+                <Star className="w-3 h-3 text-secondary fill-current" />
+                <Star className="w-3 h-3 text-secondary fill-current" />
+                <Star className="w-3 h-3 text-secondary fill-current" />
               </div>
             </div>
 
-            {/* Key Details */}
-            <div className="flex-1 flex flex-col justify-center">
-              <div className="space-y-4">
-                {/* Price/Time Info */}
-                <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Clock className="w-4 h-4 text-white/80" />
-                    <span className="text-white/90 text-xs font-open-sans">זמן אספקה</span>
-                  </div>
-                  <span className="text-white font-assistant font-semibold">48-72 שעות</span>
-                </div>
+            {/* Decorative Divider */}
+            <div className="px-6">
+              <div className="w-full h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
+            </div>
 
-                {/* Features List */}
-                <div className="space-y-2">
-                  {pkg.features.slice(0, 3).map((feature, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-3 text-white/95"
-                    >
-                      <div className="w-5 h-5 rounded-full bg-secondary/80 flex items-center justify-center flex-shrink-0">
-                        <Check className="w-3 h-3 text-white" />
-                      </div>
-                      <span className="text-sm font-open-sans leading-relaxed">{feature}</span>
+            {/* Main Content */}
+            <div className="flex-1 px-6 py-4 flex flex-col justify-center">
+              {/* Delivery Info */}
+              <div className="bg-white/10 rounded-xl p-4 mb-4 backdrop-blur-sm border border-white/10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-white/90" />
+                    <span className="text-white/90 text-sm font-open-sans">זמן אספקה</span>
+                  </div>
+                  <span className="text-white font-assistant font-bold text-sm">48-72 שעות</span>
+                </div>
+              </div>
+
+              {/* Features List */}
+              <div className="space-y-3">
+                {pkg.features.slice(0, 4).map((feature, index) => (
+                  <div
+                    key={index}
+                    className="flex items-start gap-3 text-white/95"
+                  >
+                    <div className="w-5 h-5 rounded-full bg-secondary/90 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+                      <Check className="w-3 h-3 text-white font-bold" />
                     </div>
-                  ))}
-                </div>
+                    <span className="text-sm font-open-sans leading-relaxed flex-1">{feature}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Bottom CTA */}
-            <div className="mt-4 pt-4 border-t border-white/20">
+            {/* Footer Section */}
+            <div className="p-6 pt-2">
+              <div className="w-full h-px bg-gradient-to-r from-transparent via-white/30 to-transparent mb-4"></div>
               <div className="text-center">
-                <span className="text-white/80 text-xs font-open-sans">לחץ לפרטים נוספים</span>
+                <div className="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-2 backdrop-blur-sm border border-white/20">
+                  <span className="text-white/90 text-xs font-open-sans">לחץ לפרטים נוספים</span>
+                  <div className="w-2 h-2 rounded-full bg-secondary animate-pulse"></div>
+                </div>
               </div>
             </div>
           </motion.div>
