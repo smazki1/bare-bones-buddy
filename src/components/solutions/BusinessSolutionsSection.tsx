@@ -83,8 +83,11 @@ const BusinessSolutionsCard = ({ item, index }: { item: SolutionCard; index: num
     </motion.div>
   );
 
-  // If the item has no href or tagSlug, render as non-clickable
-  if (!item.href && !item.tagSlug) {
+  // Generate href at render time - prioritize custom href over auto-generated
+  const href = item.href || (item.tagSlug ? `/portfolio?tag=${item.tagSlug}` : '');
+  
+  // If no link should be generated, render as non-clickable
+  if (!href) {
     return (
       <div 
         className="cursor-default"
@@ -94,9 +97,6 @@ const BusinessSolutionsCard = ({ item, index }: { item: SolutionCard; index: num
       </div>
     );
   }
-
-  // Generate href if not provided but tagSlug exists
-  const href = item.href || (item.tagSlug ? `/portfolio?tag=${item.tagSlug}` : '');
 
   return (
     <Link 

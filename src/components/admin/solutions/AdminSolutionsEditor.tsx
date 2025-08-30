@@ -1,15 +1,17 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { SolutionCard } from '@/types/solutions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { X, Upload, Play, Pause, ExternalLink } from 'lucide-react';
+import { X, Upload, Play, Pause, ExternalLink, ChevronDown, ChevronRight } from 'lucide-react';
 import { convertFileToDataUrl, isValidImageFile, isValidVideoFile } from '@/utils/fileUtils';
 import { useToast } from '@/hooks/use-toast';
+import { marketsStore } from '@/data/marketsStore';
 
 interface AdminSolutionsEditorProps {
   card: SolutionCard | null;
@@ -38,23 +40,59 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
     }
   );
   const [videoPlaying, setVideoPlaying] = useState(false);
+  const [isClickable, setIsClickable] = useState(false);
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+  const [availableTags, setAvailableTags] = useState<Array<{id: string, label: string, slug: string}>>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
+  // Load available tags from markets store
+  useEffect(() => {
+    const marketsConfig = marketsStore.safeGetConfigOrDefaults();
+    const enabledTags = marketsConfig.items
+      .filter(item => item.enabled)
+      .map(item => ({
+        id: item.id,
+        label: item.label,
+        slug: item.slug
+      }));
+    setAvailableTags(enabledTags);
+  }, []);
+
+  // Initialize clickable state based on existing data
+  useEffect(() => {
+    if (card) {
+      const hasLink = !!(card.href || card.tagSlug);
+      setIsClickable(hasLink);
+      // Open advanced section if there's custom href or video
+      setIsAdvancedOpen(!!(card.videoSrc || (card.href && card.href !== `/portfolio?tag=${card.tagSlug}`)));
+    }
+  }, [card]);
+
   const isDirty = JSON.stringify(formData) !== JSON.stringify(card);
 
   const handleInputChange = (field: keyof SolutionCard, value: any) => {
-    setFormData(prev => {
-      const updatedData = { ...prev, [field]: value };
-      
-      // Auto-generate href when tagSlug changes and href is empty
-      if (field === 'tagSlug' && value && !prev.href) {
-        updatedData.href = `/portfolio?tag=${value}`;
-      }
-      
-      return updatedData;
-    });
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleClickableToggle = (checked: boolean) => {
+    setIsClickable(checked);
+    if (checked && formData.tagSlug) {
+      // Auto-generate href from selected tag
+      handleInputChange('href', `/portfolio?tag=${formData.tagSlug}`);
+    } else if (!checked) {
+      // Clear href when not clickable
+      handleInputChange('href', '');
+    }
+  };
+
+  const handleTagChange = (selectedSlug: string) => {
+    handleInputChange('tagSlug', selectedSlug);
+    if (isClickable) {
+      // Auto-update href when tag changes and card is clickable
+      handleInputChange('href', `/portfolio?tag=${selectedSlug}`);
+    }
   };
 
   const handleImageUpload = async (file: File) => {
@@ -111,10 +149,10 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
       return;
     }
 
-    if (!formData.imageSrc && !formData.videoSrc) {
+    if (!formData.imageSrc) {
       toast({
         title: 'שגיאה',
-        description: 'יש להוסיף לפחות תמונה או וידאו',
+        description: 'יש להוסיף תמונה',
         variant: 'destructive'
       });
       return;
@@ -145,12 +183,6 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
     }
   };
 
-  const linkTemplates = [
-    { label: 'תיק עבודות עם תג', value: `/portfolio?tag=${formData.tagSlug || 'TAG'}` },
-    { label: 'תיק עבודות כללי', value: '/portfolio' },
-    { label: 'צור קשר', value: '/contact' },
-    { label: 'אין קישור', value: '' }
-  ];
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -188,86 +220,9 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="tagSlug" className="text-right text-sm font-medium">
-                    תג (slug)
+                  <Label htmlFor="image" className="text-right text-sm font-medium">
+                    תמונה <span className="text-destructive">*</span>
                   </Label>
-                  <Input
-                    id="tagSlug"
-                    value={formData.tagSlug}
-                    onChange={(e) => handleInputChange('tagSlug', e.target.value)}
-                    placeholder="restaurants"
-                    className="text-right"
-                  />
-                  <p className="text-xs text-muted-foreground text-right">
-                    התג יקבע את הקישור לתיק העבודות (יצירה אוטומטית של href)
-                  </p>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <Switch
-                    checked={formData.enabled}
-                    onCheckedChange={(checked) => handleInputChange('enabled', checked)}
-                  />
-                  <Label className="text-right text-sm font-medium">
-                    מופעל
-                  </Label>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Link Settings */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg font-assistant text-right">קישור</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-right text-sm font-medium">תבניות מהירות</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {linkTemplates.map((template) => (
-                      <Button
-                        key={template.label}
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleInputChange('href', template.value)}
-                        className="text-xs font-open-sans"
-                      >
-                        {template.label}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="href" className="text-right text-sm font-medium">
-                    קישור מותאם אישית
-                  </Label>
-                  <Input
-                    id="href"
-                    value={formData.href || ''}
-                    onChange={(e) => handleInputChange('href', e.target.value || null)}
-                    placeholder="/portfolio?tag=restaurants"
-                    className="text-right"
-                  />
-                  <p className="text-xs text-muted-foreground text-right">
-                    השאר ריק אם הכרטיס לא צריך להיות לחיץ
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Media Upload */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg font-assistant text-right">מדיה</CardTitle>
-                <CardDescription className="text-right font-open-sans">
-                  יש להוסיף לפחות תמונה או וידאו
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Image */}
-                <div className="space-y-2">
-                  <Label className="text-right text-sm font-medium">תמונה</Label>
                   <div className="flex gap-2">
                     <Button
                       type="button"
@@ -277,7 +232,7 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
                       className="flex items-center gap-2"
                     >
                       <Upload className="h-4 w-4" />
-                      העלה קובץ
+                      העלה תמונה
                     </Button>
                     <Button
                       type="button"
@@ -302,54 +257,143 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
                   <Input
                     value={formData.imageSrc || ''}
                     onChange={(e) => handleInputChange('imageSrc', e.target.value)}
-                    placeholder="או הדבק URL"
+                    placeholder="או הדבק URL לתמונה"
                     className="text-right text-xs"
                   />
                 </div>
 
-                {/* Video */}
-                <div className="space-y-2">
-                  <Label className="text-right text-sm font-medium">וידאו</Label>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => videoInputRef.current?.click()}
-                      className="flex items-center gap-2"
-                    >
-                      <Upload className="h-4 w-4" />
-                      העלה קובץ
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleInputChange('videoSrc', '')}
-                      disabled={!formData.videoSrc}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                <div className="flex items-center justify-between">
+                  <Switch
+                    checked={isClickable}
+                    onCheckedChange={handleClickableToggle}
+                  />
+                  <Label className="text-right text-sm font-medium">
+                    הפוך את הכרטיס ללחיץ
+                  </Label>
+                </div>
+
+                {isClickable && (
+                  <div className="space-y-2">
+                    <Label className="text-right text-sm font-medium">
+                      בחר קטגוריה
+                    </Label>
+                    <Select value={formData.tagSlug || ''} onValueChange={handleTagChange}>
+                      <SelectTrigger className="text-right" dir="rtl">
+                        <SelectValue placeholder="בחר קטגוריה לתיק העבודות" />
+                      </SelectTrigger>
+                      <SelectContent dir="rtl">
+                        {availableTags.map((tag) => (
+                          <SelectItem key={tag.id} value={tag.slug}>
+                            {tag.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground text-right">
+                      הכרטיס יוביל לתיק העבודות מסונן לפי הקטגוריה הנבחרת
+                    </p>
                   </div>
-                  <Input
-                    ref={videoInputRef}
-                    type="file"
-                    accept="video/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleVideoUpload(file);
-                    }}
-                    className="hidden"
+                )}
+
+                <div className="flex items-center justify-between">
+                  <Switch
+                    checked={formData.enabled}
+                    onCheckedChange={(checked) => handleInputChange('enabled', checked)}
                   />
-                  <Input
-                    value={formData.videoSrc || ''}
-                    onChange={(e) => handleInputChange('videoSrc', e.target.value)}
-                    placeholder="או הדבק URL"
-                    className="text-right text-xs"
-                  />
+                  <Label className="text-right text-sm font-medium">
+                    מופעל
+                  </Label>
                 </div>
               </CardContent>
             </Card>
+
+            {/* Advanced Settings */}
+            <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
+              <Card>
+                <CollapsibleTrigger asChild>
+                  <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {isAdvancedOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                        <CardTitle className="text-lg font-assistant text-right">הגדרות מתקדמות</CardTitle>
+                      </div>
+                    </div>
+                    <CardDescription className="text-right font-open-sans">
+                      וידאו וקישור מותאם אישית (אופציונלי)
+                    </CardDescription>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="space-y-4">
+                    {/* Video */}
+                    <div className="space-y-2">
+                      <Label className="text-right text-sm font-medium">וידאו (אופציונלי)</Label>
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => videoInputRef.current?.click()}
+                          className="flex items-center gap-2"
+                        >
+                          <Upload className="h-4 w-4" />
+                          העלה וידאו
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleInputChange('videoSrc', '')}
+                          disabled={!formData.videoSrc}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <Input
+                        ref={videoInputRef}
+                        type="file"
+                        accept="video/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleVideoUpload(file);
+                        }}
+                        className="hidden"
+                      />
+                      <Input
+                        value={formData.videoSrc || ''}
+                        onChange={(e) => handleInputChange('videoSrc', e.target.value)}
+                        placeholder="או הדבק URL לוידאו"
+                        className="text-right text-xs"
+                      />
+                    </div>
+
+                    {/* Custom Link */}
+                    <div className="space-y-2">
+                      <Label htmlFor="customHref" className="text-right text-sm font-medium">
+                        קישור מותאם אישית
+                      </Label>
+                      <Input
+                        id="customHref"
+                        value={formData.href || ''}
+                        onChange={(e) => {
+                          const newHref = e.target.value || '';
+                          handleInputChange('href', newHref);
+                          // If user manually sets custom href, update clickable state
+                          if (newHref && !isClickable) {
+                            setIsClickable(true);
+                          }
+                        }}
+                        placeholder="/contact או /portfolio"
+                        className="text-right"
+                      />
+                      <p className="text-xs text-muted-foreground text-right">
+                        עוקף את הקישור האוטומטי לתיק העבודות. השאר ריק לשימוש בקטגוריה שנבחרה למעלה
+                      </p>
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
           </div>
 
           {/* Preview */}
@@ -392,7 +436,7 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
                     <h3 className="text-white font-assistant font-bold text-lg leading-tight drop-shadow-lg text-right">
                       {formData.title || 'כותרת הכרטיס'}
                     </h3>
-                    {formData.href && (
+                    {isClickable && (formData.href || formData.tagSlug) && (
                       <div className="mt-2 flex items-center gap-1 text-white/80">
                         <ExternalLink className="h-3 w-3" />
                         <span className="text-xs">לחיץ</span>
