@@ -69,6 +69,13 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
       color: 'text-blue-600'
     },
     {
+      title: 'ניהול פתרונות ויזואליים',
+      description: 'עריכת הקלפים בסקציה "מה אפשר ליצור איתנו"',
+      icon: Settings,
+      href: '/admin/visual-solutions',
+      color: 'text-purple-600'
+    },
+    {
       title: 'ניהול שווקי מזון',
       description: 'עריכת התגיות והקישורים של סקשן השווקים',
       icon: Users,
