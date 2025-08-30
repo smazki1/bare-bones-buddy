@@ -60,7 +60,7 @@ const categories = ['הכל', 'מסעדות', 'מאפיות', 'בתי קפה', '
 const BeforeAfterGallery = () => {
   const [activeCategory, setActiveCategory] = useState('הכל');
   const [hoveredItem, setHoveredItem] = useState<number | null>(null);
-  const { elementRef, isIntersecting } = useIntersectionObserver({
+  const { ref, isIntersecting } = useIntersectionObserver({
     threshold: 0.1,
   });
 
@@ -70,7 +70,7 @@ const BeforeAfterGallery = () => {
 
   return (
     <section 
-      ref={elementRef}
+      ref={ref}
       className="py-20 bg-background"
     >
       <div className="container mx-auto px-4">

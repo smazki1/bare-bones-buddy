@@ -71,13 +71,13 @@ const additionalPromises = [
 ];
 
 const GuaranteesSection = () => {
-  const { elementRef, isIntersecting } = useIntersectionObserver({
+  const { ref, isIntersecting } = useIntersectionObserver({
     threshold: 0.1,
   });
 
   return (
     <section 
-      ref={elementRef}
+      ref={ref}
       className="py-20 bg-background"
     >
       <div className="container mx-auto px-4">

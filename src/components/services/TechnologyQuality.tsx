@@ -63,13 +63,13 @@ const qualityPromises = [
 ];
 
 const TechnologyQuality = () => {
-  const { elementRef, isIntersecting } = useIntersectionObserver({
+  const { ref, isIntersecting } = useIntersectionObserver({
     threshold: 0.1,
   });
 
   return (
     <section 
-      ref={elementRef}
+      ref={ref}
       className="py-20 bg-gradient-to-b from-muted/30 to-background"
     >
       <div className="container mx-auto px-4">
