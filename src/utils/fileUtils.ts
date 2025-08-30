@@ -14,6 +14,13 @@ export const isValidImageFile = (file: File): boolean => {
 
 export const isValidVideoFile = (file: File): boolean => {
   const validTypes = ['video/mp4', 'video/webm'];
+  console.log('Video file validation:', {
+    fileType: file.type,
+    isValidType: validTypes.includes(file.type),
+    fileSize: file.size,
+    isValidSize: file.size <= 12 * 1024 * 1024,
+    validTypes
+  });
   return validTypes.includes(file.type) && file.size <= 12 * 1024 * 1024; // 12MB limit
 };
 

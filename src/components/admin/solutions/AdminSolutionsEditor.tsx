@@ -118,19 +118,30 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
   };
 
   const handleVideoUpload = async (file: File) => {
+    console.log('Video upload attempt:', {
+      fileName: file.name,
+      fileType: file.type,
+      fileSize: file.size,
+      fileSizeMB: (file.size / 1024 / 1024).toFixed(2)
+    });
+
     if (!isValidVideoFile(file)) {
+      console.log('Video file validation failed for:', file.type);
       toast({
         title: 'שגיאה',
-        description: 'קובץ וידאו לא תקין. נתמכים: MP4, WebM (עד 12MB)',
+        description: `קובץ וידאו לא תקין. סוג קובץ: ${file.type}. נתמכים: MP4, WebM (עד 12MB)`,
         variant: 'destructive'
       });
       return;
     }
 
     try {
+      console.log('Converting video file to data URL...');
       const dataUrl = await convertFileToDataUrl(file);
+      console.log('Video conversion successful, data URL length:', dataUrl.length);
       handleInputChange('videoSrc', dataUrl);
     } catch (error) {
+      console.error('Video upload error:', error);
       toast({
         title: 'שגיאה',
         description: 'שגיאה בהעלאת הוידאו',
