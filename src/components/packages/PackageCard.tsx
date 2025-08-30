@@ -51,8 +51,8 @@ const PackageCard = ({ package: pkg, onClick }: PackageCardProps) => {
       onMouseLeave={handleMouseLeave}
       onFocus={handleFocus}
       onBlur={handleBlur}
-      whileHover={canFlip ? {} : { y: -4 }}
-      transition={{ duration: 0.3 }}
+      whileHover={canFlip ? {} : { scale: 1.02 }}
+      transition={{ duration: 0.5 }}
       aria-label={`פרטים על חבילת ${pkg.name}`}
       role="button"
       tabIndex={0}
@@ -64,7 +64,7 @@ const PackageCard = ({ package: pkg, onClick }: PackageCardProps) => {
       }}
       style={{ perspective: '1200px' }}
     >
-      <div className="rounded-2xl overflow-hidden h-full shadow-md hover:shadow-lg transition-shadow duration-300 aspect-[4/5] relative">
+      <div className="rounded-2xl overflow-hidden h-full shadow-elegant hover:shadow-warm transition-all duration-500 group-hover:scale-105 aspect-[4/5] relative">
         {/* 3D Card Inner Wrapper */}
         <div 
           className={`w-full h-full relative transition-transform duration-300 ${
