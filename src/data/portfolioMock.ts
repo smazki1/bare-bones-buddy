@@ -109,7 +109,7 @@ export const portfolioMockData: Project[] = [
     category: "confectioneries"
   },
 
-  // Delis
+  // Delis/Delicatessen
   {
     id: 10,
     businessName: "מעדניית הטעמים",
@@ -118,7 +118,7 @@ export const portfolioMockData: Project[] = [
     imageAfter: "https://images.unsplash.com/photo-1506084868230-bb9d95c24759?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
     imageBefore: "https://images.unsplash.com/photo-1506084868230-bb9d95c24759?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80&blur=8",
     size: "small",
-    category: "delis"
+    category: "delicatessen"
   },
   {
     id: 11,
@@ -128,7 +128,7 @@ export const portfolioMockData: Project[] = [
     imageAfter: "https://images.unsplash.com/photo-1552009392-45f4b7bb4530?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
     imageBefore: "https://images.unsplash.com/photo-1552009392-45f4b7bb4530?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80&blur=8",
     size: "medium",
-    category: "delis"
+    category: "delicatessen"
   },
 
   // Bars
@@ -175,7 +175,7 @@ export const portfolioMockData: Project[] = [
     category: "fast-food"
   },
 
-  // Branded Products
+  // Premium/Luxury Products
   {
     id: 16,
     businessName: "מותג הטעם",
@@ -184,7 +184,7 @@ export const portfolioMockData: Project[] = [
     imageAfter: "https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
     imageBefore: "https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80&blur=8",
     size: "large",
-    category: "branded-products"
+    category: "premium"
   },
   {
     id: 17,
@@ -194,7 +194,51 @@ export const portfolioMockData: Project[] = [
     imageAfter: "https://images.unsplash.com/photo-1586201375761-83865001e31c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
     imageBefore: "https://images.unsplash.com/photo-1586201375761-83865001e31c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80&blur=8",
     size: "medium",
-    category: "branded-products"
+    category: "premium"
+  },
+
+  // Cafes (Coffee & Beverages)
+  {
+    id: 21,
+    businessName: "קפה הבוקר",
+    businessType: "בית קפה",
+    serviceType: "תמונות",
+    imageAfter: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+    imageBefore: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80&blur=8",
+    size: "medium",
+    category: "cafes"
+  },
+  {
+    id: 22,
+    businessName: "משקאות טבעיים",
+    businessType: "בית קפה",
+    serviceType: "תמונות",
+    imageAfter: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+    imageBefore: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80&blur=8",
+    size: "small",
+    category: "cafes"
+  },
+
+  // Manufacturers
+  {
+    id: 23,
+    businessName: "מפעל השוקולד",
+    businessType: "יצרן",
+    serviceType: "תמונות",
+    imageAfter: "https://images.unsplash.com/photo-1548907040-4baa42d10919?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+    imageBefore: "https://images.unsplash.com/photo-1548907040-4baa42d10919?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80&blur=8",
+    size: "large",
+    category: "manufacturers"
+  },
+  {
+    id: 24,
+    businessName: "יצרן הבירות",
+    businessType: "יצרן",
+    serviceType: "סרטונים",
+    imageAfter: "https://images.unsplash.com/photo-1608270586620-248524c67de9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+    imageBefore: "https://images.unsplash.com/photo-1608270586620-248524c67de9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80&blur=8",
+    size: "medium",
+    category: "manufacturers"
   },
 
   // Catering
@@ -221,7 +265,7 @@ export const portfolioMockData: Project[] = [
 
   // Additional items to reach 60+ items
   {
-    id: 20,
+    id: 25,
     businessName: "מסעדת הנמל",
     businessType: "מסעדה",
     serviceType: "תמונות",
@@ -235,14 +279,14 @@ export const portfolioMockData: Project[] = [
 
 // Generate additional items programmatically
 const additionalItems: Project[] = [];
-const baseItems = portfolioMockData.slice(0, 20);
+const baseItems = portfolioMockData.slice(0, 25);
 
-for (let i = 21; i <= 80; i++) {
-  const baseItem = baseItems[(i - 21) % baseItems.length];
+for (let i = 26; i <= 80; i++) {
+  const baseItem = baseItems[(i - 26) % baseItems.length];
   additionalItems.push({
     ...baseItem,
     id: i,
-    businessName: `${baseItem.businessName} ${Math.floor(i / 20) + 1}`,
+    businessName: `${baseItem.businessName} ${Math.floor(i / 25) + 1}`,
   });
 }
 
@@ -253,10 +297,12 @@ export const categoryFilters = [
   { label: 'הכל', slug: 'all' },
   { label: 'מסעדות', slug: 'restaurants' },
   { label: 'מאפיות', slug: 'bakeries' },
-  { label: 'קונדיטוריות', slug: 'confectioneries' },
-  { label: 'מעדניות', slug: 'delis' },
   { label: 'ברים', slug: 'bars' },
+  { label: 'קפה ומשקאות', slug: 'cafes' },
   { label: 'אוכל מהיר', slug: 'fast-food' },
-  { label: 'מוצרים ממותגים', slug: 'branded-products' },
+  { label: 'קונדיטוריות', slug: 'confectioneries' },
+  { label: 'מעדניות', slug: 'delicatessen' },
   { label: 'קייטרינג', slug: 'catering' },
+  { label: 'מוצרי יוקרה', slug: 'premium' },
+  { label: 'יצרנים', slug: 'manufacturers' },
 ];
