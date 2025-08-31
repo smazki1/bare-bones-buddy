@@ -129,10 +129,10 @@ const ContactForm = () => {
                   className="bg-secondary hover:bg-secondary/90 text-white px-12 py-4 text-lg font-assistant font-semibold"
                 >
                   <Send className="w-5 h-5 ml-2" />
-                  שלחו בקשה להצעת מחיר
+                  שלחו בקשה
                 </Button>
                 <p className="text-sm text-muted-foreground mt-4 font-open-sans">
-                  נחזור אליכם תוך 24 שעות עם הצעת מחיר מפורטת
+                  נחזור אליכם תוך 24 שעות
                 </p>
               </div>
             </form>

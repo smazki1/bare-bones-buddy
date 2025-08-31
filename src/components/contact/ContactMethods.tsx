@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Phone, MessageCircle, Mail, Calendar } from 'lucide-react';
+import { Phone, MessageCircle, Mail } from 'lucide-react';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { Button } from '@/components/ui/button';
 
@@ -30,18 +30,9 @@ const ContactMethods = () => {
       title: 'אימייל',
       description: 'שלחו פרטים מפורטים',
       info: 'info@foodvision.co.il',
-      subInfo: 'מענה תוך 4 שעות',
+      subInfo: '',
       action: 'mailto:info@foodvision.co.il?subject=בקשה לפרטים על שירותי צילום AI',
       actionText: 'שלחו מייל'
-    },
-    {
-      icon: Calendar,
-      title: 'פגישה אישית',
-      description: 'ייעוץ מקצועי פנים אל פנים',
-      info: 'פגישת ייעוץ חינמית',
-      subInfo: '30 דקות באמצעות זום',
-      action: 'https://calendly.com/foodvision/consultation',
-      actionText: 'קביעת פגישה'
     }
   ];
 
@@ -87,9 +78,11 @@ const ContactMethods = () => {
                 <p className="font-assistant font-semibold text-foreground">
                   {method.info}
                 </p>
-                <p className="text-sm text-muted-foreground font-open-sans">
-                  {method.subInfo}
-                </p>
+                {method.subInfo && (
+                  <p className="text-sm text-muted-foreground font-open-sans">
+                    {method.subInfo}
+                  </p>
+                )}
               </div>
               
               <Button 
