@@ -1,7 +1,7 @@
 import HeroSection from '@/components/HeroSection';
 import BusinessSolutionsSection from '@/components/solutions/BusinessSolutionsSection';
 // import FeatureWorkSection from '@/components/FeatureWorkSection';
-import PackagesSection from '@/components/packages/PackagesSection';
+// import PackagesSection from '@/components/packages/PackagesSection';
 import VisualSolutionsSection from '@/components/VisualSolutionsSection';
 import TestimonialsSection from '@/components/TestimonialsSection';
 import SectorsSection from '@/components/SectorsSection';
@@ -15,7 +15,7 @@ const Index = () => {
       <HeroSection />
       <BusinessSolutionsSection />
       <VisualSolutionsSection />
-      <PackagesSection />
+      {/* PackagesSection hidden per request */}
       
       <TestimonialsSection />
       <SectorsSection />
