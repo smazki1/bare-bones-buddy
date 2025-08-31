@@ -40,7 +40,9 @@ const ContactHero = () => {
             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
           >
             <a 
-              href="#contact-form"
+              href="https://wa.me/972527772807?text=%D7%A9%D7%9C%D7%95%D7%9D!%20%D7%9E%D7%A2%D7%95%D7%A0%D7%99%D7%99%D7%9F%20%D7%91%D7%A9%D7%99%D7%A8%D7%95%D7%AA%D7%99%D7%9D%20%D7%A9%D7%9C%D7%9B%D7%9D"
+              target="_blank"
+              rel="noopener noreferrer"
               className="bg-secondary hover:bg-secondary/90 text-white px-8 py-4 rounded-lg font-assistant font-semibold text-lg transition-all duration-200 hover:scale-105"
             >
               שלחו הודעה עכשיו

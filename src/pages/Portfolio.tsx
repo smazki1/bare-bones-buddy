@@ -3,7 +3,6 @@ import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
-import FloatingWhatsApp from '@/components/FloatingWhatsApp';
 import PortfolioHero from '@/components/portfolio/PortfolioHero';
 import FilterPills from '@/components/portfolio/FilterPills';
 import MasonryGrid from '@/components/portfolio/MasonryGrid';
@@ -185,7 +184,6 @@ const Portfolio = () => {
         </main>
         
         <Footer />
-        <FloatingWhatsApp />
       </div>
     );
 };
