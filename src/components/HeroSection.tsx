@@ -83,7 +83,7 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.2 }}
           >
-            מנות מושלמות.{' '}
+            {"מנות מושלמות\u200F."}{' '}
             <span className="bg-gradient-to-r from-secondary to-secondary/80 bg-clip-text text-transparent">
               תמונות מושלמות.
             </span>
@@ -95,7 +95,7 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.4 }}
           >
-            Food Vision יוצרת תמונות מקצועיות למסעדות - מהר, זול, ובלי מאמץ
+            יוצרים תמונות מקצועיות למסעדות ועסקים - מהר, זול, באיכות גבוהה ובלי מאמץ
           </motion.p>
 
           <motion.div
@@ -108,12 +108,12 @@ const HeroSection = () => {
               size="lg" 
               className="bg-secondary hover:bg-secondary/90 text-white px-8 py-6 text-lg font-assistant font-semibold shadow-warm"
             >
-              צפה בתמונות המנות שלך עכשיו
+              התחילו עכשיו
             </Button>
             <Button 
               variant="outline" 
               size="lg"
-              className="border-white/30 text-white hover:bg-white/10 px-8 py-6 text-lg font-assistant"
+              className="bg-white text-primary hover:bg-white/90 px-8 py-6 text-lg font-assistant border-0"
             >
               ראה דוגמאות
             </Button>
@@ -125,7 +125,7 @@ const HeroSection = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.8 }}
           >
-            "חסכנו למסעדות 80% בעלויות ורבבנו לייקים ב-3x"
+            מה שלקח שבועות עם צלם - אצלנו מוכן תוך ימים, ב-90% פחות כסף
           </motion.div>
         </div>
       </div>
