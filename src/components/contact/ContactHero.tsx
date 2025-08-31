@@ -47,12 +47,7 @@ const ContactHero = () => {
             >
               שלחו הודעה עכשיו
             </a>
-            <a 
-              href="#contact-methods"
-              className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white border border-white/30 px-8 py-4 rounded-lg font-assistant font-semibold text-lg transition-all duration-200"
-            >
-              אפשרויות התקשרות
-            </a>
+            {/* Removed secondary options button per request */}
           </motion.div>
         </motion.div>
       </div>

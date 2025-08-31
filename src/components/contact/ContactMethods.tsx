@@ -53,14 +53,14 @@ const ContactMethods = () => {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 justify-items-center">
           {contactMethods.map((method, index) => (
             <motion.div
               key={method.title}
               initial={{ opacity: 0, y: 30 }}
               animate={isIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="bg-card rounded-2xl p-6 shadow-elegant hover:shadow-warm transition-all duration-300 text-center group hover:scale-105"
+              className="bg-card rounded-2xl p-6 shadow-elegant hover:shadow-warm transition-all duration-300 text-center group hover:scale-105 max-w-sm w-full"
             >
               <div className="bg-secondary/10 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 group-hover:bg-secondary/20 transition-colors">
                 <method.icon className="w-8 h-8 text-secondary" />
