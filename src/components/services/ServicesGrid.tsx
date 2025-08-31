@@ -156,13 +156,20 @@ const ServicesGrid = () => {
                     </div>
                     
                     <Button 
+                      asChild
                       className={`${
                         service.popular 
                           ? 'bg-secondary hover:bg-secondary/90' 
                           : 'bg-primary hover:bg-primary/90'
                       } text-white font-assistant`}
                     >
-                      לפרטים נוספים
+                      <a
+                        href={`https://wa.me/972527772807?text=${encodeURIComponent('אני מעוניין/ת בשירותי התמונות לעסק שלי')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        צרו קשר לפרטים נוספים
+                      </a>
                     </Button>
                   </div>
                 </CardContent>
