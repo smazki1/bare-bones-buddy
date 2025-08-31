@@ -4,13 +4,7 @@ import FloatingWhatsApp from '@/components/FloatingWhatsApp';
 import Footer from '@/components/Footer';
 import ServiceHero from '@/components/services/ServiceHero';
 import ServicesGrid from '@/components/services/ServicesGrid';
-import ProcessSection from '@/components/services/ProcessSection';
-import PricingTables from '@/components/services/PricingTables';
-import BeforeAfterGallery from '@/components/services/BeforeAfterGallery';
-import IndustriesServed from '@/components/services/IndustriesServed';
-import TechnologyQuality from '@/components/services/TechnologyQuality';
-import GuaranteesSection from '@/components/services/GuaranteesSection';
-import CustomSolutions from '@/components/services/CustomSolutions';
+import CTASection from '@/components/CTASection';
 
 const Services = () => {
   return (
@@ -21,13 +15,7 @@ const Services = () => {
       <main>
         <ServiceHero />
         <ServicesGrid />
-        <ProcessSection />
-        <PricingTables />
-        <BeforeAfterGallery />
-        <IndustriesServed />
-        <TechnologyQuality />
-        <GuaranteesSection />
-        <CustomSolutions />
+        <CTASection />
       </main>
       
       <Footer />
