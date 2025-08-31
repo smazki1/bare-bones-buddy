@@ -32,7 +32,11 @@ const AdminSolutions = () => {
   }, [isAuthenticated]);
 
   const handleSectionChange = (field: 'sectionTitle' | 'sectionSubtitle', value: string) => {
-    setConfig(prev => ({ ...prev, [field]: value }));
+    setConfig(prev => {
+      const next = { ...prev, [field]: value };
+      solutionsStore.saveConfig(next);
+      return next;
+    });
     setHasUnsavedChanges(true);
   };
 
@@ -76,50 +80,72 @@ const AdminSolutions = () => {
   };
 
   const handleDeleteCard = (id: string) => {
-    setConfig(prev => ({
-      ...prev,
-      items: prev.items.filter(item => item.id !== id).map((item, index) => ({
-        ...item,
-        order: index,
-      })),
-    }));
+    setConfig(prev => {
+      const next = {
+        ...prev,
+        items: prev.items.filter(item => item.id !== id).map((item, index) => ({
+          ...item,
+          order: index,
+        })),
+      };
+      solutionsStore.saveConfig(next);
+      return next;
+    });
     setHasUnsavedChanges(true);
   };
 
   const handleToggleEnabled = (id: string, enabled: boolean) => {
-    setConfig(prev => ({
-      ...prev,
-      items: prev.items.map(item =>
-        item.id === id ? { ...item, enabled } : item
-      ),
-    }));
+    setConfig(prev => {
+      const next = {
+        ...prev,
+        items: prev.items.map(item =>
+          item.id === id ? { ...item, enabled } : item
+        ),
+      };
+      solutionsStore.saveConfig(next);
+      return next;
+    });
     setHasUnsavedChanges(true);
   };
 
   const handleReorderCards = (reorderedItems: SolutionCard[]) => {
-    setConfig(prev => ({ ...prev, items: reorderedItems }));
+    setConfig(prev => {
+      const next = { ...prev, items: reorderedItems };
+      solutionsStore.saveConfig(next);
+      return next;
+    });
     setHasUnsavedChanges(true);
   };
 
   const handleSaveCard = (cardData: SolutionCard) => {
-    if (!cardData.id) {
-      // New card
-      cardData.id = solutionsStore.generateId(cardData.title);
-    }
-
     setConfig(prev => {
-      const existingIndex = prev.items.findIndex(item => item.id === cardData.id);
-      if (existingIndex >= 0) {
-        // Update existing
-        const newItems = [...prev.items];
-        newItems[existingIndex] = cardData;
-        return { ...prev, items: newItems };
-      } else {
-        // Add new
-        return { ...prev, items: [...prev.items, cardData] };
+      const nextCard: SolutionCard = { ...cardData };
+
+      if (!nextCard.id) {
+        const base = solutionsStore.generateId(nextCard.title);
+        const existingIds = new Set(prev.items.map(i => i.id));
+        let uniqueId = base;
+        let counter = 1;
+        while (existingIds.has(uniqueId)) {
+          uniqueId = `${base}-${counter++}`;
+        }
+        nextCard.id = uniqueId;
       }
+
+      const existingIndex = prev.items.findIndex(item => item.id === nextCard.id);
+      let next: SolutionsConfig;
+      if (existingIndex >= 0) {
+        const newItems = [...prev.items];
+        newItems[existingIndex] = nextCard;
+        next = { ...prev, items: newItems };
+      } else {
+        const newItem: SolutionCard = { ...nextCard, order: prev.items.length };
+        next = { ...prev, items: [...prev.items, newItem] };
+      }
+      solutionsStore.saveConfig(next);
+      return next;
     });
-    
+
     setHasUnsavedChanges(true);
     toast({
       title: 'נשמר',

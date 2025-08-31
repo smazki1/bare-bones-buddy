@@ -82,35 +82,13 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
             </Badge>
           )}
 
-          {/* Service type badge */}
-          <Badge 
-            variant="outline" 
-            className="absolute top-3 left-3 bg-background/90 text-foreground border"
-          >
-            {project.serviceType}
-          </Badge>
-
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
           
-          {/* Desktop hover effect for Before image */}
-          {project.imageBefore && (
-            <div className={`
-              absolute inset-0 transition-opacity duration-500 hidden md:block
-              ${showBefore ? 'opacity-0' : 'opacity-0 group-hover:opacity-100'}
-            `}>
-              <img
-                src={project.imageBefore}
-                alt={`${project.businessName} - לפני`}
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-            </div>
-          )}
+          {/* Removed desktop hover overlay to keep only title and before/after label */}
         </div>
 
-        {/* Project Info */}
+        {/* Project title only */}
         <figcaption className="absolute bottom-4 left-4 right-4 text-white">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -120,9 +98,6 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
             <h3 className="text-lg font-assistant font-semibold mb-1 text-shadow-sm">
               {project.businessName}
             </h3>
-            <p className="text-sm text-white/90 font-open-sans text-shadow-sm">
-              {project.businessType}
-            </p>
           </motion.div>
         </figcaption>
       </div>

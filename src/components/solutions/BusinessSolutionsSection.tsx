@@ -116,18 +116,23 @@ const BusinessSolutionsSection = () => {
     const updateConfig = () => {
       setConfig(solutionsStore.safeGetConfigOrDefaults());
     };
-    
+
     updateConfig();
-    
-    // Listen for storage changes (for admin updates)
+
+    // Cross-tab updates
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'aiMaster:solutions') {
-        updateConfig();
-      }
+      if (e.key === 'aiMaster:solutions') updateConfig();
     };
-    
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+
+    // Same-tab updates from admin actions
+    const handleLocalUpdate = () => updateConfig();
+    window.addEventListener('solutions:updated', handleLocalUpdate as EventListener);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('solutions:updated', handleLocalUpdate as EventListener);
+    };
   }, []);
 
   if (!config) return null;

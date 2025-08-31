@@ -39,6 +39,16 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
       order: 0
     }
   );
+  const initialSnapshotRef = useRef<SolutionCard | null>(card || {
+    id: '',
+    title: '',
+    imageSrc: '',
+    videoSrc: '',
+    tagSlug: '',
+    href: '',
+    enabled: true,
+    order: 0
+  });
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [isClickable, setIsClickable] = useState(false);
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
@@ -60,17 +70,30 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
     setAvailableTags(enabledTags);
   }, []);
 
-  // Initialize clickable state based on existing data
+  // Sync form data when opening editor or when switching cards
   useEffect(() => {
-    if (card) {
-      const hasLink = !!(card.href || card.tagSlug);
-      setIsClickable(hasLink);
-      // Open advanced section if there's custom href or video
-      setIsAdvancedOpen(!!(card.videoSrc || (card.href && card.href !== `/portfolio?tag=${card.tagSlug}`)));
-    }
-  }, [card]);
+    if (!isOpen) return;
 
-  const isDirty = JSON.stringify(formData) !== JSON.stringify(card);
+    const nextData: SolutionCard = card || {
+      id: '',
+      title: '',
+      imageSrc: '',
+      videoSrc: '',
+      tagSlug: '',
+      href: '',
+      enabled: true,
+      order: 0
+    };
+
+    setFormData(nextData);
+    initialSnapshotRef.current = nextData;
+
+    const hasLink = !!(nextData.href || nextData.tagSlug);
+    setIsClickable(hasLink);
+    setIsAdvancedOpen(!!(nextData.videoSrc || (nextData.href && nextData.href !== `/portfolio?tag=${nextData.tagSlug}`)));
+  }, [card, isOpen]);
+
+  const isDirty = JSON.stringify(formData) !== JSON.stringify(initialSnapshotRef.current);
 
   const handleInputChange = (field: keyof SolutionCard, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));

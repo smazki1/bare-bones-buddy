@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Menu, X, MessageCircle } from 'lucide-react';
 import { Button } from './ui/button';
+import { Link } from 'react-router-dom';
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -18,8 +19,7 @@ const Navigation = () => {
 
   const navItems = [
     { name: 'דוגמאות', href: '/portfolio' },
-    { name: 'שירותים', href: '#services' },
-    { name: 'אודות', href: '#about' },
+    { name: 'שירותים', href: '/services' },
     { name: 'צור קשר', href: '/contact' },
   ];
 
@@ -37,15 +37,14 @@ const Navigation = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <motion.div
-            className="flex items-center"
-            whileHover={{ scale: 1.05 }}
-          >
-            <h2 className={`text-2xl font-assistant font-bold ${
-              isScrolled ? 'text-primary' : 'text-white'
-            }`}>
-              Food Vision
-            </h2>
+          <motion.div className="flex items-center" whileHover={{ scale: 1.05 }}>
+            <Link to="/" aria-label="Go to home" className="block">
+              <h2 className={`text-2xl font-assistant font-bold ${
+                isScrolled ? 'text-primary' : 'text-white'
+              }`}>
+                Food Vision
+              </h2>
+            </Link>
           </motion.div>
 
           {/* Desktop Navigation */}
@@ -64,13 +63,7 @@ const Navigation = () => {
               </motion.a>
             ))}
             
-            <Button
-              className="bg-secondary hover:bg-secondary/90 text-white font-assistant"
-              size="sm"
-            >
-              <MessageCircle className="w-4 h-4 ml-2" />
-              WhatsApp
-            </Button>
+            {/* WhatsApp button removed per request */}
           </div>
 
           {/* Mobile Menu Button */}
@@ -103,15 +96,7 @@ const Navigation = () => {
                 {item.name}
               </a>
             ))}
-            <div className="px-4">
-              <Button
-                className="w-full bg-secondary hover:bg-secondary/90 text-white font-assistant"
-                size="sm"
-              >
-                <MessageCircle className="w-4 h-4 ml-2" />
-                WhatsApp
-              </Button>
-            </div>
+            {/* WhatsApp button removed per request */}
           </div>
         </motion.div>
       </div>

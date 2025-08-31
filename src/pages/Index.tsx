@@ -1,6 +1,6 @@
 import HeroSection from '@/components/HeroSection';
 import BusinessSolutionsSection from '@/components/solutions/BusinessSolutionsSection';
-import FeatureWorkSection from '@/components/FeatureWorkSection';
+// import FeatureWorkSection from '@/components/FeatureWorkSection';
 import PackagesSection from '@/components/packages/PackagesSection';
 import VisualSolutionsSection from '@/components/VisualSolutionsSection';
 import TestimonialsSection from '@/components/TestimonialsSection';
@@ -14,14 +14,14 @@ const Index = () => {
     <div className="min-h-screen">
       <HeroSection />
       <BusinessSolutionsSection />
-      <FeatureWorkSection />
-      <PackagesSection />
       <VisualSolutionsSection />
+      <PackagesSection />
+      
       <TestimonialsSection />
       <SectorsSection />
       <CTASection />
       <Footer />
-      <FloatingWhatsApp />
+      {/* Floating WhatsApp removed per request */}
     </div>
   );
 };

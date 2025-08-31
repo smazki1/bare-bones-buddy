@@ -113,15 +113,20 @@ const VisualSolutionsSection = () => {
 
     loadConfig();
 
-    // Listen for storage events to update config when admin changes it
+    // Cross-tab updates
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'aiMaster:visualSolutions') {
-        loadConfig();
-      }
+      if (e.key === 'aiMaster:visualSolutions') loadConfig();
     };
-
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+
+    // Same-tab updates
+    const handleLocalUpdate = () => loadConfig();
+    window.addEventListener('visualSolutions:updated', handleLocalUpdate as EventListener);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('visualSolutions:updated', handleLocalUpdate as EventListener);
+    };
   }, []);
 
   const enabledSolutions = config.items

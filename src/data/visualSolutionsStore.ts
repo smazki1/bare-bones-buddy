@@ -71,6 +71,10 @@ class VisualSolutionsStore {
     
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(configToSave));
+      // Notify same-tab listeners
+      try {
+        window.dispatchEvent(new Event('visualSolutions:updated'));
+      } catch {}
     } catch (error) {
       console.error('Failed to save visual solutions config:', error);
     }

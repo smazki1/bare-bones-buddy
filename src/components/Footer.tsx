@@ -43,11 +43,10 @@ const Footer = () => {
             </h4>
             <ul className="space-y-3">
               {[
-                { name: 'דף הבית', href: '#hero' },
-                { name: 'תיק עבודות', href: '#portfolio' },
-                { name: 'שירותים', href: '#services' },
-                { name: 'אודות', href: '#about' },
-                { name: 'צור קשר', href: '#contact' },
+                { name: 'דף הבית', href: '/' },
+                { name: 'תיק עבודות', href: '/portfolio' },
+                { name: 'שירותים', href: '/services' },
+                { name: 'צור קשר', href: '/contact' },
               ].map((link) => (
                 <li key={link.name}>
                   <a

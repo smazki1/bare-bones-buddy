@@ -32,7 +32,11 @@ const AdminVisualSolutions = () => {
   }, [isAuthenticated]);
 
   const handleSectionChange = (field: 'sectionTitle' | 'sectionSubtitle', value: string) => {
-    setConfig(prev => ({ ...prev, [field]: value }));
+    setConfig(prev => {
+      const next = { ...prev, [field]: value };
+      visualSolutionsStore.saveConfig(next);
+      return next;
+    });
     setHasUnsavedChanges(true);
   };
 
@@ -64,7 +68,11 @@ const AdminVisualSolutions = () => {
     };
     
     const newItems = [...config.items, newCard];
-    setConfig(prev => ({ ...prev, items: newItems }));
+    setConfig(prev => {
+      const next = { ...prev, items: newItems };
+      visualSolutionsStore.saveConfig(next);
+      return next;
+    });
     setHasUnsavedChanges(true);
   };
 
@@ -73,7 +81,11 @@ const AdminVisualSolutions = () => {
       .filter(item => item.id !== id)
       .map((item, index) => ({ ...item, order: index }));
     
-    setConfig(prev => ({ ...prev, items: newItems }));
+    setConfig(prev => {
+      const next = { ...prev, items: newItems };
+      visualSolutionsStore.saveConfig(next);
+      return next;
+    });
     setHasUnsavedChanges(true);
   };
 
@@ -82,12 +94,20 @@ const AdminVisualSolutions = () => {
       item.id === id ? { ...item, enabled: !item.enabled } : item
     );
     
-    setConfig(prev => ({ ...prev, items: newItems }));
+    setConfig(prev => {
+      const next = { ...prev, items: newItems };
+      visualSolutionsStore.saveConfig(next);
+      return next;
+    });
     setHasUnsavedChanges(true);
   };
 
   const handleReorderCards = (newCards: VisualSolutionCard[]) => {
-    setConfig(prev => ({ ...prev, items: newCards }));
+    setConfig(prev => {
+      const next = { ...prev, items: newCards };
+      visualSolutionsStore.saveConfig(next);
+      return next;
+    });
     setHasUnsavedChanges(true);
   };
 
@@ -102,7 +122,11 @@ const AdminVisualSolutions = () => {
       newItems = [...config.items, cardData];
     }
     
-    setConfig(prev => ({ ...prev, items: newItems }));
+    setConfig(prev => {
+      const next = { ...prev, items: newItems };
+      visualSolutionsStore.saveConfig(next);
+      return next;
+    });
     setHasUnsavedChanges(true);
     
     toast({

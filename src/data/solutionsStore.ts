@@ -71,6 +71,10 @@ class SolutionsStore {
     
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(configToSave));
+      // Notify same-tab listeners that solutions config changed
+      try {
+        window.dispatchEvent(new Event('solutions:updated'));
+      } catch {}
     } catch (error) {
       console.error('Failed to save solutions config:', error);
     }

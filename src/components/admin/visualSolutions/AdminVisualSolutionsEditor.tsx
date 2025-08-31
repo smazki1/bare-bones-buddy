@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X, Upload, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { VisualSolutionCard } from '@/types/visualSolutions';
 import { visualSolutionsStore } from '@/data/visualSolutionsStore';
+import { convertFileToDataUrl, isValidImageFile, isValidVideoFile } from '@/utils/fileUtils';
 
 interface AdminVisualSolutionsEditorProps {
   isOpen: boolean;
@@ -33,6 +34,8 @@ const AdminVisualSolutionsEditor = ({
   
   const [previewMode, setPreviewMode] = useState<'image' | 'video'>('image');
   const [dragActive, setDragActive] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (editingCard) {
@@ -83,14 +86,31 @@ const AdminVisualSolutionsEditor = ({
     if (files.length === 0) return;
     
     const file = files[0];
-    if (type === 'image' && !file.type.startsWith('image/')) return;
-    if (type === 'video' && !file.type.startsWith('video/')) return;
-    
-    const url = URL.createObjectURL(file);
-    setFormData(prev => ({
-      ...prev,
-      [type === 'image' ? 'imageSrc' : 'videoSrc']: url
-    }));
+    if (type === 'image') {
+      if (!isValidImageFile(file)) return;
+      convertFileToDataUrl(file).then((dataUrl) => {
+        setFormData(prev => ({ ...prev, imageSrc: dataUrl }));
+      });
+    } else {
+      if (!isValidVideoFile(file)) return;
+      convertFileToDataUrl(file).then((dataUrl) => {
+        setFormData(prev => ({ ...prev, videoSrc: dataUrl }));
+      });
+    }
+  };
+
+  const handleImageFileSelect = async (file: File | null) => {
+    if (!file) return;
+    if (!isValidImageFile(file)) return;
+    const dataUrl = await convertFileToDataUrl(file);
+    setFormData(prev => ({ ...prev, imageSrc: dataUrl }));
+  };
+
+  const handleVideoFileSelect = async (file: File | null) => {
+    if (!file) return;
+    if (!isValidVideoFile(file)) return;
+    const dataUrl = await convertFileToDataUrl(file);
+    setFormData(prev => ({ ...prev, videoSrc: dataUrl }));
   };
 
   return (
@@ -185,6 +205,7 @@ const AdminVisualSolutionsEditor = ({
                   onDrop={(e) => handleDrop(e, 'image')}
                   onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
                   onDragLeave={() => setDragActive(false)}
+                  onClick={() => imageInputRef.current?.click()}
                 >
                   {formData.imageSrc ? (
                     <div className="space-y-2">
@@ -213,6 +234,13 @@ const AdminVisualSolutionsEditor = ({
                     </div>
                   )}
                 </div>
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleImageFileSelect(e.target.files?.[0] || null)}
+                />
                 <Input
                   value={formData.imageSrc || ''}
                   onChange={(e) => setFormData(prev => ({ ...prev, imageSrc: e.target.value }))}
@@ -232,6 +260,7 @@ const AdminVisualSolutionsEditor = ({
                   onDrop={(e) => handleDrop(e, 'video')}
                   onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
                   onDragLeave={() => setDragActive(false)}
+                  onClick={() => videoInputRef.current?.click()}
                 >
                   {formData.videoSrc ? (
                     <div className="space-y-2">
@@ -260,6 +289,13 @@ const AdminVisualSolutionsEditor = ({
                     </div>
                   )}
                 </div>
+                <input
+                  ref={videoInputRef}
+                  type="file"
+                  accept="video/*"
+                  className="hidden"
+                  onChange={(e) => handleVideoFileSelect(e.target.files?.[0] || null)}
+                />
                 <Input
                   value={formData.videoSrc || ''}
                   onChange={(e) => setFormData(prev => ({ ...prev, videoSrc: e.target.value }))}
