@@ -22,12 +22,11 @@ const Portfolio = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [allProjects, setAllProjects] = useState<Project[]>([]);
 
-  // Load projects from store (with fallback to mock data)
+  // Load projects from store
   useEffect(() => {
     const loadProjects = () => {
       const storedProjects = portfolioStore.getProjects();
-      // Use stored projects if available, otherwise use mock data
-      setAllProjects(storedProjects.length > 0 ? storedProjects : fullPortfolioData);
+      setAllProjects(storedProjects);
     };
 
     loadProjects();

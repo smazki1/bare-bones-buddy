@@ -1,4 +1,4 @@
-import { Project, categoryFilters } from './portfolioMock';
+import { Project, categoryFilters, fullPortfolioData } from './portfolioMock';
 
 // Event for real-time updates between admin and frontend
 export const PORTFOLIO_UPDATE_EVENT = 'portfolioConfigUpdate';
@@ -8,12 +8,14 @@ const STORAGE_KEY = 'aiMaster:portfolioConfig';
 export interface PortfolioConfig {
   items: Project[];
   updatedAt?: string;
+  initialized?: boolean;
 }
 
 // Default configuration with existing mock data
 const DEFAULT_CONFIG: PortfolioConfig = {
-  items: [],
-  updatedAt: new Date().toISOString()
+  items: fullPortfolioData, // Initialize with existing catalog data
+  updatedAt: new Date().toISOString(),
+  initialized: true
 };
 
 class PortfolioStore {
@@ -34,11 +36,24 @@ class PortfolioStore {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        this.config = JSON.parse(stored);
+        const parsedConfig = JSON.parse(stored);
+        this.config = parsedConfig;
+        
+        // If config exists but wasn't initialized with mock data, merge it
+        if (!parsedConfig.initialized && parsedConfig.items.length === 0) {
+          this.config.items = fullPortfolioData;
+          this.config.initialized = true;
+          this.saveConfig();
+        }
+      } else {
+        // First time - initialize with mock data
+        this.config = DEFAULT_CONFIG;
+        this.saveConfig();
       }
     } catch (error) {
       console.error('Error loading portfolio config:', error);
       this.config = DEFAULT_CONFIG;
+      this.saveConfig();
     }
   }
 
