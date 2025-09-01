@@ -83,7 +83,7 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.2 }}
           >
-            {"מנות מושלמות\u200F."}{' '}
+            <span dir="rtl">מנות מושלמות.</span>{' '}
             <span className="bg-gradient-to-r from-secondary to-secondary/80 bg-clip-text text-transparent">
               תמונות מושלמות.
             </span>
