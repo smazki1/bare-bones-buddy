@@ -101,7 +101,7 @@ const Portfolio = () => {
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
-        <Navigation />
+        <Navigation theme="light" />
         
         <main className="pt-20">
           <PortfolioHero />

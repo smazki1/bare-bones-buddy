@@ -4,7 +4,11 @@ import { Menu, X, MessageCircle } from 'lucide-react';
 import { Button } from './ui/button';
 import { Link } from 'react-router-dom';
 
-const Navigation = () => {
+type NavigationProps = {
+  theme?: 'light' | 'dark';
+};
+
+const Navigation = ({ theme = 'light' }: NavigationProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -23,11 +27,16 @@ const Navigation = () => {
     { name: 'צור קשר', href: '/contact' },
   ];
 
+  const useSolidHeader = isScrolled || theme === 'light';
+  const textColorDesktop = useSolidHeader ? 'text-foreground' : 'text-white/90';
+  const logoColor = useSolidHeader ? 'text-primary' : 'text-white';
+  const mobileButtonColor = useSolidHeader ? 'text-foreground' : 'text-white';
+
   return (
     <motion.nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-background/95 backdrop-blur-md shadow-elegant' 
+        useSolidHeader
+          ? 'bg-background/95 backdrop-blur-md shadow-elegant'
           : 'bg-transparent'
       }`}
       initial={{ y: -100 }}
@@ -39,9 +48,7 @@ const Navigation = () => {
           {/* Logo */}
           <motion.div className="flex items-center" whileHover={{ scale: 1.05 }}>
             <Link to="/" aria-label="Go to home" className="block">
-              <h2 className={`text-2xl font-assistant font-bold ${
-                isScrolled ? 'text-primary' : 'text-white'
-              }`}>
+              <h2 className={`text-2xl font-assistant font-bold ${logoColor}`}>
                 Food Vision
               </h2>
             </Link>
@@ -53,9 +60,7 @@ const Navigation = () => {
               <motion.a
                 key={item.name}
                 href={item.href}
-                className={`font-open-sans text-lg transition-colors hover:text-secondary ${
-                  isScrolled ? 'text-foreground' : 'text-white/90'
-                }`}
+                className={`font-open-sans text-lg transition-colors hover:text-secondary ${textColorDesktop}`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -72,7 +77,7 @@ const Navigation = () => {
               variant="ghost"
               size="sm"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={isScrolled ? 'text-foreground' : 'text-white'}
+              className={mobileButtonColor}
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </Button>

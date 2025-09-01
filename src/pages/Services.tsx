@@ -7,7 +7,7 @@ import CTASection from '@/components/CTASection';
 const Services = () => {
   return (
     <div className="min-h-screen bg-background text-foreground" dir="rtl">
-      <Navigation />
+      <Navigation theme="light" />
       
       <main>
         <ServicesGrid />

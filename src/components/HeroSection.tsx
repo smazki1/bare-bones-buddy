@@ -72,7 +72,7 @@ const HeroSection = () => {
       </div>
 
       {/* Navigation */}
-      <Navigation />
+      <Navigation theme="dark" />
 
       {/* Hero Content */}
       <div className="relative z-20 flex items-center justify-center min-h-screen px-4">
