@@ -78,6 +78,8 @@ const HeroSection = () => {
       <div className="relative z-20 flex items-center justify-center min-h-screen px-4">
         <div className="text-center max-w-4xl mx-auto">
           <motion.h1
+            dir="rtl"
+            style={{ unicodeBidi: 'isolate-override' }}
             className="text-5xl md:text-7xl font-assistant font-bold text-white mb-6 leading-tight"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
