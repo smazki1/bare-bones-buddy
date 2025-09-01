@@ -83,11 +83,18 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
       color: 'text-green-600'
     },
     {
+      title: 'ניהול קטלוג הפרויקטים',
+      description: 'העלאה ועריכה של פרויקטים עם תמונות לפני ואחרי',
+      icon: Image,
+      href: '/admin/portfolio',
+      color: 'text-purple-600'
+    },
+    {
       title: 'ניהול תוכן',
       description: 'עריכת טקסטים ותוכן כללי (בקרוב)',
       icon: FileText,
       href: '#',
-      color: 'text-purple-600',
+      color: 'text-orange-600',
       disabled: true
     },
     {

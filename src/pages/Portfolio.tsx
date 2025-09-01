@@ -9,6 +9,7 @@ import MasonryGrid from '@/components/portfolio/MasonryGrid';
 import PortfolioCTA from '@/components/portfolio/PortfolioCTA';
 import { useInfiniteScrollPortfolio } from '@/utils/useInfiniteScrollPortfolio';
 import { fullPortfolioData, Project } from '@/data/portfolioMock';
+import { portfolioStore, PORTFOLIO_UPDATE_EVENT } from '@/data/portfolioStore';
 
 const ITEMS_PER_PAGE = 12;
 const MAX_ITEMS_DISPLAY = 24;
@@ -19,14 +20,34 @@ const Portfolio = () => {
   const [visibleProjects, setVisibleProjects] = useState<Project[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [allProjects, setAllProjects] = useState<Project[]>([]);
+
+  // Load projects from store (with fallback to mock data)
+  useEffect(() => {
+    const loadProjects = () => {
+      const storedProjects = portfolioStore.getProjects();
+      // Use stored projects if available, otherwise use mock data
+      setAllProjects(storedProjects.length > 0 ? storedProjects : fullPortfolioData);
+    };
+
+    loadProjects();
+
+    // Listen for real-time updates from admin
+    const handleUpdate = () => {
+      loadProjects();
+    };
+
+    window.addEventListener(PORTFOLIO_UPDATE_EVENT, handleUpdate);
+    return () => window.removeEventListener(PORTFOLIO_UPDATE_EVENT, handleUpdate);
+  }, []);
 
   // Filter projects based on active filter
   const filteredProjects = useMemo(() => {
     if (activeFilter === 'all') {
-      return fullPortfolioData;
+      return allProjects;
     }
-    return fullPortfolioData.filter(project => project.category === activeFilter);
-  }, [activeFilter]);
+    return allProjects.filter(project => project.category === activeFilter);
+  }, [activeFilter, allProjects]);
 
   // Check if there are more pages to load and haven't reached max display limit
   const hasReachedMaxItems = visibleProjects.length >= MAX_ITEMS_DISPLAY;
@@ -78,7 +99,7 @@ const Portfolio = () => {
     
     // Load initial projects for new filter
     setTimeout(() => {
-      const filteredData = filter === 'all' ? fullPortfolioData : fullPortfolioData.filter(p => p.category === filter);
+      const filteredData = filter === 'all' ? allProjects : allProjects.filter(p => p.category === filter);
       const initialProjects = filteredData.slice(0, ITEMS_PER_PAGE);
       setVisibleProjects(initialProjects);
       setIsLoading(false);

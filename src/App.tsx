@@ -12,6 +12,7 @@ import AdminIndex from "./pages/admin/index";
 import AdminSolutions from "./pages/admin/solutions";
 import AdminVisualSolutions from "./pages/admin/visualSolutions";
 import AdminMarkets from "./pages/admin/markets";
+import AdminPortfolio from "./pages/admin/portfolio";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/admin/solutions" element={<AdminSolutions />} />
           <Route path="/admin/visual-solutions" element={<AdminVisualSolutions />} />
           <Route path="/admin/markets" element={<AdminMarkets />} />
+          <Route path="/admin/portfolio" element={<AdminPortfolio />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
