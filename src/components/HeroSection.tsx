@@ -44,8 +44,9 @@ const HeroSection = () => {
           />
         ))}
         
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
+        {/* Enhanced Overlay for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
+        <div className="absolute inset-0 bg-black/20" />
       </motion.div>
 
       {/* Floating Particles */}
@@ -77,10 +78,15 @@ const HeroSection = () => {
       {/* Hero Content */}
       <div className="relative z-20 flex items-center justify-center min-h-screen px-4">
         <div className="text-center max-w-4xl mx-auto">
+          {/* Glass morphism backdrop for text readability */}
+          <div className="absolute inset-0 rounded-2xl bg-black/20 backdrop-blur-sm border border-white/10 shadow-2xl" />
           <motion.h1
             dir="rtl"
-            style={{ unicodeBidi: 'isolate-override' }}
-            className="text-5xl md:text-7xl font-assistant font-bold text-white mb-6 leading-tight"
+            style={{ 
+              unicodeBidi: 'isolate-override',
+              textShadow: '0 4px 20px rgba(0,0,0,0.8), 0 2px 8px rgba(0,0,0,0.6)'
+            }}
+            className="relative z-10 text-5xl md:text-7xl font-assistant font-bold text-white mb-6 leading-tight drop-shadow-2xl"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.2 }}
@@ -92,7 +98,8 @@ const HeroSection = () => {
           </motion.h1>
 
           <motion.p
-            className="text-xl md:text-2xl text-white/90 mb-8 font-open-sans max-w-2xl mx-auto"
+            className="relative z-10 text-xl md:text-2xl text-white mb-8 font-open-sans max-w-2xl mx-auto drop-shadow-xl"
+            style={{ textShadow: '0 2px 12px rgba(0,0,0,0.8), 0 1px 4px rgba(0,0,0,0.6)' }}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.4 }}
@@ -101,7 +108,7 @@ const HeroSection = () => {
           </motion.p>
 
           <motion.div
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12"
+            className="relative z-10 flex flex-col sm:flex-row gap-4 justify-center items-center mb-12"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.6 }}
@@ -122,7 +129,8 @@ const HeroSection = () => {
           </motion.div>
 
           <motion.div
-            className="text-white/80 font-open-sans text-lg"
+            className="relative z-10 text-white font-open-sans text-lg drop-shadow-lg"
+            style={{ textShadow: '0 2px 8px rgba(0,0,0,0.8)' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.8 }}
