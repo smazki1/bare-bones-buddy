@@ -140,6 +140,17 @@ const Footer = () => {
           <p className="text-white/60 font-open-sans">
             © 2024 Food Vision. כל הזכויות שמורות.
           </p>
+          <p className="text-white/70 font-open-sans mt-2">
+            נבנה באהבה על ידי{' '}
+            <a
+              href="https://ai-master.co.il"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-secondary"
+            >
+              אבי פריד · AI MASTER
+            </a>
+          </p>
         </motion.div>
       </div>
     </footer>
