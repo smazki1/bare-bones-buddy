@@ -1,10 +1,76 @@
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Instagram, Video, BookOpen, Menu, Globe, Crown, Clock, Users } from 'lucide-react';
+import { Instagram, Video, BookOpen, Menu, Globe, Crown, Clock, Users, Target, Camera, Flame, Gift, Zap } from 'lucide-react';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 
 const services = [
+  {
+    icon: Target,
+    title: 'חבילת ניסיון',
+    description: 'לנסות בלי סיכון',
+    includes: '10-12 תמונות מקצועיות, פגישת אפיון אישית, זיכוי מלא של 499₪ לחבילה הבאה!',
+    suitableFor: 'כל סוגי העסקים שרוצים לראות איך זה עובד',
+    deliveryTime: '3-5 ימים',
+    price: '₪499',
+    popular: false,
+    buttonText: 'התחל בלי סיכון - זיכוי מלא!'
+  },
+  {
+    icon: Camera,
+    title: 'חבילת טעימות',
+    description: 'תמונות מקצועיות למסעדה',
+    includes: '60 תמונות, 10–12 מנות, גדלים מותאמים לכל הפלטפורמות',
+    suitableFor: 'בתי קפה, ביסטרו, מסעדות קטנות',
+    deliveryTime: '5–7 ימים',
+    price: '₪1,239',
+    originalPrice: '₪740 לאחר זיכוי',
+    popular: false
+  },
+  {
+    icon: Flame,
+    title: 'חבילת נוכחות דיגיטלית מלאה',
+    description: 'הכי פופולרי – המותג שלכם בכל מקום',
+    includes: '150 תמונות מקצועיות (6 לכל מנה), 25–30 מנות מהתפריט, 5 סרטוני וידאו קצרים (8–16 שניות), תמונות מותאמות לאפליקציות משלוחים',
+    suitableFor: 'מסעדות שרוצות נוכחות דיגיטלית חזקה',
+    deliveryTime: '7–10 ימים',
+    price: '₪1,689',
+    originalPrice: '₪1,190 לאחר זיכוי',
+    popular: true
+  },
+  {
+    icon: Crown,
+    title: 'חבילת הפקת פרימיום',
+    description: 'פתרון מושלם לרשתות גדולות – כל התפריט ברמה מקצועית מלאה',
+    includes: '325+ תמונות מקצועיות, 50–60 מנות (כל התפריט), 10 סרטוני וידאו מקצועיים, ייעוץ מיתוג ושיווק דיגיטלי',
+    suitableFor: 'רשתות מסעדות, מסעדות גדולות',
+    deliveryTime: '10–14 ימים',
+    price: '₪2,939',
+    originalPrice: '₪2,440 לאחר זיכוי',
+    popular: false
+  },
+  {
+    icon: Gift,
+    title: 'חבילת מבצע השקה',
+    description: 'רוצה לראות איך זה עובד? – סרטון מקצועי במחיר השקה מיוחד',
+    includes: 'סרטון מקצועי מלא ואיכותי, בלי התחייבות ובלי סיכון, מבצע ללקוחות חדשים בלבד',
+    suitableFor: 'כל מסעדה שמסוקרנת מהשירות',
+    deliveryTime: '2–3 ימים',
+    price: '₪299',
+    originalPrice: '₪99 מבצע השקה',
+    popular: false,
+    buttonText: 'אני רוצה לנסות ב־99₪!'
+  },
+  {
+    icon: Zap,
+    title: 'חבילת On the Go',
+    description: 'תמונות מקצועיות לפי הצורך',
+    includes: 'יצירת תמונות לפי דרישה, מותאם לכל מנה/אירוע, באיכות גבוהה וללא התחייבות לחבילה גדולה',
+    suitableFor: 'עסקים שצריכים תמונות נקודתיות – למנות חדשות, פוסטים לרשתות, מבצעים מיוחדים',
+    deliveryTime: '24–72 שעות (תלוי בכמות)',
+    price: 'החל מ־₪120 לתמונה',
+    popular: false
+  },
   {
     icon: Instagram,
     title: 'בנק תמונות לרשתות חברתיות',
@@ -23,7 +89,7 @@ const services = [
     suitableFor: 'עסקים דינמיים',
     deliveryTime: '5-7 ימים',
     price: '₪1,290',
-    popular: true
+    popular: false
   },
   {
     icon: BookOpen,
@@ -33,26 +99,6 @@ const services = [
     suitableFor: 'יצרנים, סיטונאים',
     deliveryTime: '7-10 ימים',
     price: '₪1,890',
-    popular: false
-  },
-  {
-    icon: Menu,
-    title: 'תפריטים ויזואליים',
-    description: 'תפריט שמעורר תיאבון',
-    includes: 'כל המנות, עיצוב תפריט',
-    suitableFor: 'מסעדות, בתי קפה',
-    deliveryTime: '5-8 ימים',
-    price: '₪1,490',
-    popular: false
-  },
-  {
-    icon: Globe,
-    title: 'תמונות לאתר',
-    description: 'אתר שנראה מיליון דולר',
-    includes: 'תמונות אתר, באנרים',
-    suitableFor: 'כל העסקים',
-    deliveryTime: '3-5 ימים',
-    price: '₪690',
     popular: false
   },
   {
@@ -153,6 +199,11 @@ const ServicesGrid = () => {
                       <div className="text-3xl font-assistant font-bold text-primary">
                         {service.price}
                       </div>
+                      {service.originalPrice && (
+                        <div className="text-sm text-secondary font-assistant font-semibold">
+                          {service.originalPrice}
+                        </div>
+                      )}
                     </div>
                     
                     <Button 
@@ -168,7 +219,7 @@ const ServicesGrid = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        צרו קשר לפרטים נוספים
+                        {service.buttonText || 'צרו קשר לפרטים נוספים'}
                       </a>
                     </Button>
                   </div>
