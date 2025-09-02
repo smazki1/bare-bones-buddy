@@ -34,6 +34,7 @@
 - [x] Removed floating WhatsApp from all pages
 - [x] Made logo clickable
 - [x] Fixed period placement in hero title
+- [x] Hero buttons route to Services and Portfolio
 
 ### Technical Implementation
 - [x] React + TypeScript setup

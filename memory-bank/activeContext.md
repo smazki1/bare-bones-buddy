@@ -24,6 +24,7 @@ Recently completed major website refinements and fixes. All user requests have b
 6. **Services Page**: Removed hero section and complex sections, replaced with simple CTA
 7. **Floating WhatsApp**: Removed from all pages
 8. **RTL Text Fix**: Fixed period placement in hero title using proper BiDi handling
+9. **Hero CTA Routing**: Updated hero buttons — "התחילו עכשיו" now routes to `/services`, and "ראה דוגמאות" routes to `/portfolio`
 
 ## Current State
 - All admin panels working with real-time updates

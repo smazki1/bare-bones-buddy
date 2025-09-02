@@ -1,54 +1,13 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Send } from 'lucide-react';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
 
 const ContactForm = () => {
   const { ref, isIntersecting } = useIntersectionObserver({ threshold: 0.2 });
-  const { toast } = useToast();
-  
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    restaurantName: ''
-  });
-
-  // Simplified form: no services selection or file uploads
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Basic validation
-    if (!formData.name || !formData.phone || !formData.email || !formData.restaurantName) {
-      toast({
-        title: "שגיאה",
-        description: "אנא מלאו את כל השדות הנדרשים",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Simulate form submission
-    toast({
-      title: "הודעה נשלחה בהצלחה!",
-      description: "נחזור אליכם תוך 24 שעות עם הצעת מחיר מפורטת",
-    });
-
-    // Reset form
-    setFormData({
-      name: '',
-      phone: '',
-      email: '',
-      restaurantName: ''
-    });
-  };
 
   return (
-    <section ref={ref} id="contact-form" className="py-20 bg-gradient-subtle">
+    <section ref={ref} id="contact-form" className="py-20 bg-gradient-subtle" dir="rtl">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -71,69 +30,69 @@ const ContactForm = () => {
           className="max-w-4xl mx-auto"
         >
           <div className="bg-card rounded-2xl p-8 shadow-elegant">
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Personal Details */}
+            {/* Lead form per spec */}
+            <form id="lead-form" className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <label className="block text-sm font-assistant font-semibold text-foreground mb-2">
+                  <label htmlFor="fullName" className="block text-sm font-assistant font-semibold text-foreground mb-2">
                     שם מלא *
                   </label>
                   <Input
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    id="fullName"
+                    name="fullName"
+                    type="text"
                     placeholder="השם שלכם"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-assistant font-semibold text-foreground mb-2">
+                  <label htmlFor="phone" className="block text-sm font-assistant font-semibold text-foreground mb-2">
                     טלפון *
                   </label>
                   <Input
-                    value={formData.phone}
-                    onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                    id="phone"
+                    name="phone"
+                    type="tel"
                     placeholder="050-1234567"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-assistant font-semibold text-foreground mb-2">
+                  <label htmlFor="email" className="block text-sm font-assistant font-semibold text-foreground mb-2">
                     אימייל *
                   </label>
                   <Input
+                    id="email"
+                    name="email"
                     type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                     placeholder="name@restaurant.com"
                     required
                   />
                 </div>
               </div>
-              {/* Business Details */}
+
               <div>
-                <label className="block text-sm font-assistant font-semibold text-foreground mb-2">
+                <label htmlFor="business" className="block text-sm font-assistant font-semibold text-foreground mb-2">
                   שם המסעדה / העסק *
                 </label>
                 <Input
-                  value={formData.restaurantName}
-                  onChange={(e) => setFormData(prev => ({ ...prev, restaurantName: e.target.value }))}
+                  id="business"
+                  name="business"
+                  type="text"
                   placeholder="שם המסעדה או העסק"
                   required
                 />
               </div>
 
-              {/* Submit Button */}
+              {/* Hidden client timestamp */}
+              <input id="clientTimestamp" name="clientTimestamp" type="hidden" />
+
+              {/* Submit and status */}
               <div className="text-center">
-                <Button 
-                  type="submit" 
-                  className="bg-secondary hover:bg-secondary/90 text-white px-12 py-4 text-lg font-assistant font-semibold"
-                >
-                  <Send className="w-5 h-5 ml-2" />
+                <Button id="submitBtn" type="submit" className="bg-secondary hover:bg-secondary/90 text-white px-12 py-4 text-lg font-assistant font-semibold">
                   שלחו בקשה
                 </Button>
-                <p className="text-sm text-muted-foreground mt-4 font-open-sans">
-                  נחזור אליכם תוך 24 שעות
-                </p>
+                <div id="form-status" aria-live="polite" role="status" className="mt-4 text-sm font-open-sans"></div>
               </div>
             </form>
           </div>

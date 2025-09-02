@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,9 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Edit, Trash2, Search, Image, Eye, Copy } from 'lucide-react';
+import { Edit, Trash2, Search, Image, Eye, Copy, Pin } from 'lucide-react';
 import { Project } from '@/data/portfolioMock';
 import { categoryFilters } from '@/data/portfolioMock';
+import { portfolioStore } from '@/data/portfolioStore';
 
 interface AdminPortfolioListProps {
   projects: Project[];
@@ -21,6 +22,9 @@ const AdminPortfolioList = ({ projects, onEdit, onDelete, onDuplicate }: AdminPo
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [serviceFilter, setServiceFilter] = useState('all');
+  const [sortMode, setSortMode] = useState(false);
+  const [localOrder, setLocalOrder] = useState<number[]>([]);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
 
   const filteredProjects = projects.filter(project => {
     const matchesSearch = project.businessName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -31,12 +35,73 @@ const AdminPortfolioList = ({ projects, onEdit, onDelete, onDuplicate }: AdminPo
     return matchesSearch && matchesCategory && matchesService;
   });
 
+  const visibleCategory = categoryFilter === 'all' ? '' : categoryFilter;
+
+  useEffect(() => {
+    if (sortMode && visibleCategory) {
+      // Initialize once per category change
+      setLocalOrder(prev => {
+        const currentIds = filteredProjects.map(p => Number(p.id));
+        const unchanged = prev.length === currentIds.length && prev.every((v, i) => v === currentIds[i]);
+        return unchanged ? prev : currentIds;
+      });
+    }
+  }, [sortMode, visibleCategory, filteredProjects.length]);
+
+  const moveItem = (id: number, direction: 'up' | 'down') => {
+    setLocalOrder(prev => {
+      const idx = prev.indexOf(id);
+      if (idx === -1) return prev;
+      const target = direction === 'up' ? idx - 1 : idx + 1;
+      if (target < 0 || target >= prev.length) return prev;
+      const next = [...prev];
+      const temp = next[idx];
+      next[idx] = next[target];
+      next[target] = temp;
+      return next;
+    });
+  };
+
+  const saveOrder = () => {
+    if (!visibleCategory || !sortMode || localOrder.length === 0) return;
+    portfolioStore.setManualOrderForCategory(visibleCategory, localOrder);
+  };
+
+  // Drag & Drop handlers
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    if (!sortMode || !visibleCategory) return;
+    try {
+      e.dataTransfer.setData('text/plain', String(index));
+      e.dataTransfer.effectAllowed = 'move';
+    } catch {}
+    setDragIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    if (!sortMode || !visibleCategory) return;
+    e.preventDefault();
+  };
+
+  const handleDrop = (targetIndex: number, displayedIds: number[]) => {
+    if (!sortMode || !visibleCategory) return;
+    if (dragIndex === null || dragIndex === targetIndex) return;
+    const next = [...displayedIds];
+    const [moved] = next.splice(dragIndex, 1);
+    next.splice(targetIndex, 0, moved);
+    setLocalOrder(next);
+    setDragIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDragIndex(null);
+  };
+
   const ProjectCard = ({ project }: { project: Project }) => (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.3 }}
+      initial={sortMode ? false : { opacity: 0, y: 20 }}
+      animate={sortMode ? undefined : { opacity: 1, y: 0 }}
+      exit={sortMode ? undefined : { opacity: 0, y: -20 }}
+      transition={sortMode ? { duration: 0 } : { duration: 0.3 }}
     >
       <Card className="group hover:shadow-md transition-shadow">
         <CardHeader className="pb-3">
@@ -56,6 +121,15 @@ const AdminPortfolioList = ({ projects, onEdit, onDelete, onDuplicate }: AdminPo
               <Badge variant="outline" className="text-xs">
                 {categoryFilters.find(cat => cat.slug === project.category)?.label}
               </Badge>
+              {project.pinned && (
+                <Badge variant="secondary" className="text-[10px] mt-1">Pinned</Badge>
+              )}
+              {sortMode && visibleCategory && (
+                <div className="flex gap-1 mt-1">
+                  <Button variant="outline" size="sm" className="h-7 px-2 text-xs" onClick={() => moveItem(Number(project.id), 'up')}>↑</Button>
+                  <Button variant="outline" size="sm" className="h-7 px-2 text-xs" onClick={() => moveItem(Number(project.id), 'down')}>↓</Button>
+                </div>
+              )}
             </div>
           </div>
         </CardHeader>
@@ -64,25 +138,27 @@ const AdminPortfolioList = ({ projects, onEdit, onDelete, onDuplicate }: AdminPo
           {/* Image Preview */}
           <div className="flex gap-2">
             {project.imageAfter && (
-              <div className="flex-1">
+              <div className="flex-1" style={{ pointerEvents: sortMode ? 'none' : 'auto' }}>
                 <p className="text-xs text-muted-foreground mb-1">אחרי</p>
                 <div className="relative aspect-video rounded-md overflow-hidden bg-muted">
                   <img
                     src={project.imageAfter}
                     alt="תמונה אחרי"
                     className="w-full h-full object-cover"
+                    draggable={false}
                   />
                 </div>
               </div>
             )}
             {project.imageBefore && (
-              <div className="flex-1">
+              <div className="flex-1" style={{ pointerEvents: sortMode ? 'none' : 'auto' }}>
                 <p className="text-xs text-muted-foreground mb-1">לפני</p>
                 <div className="relative aspect-video rounded-md overflow-hidden bg-muted">
                   <img
                     src={project.imageBefore}
                     alt="תמונה לפני"
                     className="w-full h-full object-cover"
+                    draggable={false}
                   />
                 </div>
               </div>
@@ -99,6 +175,18 @@ const AdminPortfolioList = ({ projects, onEdit, onDelete, onDuplicate }: AdminPo
 
           {/* Actions */}
           <div className="flex items-center gap-2 pt-2 border-t">
+            {!sortMode && (
+              <Button
+                variant={project.pinned ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => portfolioStore.togglePinned(project.id)}
+                className="text-xs font-assistant"
+              >
+                <Pin className="w-3 h-3 mr-1" />
+                {project.pinned ? 'Unpin' : 'Pin'}
+              </Button>
+            )}
+
             <Button
               variant="outline"
               size="sm"
@@ -155,6 +243,13 @@ const AdminPortfolioList = ({ projects, onEdit, onDelete, onDuplicate }: AdminPo
     </motion.div>
   );
 
+  // Compute displayed list (used for both rendering and DnD index mapping)
+  const displayedProjects = (sortMode && visibleCategory
+    ? [...filteredProjects].sort((a, b) => localOrder.indexOf(Number(a.id)) - localOrder.indexOf(Number(b.id)))
+    : filteredProjects);
+
+  const displayedIds = displayedProjects.map(p => Number(p.id));
+
   return (
     <div className="space-y-6">
       {/* Filters */}
@@ -204,15 +299,52 @@ const AdminPortfolioList = ({ projects, onEdit, onDelete, onDuplicate }: AdminPo
               <Image className="w-4 h-4" />
               <span>{filteredProjects.length} פרויקטים</span>
             </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant={sortMode ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSortMode(!sortMode)}
+                className="font-assistant text-xs"
+                title={categoryFilter === 'all' ? 'Select a category to save order' : ''}
+              >
+                {sortMode ? 'סיום סידור' : 'מצב סידור'}
+              </Button>
+              {sortMode && visibleCategory && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={saveOrder}
+                  className="font-assistant text-xs"
+                >
+                  שמור סדר
+                </Button>
+              )}
+            </div>
           </div>
+          {sortMode && !visibleCategory && (
+            <div className="text-xs text-muted-foreground mt-2" dir="rtl">
+              בחרו קטגוריה כדי לסדר ולשמור את סדר הפרויקטים.
+            </div>
+          )}
         </CardContent>
       </Card>
 
       {/* Projects Grid */}
       {filteredProjects.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredProjects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
+          {displayedProjects.map((project, index) => (
+            <div
+              key={project.id}
+              draggable={!!sortMode && !!visibleCategory}
+              onDragStart={(e) => handleDragStart(e, index)}
+              onDragOver={handleDragOver}
+              onDrop={() => handleDrop(index, displayedIds)}
+              onDragEnd={handleDragEnd}
+              className={sortMode && visibleCategory ? 'cursor-move' : ''}
+              aria-grabbed={sortMode && visibleCategory ? dragIndex === index : undefined}
+            >
+              <ProjectCard project={project} />
+            </div>
           ))}
         </div>
       ) : (

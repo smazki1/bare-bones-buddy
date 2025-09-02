@@ -34,6 +34,7 @@ const Navigation = ({ theme = 'light' }: NavigationProps) => {
 
   return (
     <motion.nav
+      dir="rtl"
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         useSolidHeader
           ? 'bg-background/95 backdrop-blur-md shadow-elegant'
@@ -44,7 +45,7 @@ const Navigation = ({ theme = 'light' }: NavigationProps) => {
       transition={{ duration: 0.8 }}
     >
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16 md:h-20">
+        <div className="flex items-center justify-between h-16 md:h-20 rtl:flex-row-reverse">
           {/* Logo */}
           <motion.div className="flex items-center" whileHover={{ scale: 1.05 }}>
             <Link to="/" aria-label="Go to home" className="block">

@@ -9,6 +9,8 @@ export type Project = {
   imageBefore?: string;
   size: ProjectSize;
   category: string;
+  pinned?: boolean;
+  createdAt?: string;
 };
 
 // Mock portfolio data with varied sizes and categories

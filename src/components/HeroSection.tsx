@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Button } from './ui/button';
+import { useNavigate } from 'react-router-dom';
 import Navigation from './Navigation';
 
 const HeroSection = () => {
   const [currentImage, setCurrentImage] = useState(0);
+  const navigate = useNavigate();
   const { scrollY } = useScroll();
   const y = useTransform(scrollY, [0, 500], [0, 250]);
 
@@ -109,6 +111,7 @@ const HeroSection = () => {
             <Button 
               size="lg" 
               className="bg-secondary hover:bg-secondary/90 text-white px-8 py-6 text-lg font-assistant font-semibold shadow-warm"
+              onClick={() => navigate('/services')}
             >
               התחילו עכשיו
             </Button>
@@ -116,6 +119,7 @@ const HeroSection = () => {
               variant="outline" 
               size="lg"
               className="bg-white text-primary hover:bg-white/90 px-8 py-6 text-lg font-assistant border-0"
+              onClick={() => navigate('/portfolio')}
             >
               ראה דוגמאות
             </Button>

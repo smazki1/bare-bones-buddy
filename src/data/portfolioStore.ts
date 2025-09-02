@@ -9,13 +9,15 @@ export interface PortfolioConfig {
   items: Project[];
   updatedAt?: string;
   initialized?: boolean;
+  manualOrderByCategory?: Record<string, number[]>;
 }
 
 // Default configuration with existing mock data
 const DEFAULT_CONFIG: PortfolioConfig = {
   items: fullPortfolioData, // Initialize with existing catalog data
   updatedAt: new Date().toISOString(),
-  initialized: true
+  initialized: true,
+  manualOrderByCategory: {}
 };
 
 class PortfolioStore {
@@ -76,10 +78,7 @@ class PortfolioStore {
   }
 
   getProjects(): Project[] {
-    return [...this.config.items].sort((a, b) => {
-      // Sort by ID to maintain consistent order
-      return Number(a.id) - Number(b.id);
-    });
+    return [...this.config.items].sort((a, b) => this.sortProjects(a, b));
   }
 
   addProject(project: Omit<Project, 'id'>): Project {
@@ -126,7 +125,8 @@ class PortfolioStore {
     if (category === 'all') {
       return this.getProjects();
     }
-    return this.getProjects().filter(p => p.category === category);
+    const filtered = this.getProjects().filter(p => p.category === category);
+    return filtered.sort((a, b) => this.sortProjects(a, b, category));
   }
 
   // Bulk operations for import/export
@@ -179,3 +179,53 @@ class PortfolioStore {
 }
 
 export const portfolioStore = new PortfolioStore();
+
+// Helper methods added to class via prototype to keep minimal diff
+PortfolioStore.prototype['sortProjects'] = function(this: PortfolioStore, a: Project, b: Project, category?: string) {
+  const manual = this.getConfig().manualOrderByCategory || {};
+  if (category && manual[category]) {
+    const order = manual[category];
+    const ia = order.indexOf(Number(a.id));
+    const ib = order.indexOf(Number(b.id));
+    const aIn = ia !== -1; const bIn = ib !== -1;
+    if (aIn && bIn) return ia - ib;
+    if (aIn) return -1;
+    if (bIn) return 1;
+  }
+
+  if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1;
+
+  const ta = a.createdAt ? Date.parse(a.createdAt) : 0;
+  const tb = b.createdAt ? Date.parse(b.createdAt) : 0;
+  if (tb !== ta) return tb - ta;
+
+  return Number(b.id) - Number(a.id);
+};
+
+PortfolioStore.prototype['setManualOrderForCategory'] = function(this: PortfolioStore, category: string, orderedIds: number[]) {
+  const cfg = this.getConfig();
+  const manual = cfg.manualOrderByCategory || {};
+  manual[category] = [...orderedIds];
+  this.config.manualOrderByCategory = manual;
+  this['saveConfig']();
+};
+
+PortfolioStore.prototype['togglePinned'] = function(this: PortfolioStore, id: string | number) {
+  const idx = this['config'].items.findIndex(p => p.id == id);
+  if (idx === -1) return false;
+  const current = this['config'].items[idx].pinned === true;
+  this['config'].items[idx].pinned = !current;
+  this['saveConfig']();
+  return true;
+};
+
+// Ensure createdAt is set on add
+const _origAdd = PortfolioStore.prototype.addProject;
+PortfolioStore.prototype.addProject = function(this: PortfolioStore, project: Omit<Project, 'id'>): Project {
+  const withCreatedAt = {
+    createdAt: new Date().toISOString(),
+    pinned: false,
+    ...project,
+  } as Omit<Project, 'id'>;
+  return _origAdd.call(this, withCreatedAt);
+};
