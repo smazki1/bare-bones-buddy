@@ -87,6 +87,16 @@ const ContactForm = () => {
               {/* Hidden client timestamp */}
               <input id="clientTimestamp" name="clientTimestamp" type="hidden" />
 
+              {/* Privacy consent */}
+              <div className="flex items-start gap-3">
+                <input id="privacyConsent" name="privacyConsent" type="checkbox" required className="mt-1" />
+                <label htmlFor="privacyConsent" className="text-sm text-muted-foreground">
+                  קראתי ואני מסכים/ה ל{' '}
+                  <a href="/privacy" className="underline hover:text-secondary">מדיניות הפרטיות</a>
+                  {' '}של האתר. אני מבין/ה שהמידע שאמסור יעובד בהתאם למדיניות זו.
+                </label>
+              </div>
+
               {/* Submit and status */}
               <div className="text-center">
                 <Button id="submitBtn" type="submit" className="bg-secondary hover:bg-secondary/90 text-white px-12 py-4 text-lg font-assistant font-semibold">

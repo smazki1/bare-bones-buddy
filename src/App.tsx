@@ -13,6 +13,8 @@ import AdminSolutions from "./pages/admin/solutions";
 import AdminVisualSolutions from "./pages/admin/visualSolutions";
 import AdminMarkets from "./pages/admin/markets";
 import AdminPortfolio from "./pages/admin/portfolio";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +29,8 @@ const App = () => (
           <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/services" element={<Services />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
           <Route path="/admin" element={<AdminIndex />} />
           <Route path="/admin/solutions" element={<AdminSolutions />} />
           <Route path="/admin/visual-solutions" element={<AdminVisualSolutions />} />

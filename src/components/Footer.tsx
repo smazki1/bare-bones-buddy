@@ -47,6 +47,8 @@ const Footer = () => {
                 { name: 'תיק עבודות', href: '/portfolio' },
                 { name: 'שירותים', href: '/services' },
                 { name: 'צור קשר', href: '/contact' },
+                { name: 'מדיניות פרטיות', href: '/privacy' },
+                { name: 'תנאי שימוש', href: '/terms' },
               ].map((link) => (
                 <li key={link.name}>
                   <a
