@@ -146,12 +146,29 @@ const ServicesGrid = () => {
               animate={isIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
             >
-              <Card className={`h-full hover:shadow-elegant transition-shadow duration-300 border-2 ${
-                service.popular ? 'border-secondary bg-gradient-to-br from-secondary/5 to-primary/5' : 'border-border'
+              <Card className={`h-full hover:shadow-elegant transition-all duration-300 border-2 ${
+                service.popular 
+                  ? 'border-secondary bg-gradient-to-br from-secondary/5 to-primary/5' 
+                  : (index === 0 || index === 1) 
+                    ? 'border-secondary/70 bg-gradient-to-br from-secondary/10 to-orange-50 shadow-lg hover:shadow-xl hover:scale-[1.02] ring-2 ring-secondary/20' 
+                    : 'border-border'
               } relative overflow-hidden`}>
                 {service.popular && (
                   <div className="absolute top-4 right-4 bg-secondary text-white px-3 py-1 rounded-full text-sm font-assistant font-semibold">
                     פופולרי
+                  </div>
+                )}
+                
+                {/* Special tags for featured packages */}
+                {index === 0 && (
+                  <div className="absolute top-4 right-4 bg-gradient-to-r from-red-500 to-orange-500 text-white px-3 py-1 rounded-full text-sm font-assistant font-semibold animate-pulse">
+                    🔥 מבצע השקה
+                  </div>
+                )}
+                
+                {index === 1 && (
+                  <div className="absolute top-4 right-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-sm font-assistant font-semibold">
+                    ✨ ללא סיכון
                   </div>
                 )}
                 
@@ -211,7 +228,9 @@ const ServicesGrid = () => {
                       className={`${
                         service.popular 
                           ? 'bg-secondary hover:bg-secondary/90' 
-                          : 'bg-primary hover:bg-primary/90'
+                          : (index === 0 || index === 1)
+                            ? 'bg-gradient-to-r from-secondary to-orange-500 hover:from-secondary/90 hover:to-orange-600 shadow-lg'
+                            : 'bg-primary hover:bg-primary/90'
                       } text-white font-assistant`}
                     >
                       <a
