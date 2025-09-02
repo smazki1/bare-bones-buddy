@@ -12,8 +12,8 @@ const services = [
     includes: 'סרטון מקצועי מלא ואיכותי, בלי התחייבות, מבצע ללקוחות חדשים בלבד',
     suitableFor: 'כל מסעדה שמסוקרנת מהשירות',
     deliveryTime: '2–3 ימים',
-    price: '₪299',
-    originalPrice: '₪99 מבצע השקה',
+    price: '₪99',
+    originalPrice: '₪299',
     popular: false,
     buttonText: 'אני רוצה לנסות ב־99₪!'
   },
@@ -196,11 +196,11 @@ const ServicesGrid = () => {
                   <div className="flex items-center justify-between">
                     <div className="text-right">
                       <span className="text-sm text-muted-foreground font-open-sans">החל מ</span>
-                      <div className="text-3xl font-assistant font-bold text-primary">
+                      <div className="text-3xl font-assistant font-bold text-red-600">
                         {service.price}
                       </div>
                       {service.originalPrice && (
-                        <div className="text-sm text-secondary font-assistant font-semibold">
+                        <div className="text-sm font-assistant font-semibold text-orange-500/80">
                           {service.originalPrice}
                         </div>
                       )}
