@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -248,6 +248,9 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject }: Admin
           <DialogTitle className="text-xl font-assistant">
             {editingProject ? 'עריכת פרויקט' : 'פרויקט חדש'}
           </DialogTitle>
+          <DialogDescription className="font-open-sans text-muted-foreground">
+            {editingProject ? 'עדכן את פרטי הפרויקט והתמונות' : 'הוסף פרויקט חדש עם תמונות לפני ואחרי'}
+          </DialogDescription>
         </DialogHeader>
 
         <motion.div

@@ -105,11 +105,12 @@ const Portfolio = () => {
     }, 300);
   };
 
-  // Load initial projects
+  // Load initial projects when filtered projects change
   useEffect(() => {
     const initialProjects = filteredProjects.slice(0, ITEMS_PER_PAGE);
     setVisibleProjects(initialProjects);
-  }, []);
+    setCurrentPage(1);
+  }, [filteredProjects]);
 
   // Update filter from URL param on mount
   useEffect(() => {
