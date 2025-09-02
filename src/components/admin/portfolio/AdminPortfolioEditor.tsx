@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -40,8 +40,9 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject }: Admin
   const afterInputRef = useRef<HTMLInputElement>(null);
   const beforeInputRef = useRef<HTMLInputElement>(null);
 
-  // Initialize form data when editing
-  useState(() => {
+  // Initialize/refresh form data when dialog opens or project changes
+  useEffect(() => {
+    if (!isOpen) return;
     if (editingProject) {
       setFormData({
         businessName: editingProject.businessName,
@@ -68,7 +69,7 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject }: Admin
       });
       setPreviewImages({});
     }
-  });
+  }, [isOpen, editingProject]);
 
   const handleImageUpload = async (file: File, type: 'after' | 'before') => {
     if (!isValidImageFile(file)) {

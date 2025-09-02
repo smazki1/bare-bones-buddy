@@ -53,7 +53,9 @@ const AdminPortfolioPage = () => {
   };
 
   const handleEditProject = (project: Project) => {
-    setEditingProject(project);
+    // Always pass a fresh reference from the store to avoid stale data
+    const fresh = portfolioStore.getProjects().find(p => p.id === project.id) || project;
+    setEditingProject(fresh);
     setIsEditorOpen(true);
   };
 
