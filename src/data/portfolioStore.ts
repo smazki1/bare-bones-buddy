@@ -228,8 +228,4 @@ class PortfolioStore {
   }
 }
 
-<<<<<<< HEAD
 export const portfolioStore = new PortfolioStore();
-=======
-export const portfolioStore = new PortfolioStore();
->>>>>>> 1cdeba7 (feat(portfolioStore): durable IndexedDB persistence with localStorage fallback to prevent data loss across edits/builds)
