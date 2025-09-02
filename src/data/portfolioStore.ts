@@ -1,9 +1,11 @@
 import { Project, categoryFilters, fullPortfolioData } from './portfolioMock';
+import { get, set } from 'idb-keyval';
 
 // Event for real-time updates between admin and frontend
 export const PORTFOLIO_UPDATE_EVENT = 'portfolioConfigUpdate';
 
 const STORAGE_KEY = 'aiMaster:portfolioConfig';
+const IDB_KEY = 'aiMaster:idb:portfolioConfig:v1';
 
 export interface PortfolioConfig {
   items: Project[];
@@ -34,35 +36,44 @@ class PortfolioStore {
     });
   }
 
-  private loadConfig(): void {
+  private async loadConfig(): Promise<void> {
     try {
+      // Prefer IndexedDB
+      const idbConfig = await get<PortfolioConfig>(IDB_KEY);
+      if (idbConfig) {
+        this.config = idbConfig;
+        // Keep localStorage in sync for backward-compat
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.config));
+        return;
+      }
+
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsedConfig = JSON.parse(stored);
         this.config = parsedConfig;
+        await set(IDB_KEY, this.config);
         
-        // If config exists but wasn't initialized with mock data, merge it
         if (!parsedConfig.initialized && parsedConfig.items.length === 0) {
           this.config.items = fullPortfolioData;
           this.config.initialized = true;
-          this.saveConfig();
+          await this.saveConfig();
         }
       } else {
-        // First time - initialize with mock data
         this.config = DEFAULT_CONFIG;
-        this.saveConfig();
+        await this.saveConfig();
       }
     } catch (error) {
       console.error('Error loading portfolio config:', error);
       this.config = DEFAULT_CONFIG;
-      this.saveConfig();
+      await this.saveConfig();
     }
   }
 
-  private saveConfig(): void {
+  private async saveConfig(): Promise<void> {
     try {
       this.config.updatedAt = new Date().toISOString();
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.config));
+      await set(IDB_KEY, this.config);
       this.dispatchUpdateEvent();
     } catch (error) {
       console.error('Error saving portfolio config:', error);
@@ -116,7 +127,7 @@ class PortfolioStore {
     };
 
     this.config.items.push(newProject);
-    this.saveConfig();
+    void this.saveConfig();
     return newProject;
   }
 
@@ -129,7 +140,7 @@ class PortfolioStore {
       ...updates,
       id: this.config.items[index].id // Preserve original ID
     };
-    this.saveConfig();
+    void this.saveConfig();
     return true;
   }
 
@@ -138,7 +149,7 @@ class PortfolioStore {
     this.config.items = this.config.items.filter(p => p.id != id);
     
     if (this.config.items.length < initialLength) {
-      this.saveConfig();
+      void this.saveConfig();
       return true;
     }
     return false;
@@ -171,7 +182,7 @@ class PortfolioStore {
   // Bulk operations for import/export
   setProjects(projects: Project[]): void {
     this.config.items = [...projects];
-    this.saveConfig();
+    void this.saveConfig();
   }
 
   exportConfig(): PortfolioConfig {
@@ -180,13 +191,13 @@ class PortfolioStore {
 
   importConfig(config: PortfolioConfig): void {
     this.config = { ...config, updatedAt: new Date().toISOString() };
-    this.saveConfig();
+    void this.saveConfig();
   }
 
   // Reset to empty (admin can import mock data if needed)
   reset(): void {
     this.config = { ...DEFAULT_CONFIG, updatedAt: new Date().toISOString() };
-    this.saveConfig();
+    void this.saveConfig();
   }
 
   // Get available categories
@@ -217,4 +228,8 @@ class PortfolioStore {
   }
 }
 
+<<<<<<< HEAD
 export const portfolioStore = new PortfolioStore();
+=======
+export const portfolioStore = new PortfolioStore();
+>>>>>>> 1cdeba7 (feat(portfolioStore): durable IndexedDB persistence with localStorage fallback to prevent data loss across edits/builds)
