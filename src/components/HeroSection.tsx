@@ -79,31 +79,16 @@ const HeroSection = () => {
       {/* Hero Content */}
       <div className="relative z-20 flex items-center justify-center min-h-screen px-4">
         <div className="text-center max-w-5xl mx-auto">
-          {/* רקע עדין למובייל בלבד */}
-          <div className="relative">
-            <div className="md:hidden absolute inset-0 bg-black/35 backdrop-blur-sm rounded-2xl -m-4"></div>
-            
-            <motion.h1
-              dir="rtl"
-              className="relative text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-assistant font-extrabold text-white mb-6 leading-tight tracking-tight drop-shadow-2xl"
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.2 }}
-            >
-              יוצרים תמונות מקצועיות למסעדות ועסקים —<br className="hidden sm:block" />
-              <span className="inline-block bg-gradient-to-r from-secondary/90 to-secondary bg-white/15 md:bg-transparent rounded-lg px-2 py-1 md:px-0 md:py-0 mx-1 md:mx-0">
-                מהר
-              </span>
-              , 
-              <span className="inline-block bg-gradient-to-r from-orange-400/90 to-orange-300 bg-white/15 md:bg-transparent rounded-lg px-2 py-1 md:px-0 md:py-0 mx-1 md:mx-0">
-                זול
-              </span>
-              ,<br className="hidden lg:block" /> באיכות גבוהה 
-              <span className="inline-block bg-gradient-to-r from-green-400/90 to-green-300 bg-white/15 md:bg-transparent rounded-lg px-2 py-1 md:px-0 md:py-0 mx-1 md:mx-0">
-                ובלי מאמץ
-              </span>
-            </motion.h1>
-          </div>
+          <motion.h1
+            dir="rtl"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-assistant font-bold text-white mb-6 leading-tight tracking-tight drop-shadow-lg"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.2 }}
+          >
+            יוצרים תמונות מקצועיות למסעדות ועסקים —<br className="hidden sm:block" />
+            <strong>מהר</strong>, <strong>זול</strong>, באיכות גבוהה <strong>ובלי מאמץ</strong>
+          </motion.h1>
 
           <motion.p
             className="text-lg md:text-xl lg:text-2xl text-white/95 mb-8 font-open-sans max-w-4xl mx-auto leading-relaxed drop-shadow-lg"
@@ -111,14 +96,7 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.4 }}
           >
-            מה שלקח <span className="font-semibold">שבועות</span> עם צלם — אצלנו מוכן 
-            <span className="inline-block bg-black/25 md:bg-transparent rounded px-2 py-1 md:px-0 md:py-0 mx-1 font-bold text-secondary drop-shadow-md">
-              תוך ימים
-            </span>
-            , וב־
-            <span className="inline-block bg-black/25 md:bg-transparent rounded px-2 py-1 md:px-0 md:py-0 mx-1 font-extrabold text-red-400 drop-shadow-md">
-              90% פחות כסף
-            </span>
+            מה שלקח <strong>שבועות</strong> עם צלם — אצלנו מוכן <strong>תוך ימים</strong>, וב־<strong>90% פחות כסף</strong>
           </motion.p>
 
           <motion.div
