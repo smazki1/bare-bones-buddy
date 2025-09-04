@@ -55,14 +55,12 @@ export const callPortfolioAdmin = async (action: string, payload: any): Promise<
       throw new Error('User not authenticated. Please log in.');
     }
 
-    // Verify admin status
-    const { data: adminCheck } = await supabase
-      .from('admin_users')
-      .select('user_id')
-      .eq('user_id', session.user.id)
-      .single();
+    // Verify admin status via SECURITY DEFINER function
+    const { data: adminRow, error: adminErr } = await supabase
+      .rpc('get_admin_user', { user_id_param: session.user.id })
+      .maybeSingle();
 
-    if (!adminCheck) {
+    if (adminErr || !adminRow) {
       throw new Error('Access denied. Admin privileges required.');
     }
 

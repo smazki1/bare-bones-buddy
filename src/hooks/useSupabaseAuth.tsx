@@ -47,13 +47,13 @@ export const useSupabaseAuth = () => {
 
   const checkAdminStatus = async (userId: string) => {
     try {
+      // Use SECURITY DEFINER function to bypass restrictive RLS on admin_users
       const { data, error } = await supabase
-        .from('admin_users')
-        .select('user_id')
-        .eq('user_id', userId)
-        .single();
-      
-      setIsAdmin(!!data && !error);
+        .rpc('get_admin_user', { user_id_param: userId })
+        .maybeSingle();
+
+      if (error) throw error;
+      setIsAdmin(!!data && (data as any).user_id === userId);
     } catch (error) {
       console.error('Error checking admin status:', error);
       setIsAdmin(false);
