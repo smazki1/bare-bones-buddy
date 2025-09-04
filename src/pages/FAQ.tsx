@@ -157,9 +157,9 @@ const FAQ = () => {
                     <motion.div
                       key={index}
                       style={{ y: yOffset }}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={processIntersecting ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.6, delay: index * 0.2 }}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={processIntersecting ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+                      transition={{ duration: 0.6, delay: index * 0.15 }}
                       className="relative group"
                     >
                       {/* Step Number */}
