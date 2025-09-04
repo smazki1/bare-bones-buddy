@@ -86,7 +86,7 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.2 }}
           >
-            מנות מושלמות. תמונות מושלמות.
+            מנות <span className="text-secondary">מושלמות</span>. תמונות <span className="text-secondary">מושלמות</span>.
           </motion.h1>
 
           <motion.p
