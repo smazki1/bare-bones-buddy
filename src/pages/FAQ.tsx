@@ -128,7 +128,7 @@ const FAQ = () => {
         </section>
 
         {/* How It Works Section - Interactive Process */}
-        <section ref={processContainerRef} className="relative py-32 overflow-hidden">
+        <section ref={processContainerRef} className="py-32 overflow-hidden">
           <div className="container mx-auto px-4">
             <motion.div
               initial={{ opacity: 0, y: 50 }}
@@ -150,7 +150,7 @@ const FAQ = () => {
                   const yOffset = useTransform(
                     scrollYProgress,
                     [0, 0.5, 1],
-                    [40 * (index + 1), 0, -40 * (index + 1)]
+                    [100 * (index + 1), 0, -100 * (index + 1)]
                   );
                   
                   return (
