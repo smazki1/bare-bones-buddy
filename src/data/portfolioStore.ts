@@ -1,11 +1,8 @@
 import { Project, categoryFilters, fullPortfolioData } from './portfolioMock';
-import { get, set } from 'idb-keyval';
+import { supabase } from '@/integrations/supabase/client';
 
 // Event for real-time updates between admin and frontend
 export const PORTFOLIO_UPDATE_EVENT = 'portfolioConfigUpdate';
-
-const STORAGE_KEY = 'aiMaster:portfolioConfig';
-const IDB_KEY = 'aiMaster:idb:portfolioConfig:v1';
 
 export interface PortfolioConfig {
   items: Project[];
@@ -14,77 +11,155 @@ export interface PortfolioConfig {
   manualOrderByCategory?: Record<string, number[]>;
 }
 
-// Default configuration with existing mock data
-const DEFAULT_CONFIG: PortfolioConfig = {
-  items: fullPortfolioData, // Initialize with existing catalog data
-  updatedAt: new Date().toISOString(),
-  initialized: true,
-  manualOrderByCategory: {}
-};
+// Convert Supabase project to frontend format
+const convertFromSupabase = (dbProject: any): Project => ({
+  id: dbProject.id.toString(),
+  businessName: dbProject.business_name,
+  businessType: dbProject.business_type,
+  serviceType: dbProject.service_type,
+  imageAfter: dbProject.image_after,
+  imageBefore: dbProject.image_before,
+  size: dbProject.size,
+  category: dbProject.category,
+  pinned: dbProject.pinned || false,
+  createdAt: dbProject.created_at
+});
+
+// Convert frontend project to Supabase format for update
+const convertToSupabaseUpdate = (project: Project) => ({
+  business_name: project.businessName,
+  business_type: project.businessType,
+  service_type: project.serviceType,
+  image_after: project.imageAfter,
+  image_before: project.imageBefore,
+  size: project.size,
+  category: project.category,
+  pinned: project.pinned || false,
+  created_at: project.createdAt
+});
+
+// Convert frontend project to Supabase format for insert  
+const convertToSupabaseInsert = (project: Omit<Project, 'id'>) => ({
+  business_name: project.businessName,
+  business_type: project.businessType,
+  service_type: project.serviceType,
+  image_after: project.imageAfter,
+  image_before: project.imageBefore,
+  size: project.size,
+  category: project.category,
+  pinned: project.pinned || false,
+  created_at: project.createdAt
+});
 
 class PortfolioStore {
-  private config: PortfolioConfig = DEFAULT_CONFIG;
+  private config: PortfolioConfig = { items: [], initialized: false };
+  private isLoaded = false;
 
   constructor() {
     this.loadConfig();
-    // Listen for storage changes from other tabs
-    window.addEventListener('storage', (e) => {
-      if (e.key === STORAGE_KEY) {
-        this.loadConfig();
-        this.dispatchUpdateEvent();
-      }
-    });
   }
 
   private async loadConfig(): Promise<void> {
     try {
-      // Prefer IndexedDB
-      const idbConfig = await get<PortfolioConfig>(IDB_KEY);
-      if (idbConfig) {
-        this.config = idbConfig;
-        // Best-effort mirror to localStorage (ignore quota failures)
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(this.config));
-        } catch {}
-        this.dispatchUpdateEvent();
-        return;
-      }
+      if (this.isLoaded) return;
+      
+      // Load projects from Supabase
+      const { data: projects, error } = await supabase
+        .from('projects')
+        .select('*')
+        .order('pinned', { ascending: false })
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: false });
 
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsedConfig = JSON.parse(stored);
-        this.config = parsedConfig;
-        await set(IDB_KEY, this.config);
-        
-        if (!parsedConfig.initialized && parsedConfig.items.length === 0) {
-          this.config.items = fullPortfolioData;
-          this.config.initialized = true;
-          await this.saveConfig();
-        }
+      if (error) {
+        console.error('Error loading projects from Supabase:', error);
+        // Fallback to mock data if Supabase fails
+        this.config = {
+          items: fullPortfolioData,
+          initialized: true,
+          updatedAt: new Date().toISOString(),
+          manualOrderByCategory: {}
+        };
       } else {
-        this.config = DEFAULT_CONFIG;
-        await this.saveConfig();
+        this.config = {
+          items: projects ? projects.map(convertFromSupabase) : [],
+          initialized: true,
+          updatedAt: new Date().toISOString(),
+          manualOrderByCategory: {}
+        };
       }
+      
+      this.isLoaded = true;
       this.dispatchUpdateEvent();
     } catch (error) {
       console.error('Error loading portfolio config:', error);
-      this.config = DEFAULT_CONFIG;
-      await this.saveConfig();
+      // Fallback to mock data
+      this.config = {
+        items: fullPortfolioData,
+        initialized: true,
+        updatedAt: new Date().toISOString(),
+        manualOrderByCategory: {}
+      };
+      this.isLoaded = true;
+      this.dispatchUpdateEvent();
     }
   }
 
-  private async saveConfig(): Promise<void> {
+  private async saveProjectToSupabase(project: Project): Promise<boolean> {
     try {
-      this.config.updatedAt = new Date().toISOString();
-      // Save to IndexedDB first (reliable for large payloads like images)
-      await set(IDB_KEY, this.config);
-      // Best-effort mirror to localStorage; ignore quota errors
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.config));
-      } catch {}
-      this.dispatchUpdateEvent();
+      if (project.id && Number(project.id) > 0) {
+        // Update existing project
+        const supabaseProject = convertToSupabaseUpdate(project);
+        const { error } = await supabase
+          .from('projects')
+          .update(supabaseProject)
+          .eq('id', Number(project.id));
+        
+        if (error) {
+          console.error('Error updating project in Supabase:', error);
+          return false;
+        }
+      } else {
+        // Insert new project  
+        const supabaseProject = convertToSupabaseInsert(project);
+        const { data, error } = await supabase
+          .from('projects')
+          .insert(supabaseProject)
+          .select()
+          .single();
+        
+        if (error) {
+          console.error('Error inserting project to Supabase:', error);
+          return false;
+        }
+        
+        // Update local project ID with the one from Supabase
+        project.id = data.id.toString();
+      }
+      
+      return true;
     } catch (error) {
-      console.error('Error saving portfolio config:', error);
+      console.error('Error saving project to Supabase:', error);
+      return false;
+    }
+  }
+
+  private async deleteProjectFromSupabase(id: string | number): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .delete()
+        .eq('id', Number(id));
+      
+      if (error) {
+        console.error('Error deleting project from Supabase:', error);
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error deleting project from Supabase:', error);
+      return false;
     }
   }
 
@@ -92,7 +167,10 @@ class PortfolioStore {
     window.dispatchEvent(new CustomEvent(PORTFOLIO_UPDATE_EVENT));
   }
 
-  getConfig(): PortfolioConfig {
+  async getConfig(): Promise<PortfolioConfig> {
+    if (!this.isLoaded) {
+      await this.loadConfig();
+    }
     return { ...this.config };
   }
 
@@ -117,57 +195,83 @@ class PortfolioStore {
     return Number(b.id) - Number(a.id);
   }
 
-  getProjects(): Project[] {
+  async getProjects(): Promise<Project[]> {
+    if (!this.isLoaded) {
+      await this.loadConfig();
+    }
     return [...this.config.items].sort((a, b) => this.sortProjects(a, b));
   }
 
-  addProject(project: Omit<Project, 'id'>): Project {
-    // Generate new ID
-    const maxId = this.config.items.length > 0 
-      ? Math.max(...this.config.items.map(p => Number(p.id))) 
-      : 0;
+  async addProject(project: Omit<Project, 'id'>): Promise<Project> {
+    if (!this.isLoaded) {
+      await this.loadConfig();
+    }
     
     const newProject: Project = {
       createdAt: new Date().toISOString(),
       pinned: false,
       ...project,
-      id: maxId + 1
+      id: '0' // Temporary ID, will be replaced by Supabase
     };
 
-    this.config.items.push(newProject);
-    void this.saveConfig();
+    const success = await this.saveProjectToSupabase(newProject);
+    if (success) {
+      this.config.items.unshift(newProject); // Add to beginning
+      this.dispatchUpdateEvent();
+    }
+    
     return newProject;
   }
 
-  updateProject(id: string | number, updates: Partial<Project>): boolean {
+  async updateProject(id: string | number, updates: Partial<Project>): Promise<boolean> {
+    if (!this.isLoaded) {
+      await this.loadConfig();
+    }
+    
     const index = this.config.items.findIndex(p => p.id == id);
     if (index === -1) return false;
 
-    this.config.items[index] = { 
+    const updatedProject = { 
       ...this.config.items[index], 
       ...updates,
       id: this.config.items[index].id // Preserve original ID
     };
-    void this.saveConfig();
-    return true;
-  }
-
-  deleteProject(id: string | number): boolean {
-    const initialLength = this.config.items.length;
-    this.config.items = this.config.items.filter(p => p.id != id);
     
-    if (this.config.items.length < initialLength) {
-      void this.saveConfig();
+    const success = await this.saveProjectToSupabase(updatedProject);
+    if (success) {
+      this.config.items[index] = updatedProject;
+      this.dispatchUpdateEvent();
       return true;
     }
+    
     return false;
   }
 
-  getProjectsByCategory(category: string): Project[] {
-    if (category === 'all') {
-      return this.getProjects();
+  async deleteProject(id: string | number): Promise<boolean> {
+    if (!this.isLoaded) {
+      await this.loadConfig();
     }
-    const filtered = this.getProjects().filter(p => p.category === category);
+    
+    const success = await this.deleteProjectFromSupabase(id);
+    if (success) {
+      const initialLength = this.config.items.length;
+      this.config.items = this.config.items.filter(p => p.id != id);
+      
+      if (this.config.items.length < initialLength) {
+        this.dispatchUpdateEvent();
+        return true;
+      }
+    }
+    
+    return false;
+  }
+
+  async getProjectsByCategory(category: string): Promise<Project[]> {
+    const projects = await this.getProjects();
+    if (category === 'all') {
+      return projects;
+    }
+    const filtered = projects.filter(p => p.category === category);
     return filtered.sort((a, b) => this.sortProjects(a, b, category));
   }
 
@@ -175,37 +279,48 @@ class PortfolioStore {
     const manual = this.config.manualOrderByCategory || {};
     manual[category] = [...orderedIds];
     this.config.manualOrderByCategory = manual;
-    this.saveConfig();
+    this.dispatchUpdateEvent();
   }
 
-  togglePinned(id: string | number): boolean {
+  async togglePinned(id: string | number): Promise<boolean> {
+    if (!this.isLoaded) {
+      await this.loadConfig();
+    }
+    
     const idx = this.config.items.findIndex(p => p.id == id);
     if (idx === -1) return false;
+    
     const current = this.config.items[idx].pinned === true;
-    this.config.items[idx].pinned = !current;
-    this.saveConfig();
-    return true;
+    const updates = { pinned: !current };
+    
+    return await this.updateProject(id, updates);
   }
 
   // Bulk operations for import/export
-  setProjects(projects: Project[]): void {
+  async setProjects(projects: Project[]): Promise<void> {
+    // For bulk operations, we'll keep the local approach for now
+    // This is mainly used for import/export which should be rare
     this.config.items = [...projects];
-    void this.saveConfig();
+    this.dispatchUpdateEvent();
+  }
+
+  getConfigSync(): PortfolioConfig {
+    return { ...this.config };
   }
 
   exportConfig(): PortfolioConfig {
-    return this.getConfig();
+    return this.getConfigSync();
   }
 
   importConfig(config: PortfolioConfig): void {
     this.config = { ...config, updatedAt: new Date().toISOString() };
-    void this.saveConfig();
+    this.dispatchUpdateEvent();
   }
 
   // Reset to empty (admin can import mock data if needed)
   reset(): void {
-    this.config = { ...DEFAULT_CONFIG, updatedAt: new Date().toISOString() };
-    void this.saveConfig();
+    this.config = { items: [], initialized: true, updatedAt: new Date().toISOString(), manualOrderByCategory: {} };
+    this.dispatchUpdateEvent();
   }
 
   // Get available categories
@@ -214,8 +329,8 @@ class PortfolioStore {
   }
 
   // Statistics for admin dashboard
-  getStats() {
-    const projects = this.getProjects();
+  async getStats() {
+    const projects = await this.getProjects();
     const byCategory = categoryFilters.reduce((acc, cat) => {
       if (cat.slug === 'all') return acc;
       acc[cat.slug] = projects.filter(p => p.category === cat.slug).length;
@@ -233,6 +348,12 @@ class PortfolioStore {
       byServiceType,
       lastUpdated: this.config.updatedAt
     };
+  }
+
+  // Force reload from Supabase
+  async reload(): Promise<void> {
+    this.isLoaded = false;
+    await this.loadConfig();
   }
 }
 

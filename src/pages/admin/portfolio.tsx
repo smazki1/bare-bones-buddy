@@ -19,15 +19,23 @@ const AdminPortfolioPage = () => {
   const { toast } = useToast();
   
   const [projects, setProjects] = useState<Project[]>([]);
-  const [stats, setStats] = useState(portfolioStore.getStats());
+  const [stats, setStats] = useState<any>(null);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // Load projects and stats
-  const loadData = () => {
-    setProjects(portfolioStore.getProjects());
-    setStats(portfolioStore.getStats());
+  const loadData = async () => {
+    try {
+      const [projectsData, statsData] = await Promise.all([
+        portfolioStore.getProjects(),
+        portfolioStore.getStats()
+      ]);
+      setProjects(projectsData);
+      setStats(statsData);
+    } catch (error) {
+      console.error('Error loading portfolio data:', error);
+    }
   };
 
   // Initialize data
@@ -53,17 +61,24 @@ const AdminPortfolioPage = () => {
     setIsEditorOpen(true);
   };
 
-  const handleEditProject = (project: Project) => {
-    // Always pass a fresh reference from the store to avoid stale data
-    const fresh = portfolioStore.getProjects().find(p => p.id === project.id) || project;
-    setEditingProject(fresh);
-    setIsEditorOpen(true);
+  const handleEditProject = async (project: Project) => {
+    try {
+      // Always pass a fresh reference from the store to avoid stale data
+      const projects = await portfolioStore.getProjects();
+      const fresh = projects.find(p => p.id === project.id) || project;
+      setEditingProject(fresh);
+      setIsEditorOpen(true);
+    } catch (error) {
+      console.error('Error loading project:', error);
+      setEditingProject(project);
+      setIsEditorOpen(true);
+    }
   };
 
-  const handleSaveProject = (projectData: Omit<Project, 'id'> | Project) => {
+  const handleSaveProject = async (projectData: Omit<Project, 'id'> | Project) => {
     try {
       if ('id' in projectData) {
-        portfolioStore.updateProject(projectData.id, {
+        await portfolioStore.updateProject(projectData.id, {
           businessName: projectData.businessName,
           businessType: projectData.businessType,
           serviceType: projectData.serviceType,
@@ -74,23 +89,25 @@ const AdminPortfolioPage = () => {
           pinned: projectData.pinned,
         });
       } else {
-        portfolioStore.addProject(projectData);
+        await portfolioStore.addProject(projectData);
       }
       toast({ title: 'הצלחה', description: 'הפרויקט נשמר' });
       setIsEditorOpen(false);
       setEditingProject(null);
       setHasUnsavedChanges(true);
+      loadData(); // Refresh data
     } catch (error) {
       toast({ title: 'שגיאה', description: 'שגיאה בשמירת הפרויקט', variant: 'destructive' });
     }
   };
 
-  const handleDeleteProject = (id: string | number) => {
+  const handleDeleteProject = async (id: string | number) => {
     try {
-      const ok = portfolioStore.deleteProject(id);
+      const ok = await portfolioStore.deleteProject(id);
       if (ok) {
         toast({ title: 'הצלחה', description: 'הפרויקט נמחק בהצלחה' });
         setHasUnsavedChanges(true);
+        loadData(); // Refresh data
       } else {
         toast({ title: 'שגיאה', description: 'פרויקט לא נמצא', variant: 'destructive' });
       }
@@ -332,14 +349,14 @@ const AdminPortfolioPage = () => {
               <CardContent className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">סה"כ פרויקטים</span>
-                  <Badge variant="secondary">{stats.total}</Badge>
+                  <Badge variant="secondary">{stats?.total || 0}</Badge>
                 </div>
                 
                 <Separator />
                 
                 <div className="space-y-2">
                   <p className="text-xs font-assistant font-medium">לפי שירות:</p>
-                  {Object.entries(stats.byServiceType).map(([service, count]) => (
+                  {stats?.byServiceType && Object.entries(stats.byServiceType).map(([service, count]) => (
                     <div key={service} className="flex justify-between items-center text-xs">
                       <span className="text-muted-foreground">{service}</span>
                       <span>{count}</span>
@@ -347,7 +364,7 @@ const AdminPortfolioPage = () => {
                   ))}
                 </div>
 
-                {stats.lastUpdated && (
+                {stats?.lastUpdated && (
                   <div className="pt-2 border-t">
                     <p className="text-xs text-muted-foreground">
                       עודכן: {new Date(stats.lastUpdated).toLocaleDateString('he-IL')}

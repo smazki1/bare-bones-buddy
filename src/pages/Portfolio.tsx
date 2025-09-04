@@ -23,11 +23,15 @@ const Portfolio = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [allProjects, setAllProjects] = useState<Project[]>([]);
 
-  // Load projects from local store only (persistent via IndexedDB/localStorage)
+  // Load projects from Supabase and local store
   useEffect(() => {
-    const loadProjects = () => {
-      const storedProjects = portfolioStore.getProjects();
-      setAllProjects(storedProjects);
+    const loadProjects = async () => {
+      try {
+        const storedProjects = await portfolioStore.getProjects();
+        setAllProjects(storedProjects);
+      } catch (error) {
+        console.error('Error loading projects:', error);
+      }
     };
 
     loadProjects();
