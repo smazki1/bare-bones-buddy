@@ -254,6 +254,71 @@ const AdminPortfolioPage = () => {
     }
   };
 
+  // One-time migration: import all current local projects (and any currently visible in catalog)
+  const handleImportLocalToSupabase = () => {
+    const run = async () => {
+      try {
+        let adminToken = localStorage.getItem('aiMaster:adminToken') || '';
+        if (!adminToken) {
+          const entered = window.prompt('נא להזין ADMIN_TOKEN לניהול (יישמר בדפדפן שלך):');
+          if (!entered) { toast({ title: 'בוטל', description: 'נדרש טוקן ניהול', variant: 'destructive' }); return; }
+          adminToken = entered; localStorage.setItem('aiMaster:adminToken', adminToken);
+        }
+
+        // Fetch remote to avoid duplicates
+        const remote = await fetchProjects();
+        const existing = new Set(remote.map(p => `${p.image_after}`));
+
+        // Use everything we have locally (store already contains mock + any admin items)
+        const local = portfolioStore.getProjects();
+        let imported = 0;
+        for (const p of local) {
+          if (existing.has(p.imageAfter)) continue;
+          const payload = {
+            business_name: p.businessName,
+            business_type: p.businessType,
+            service_type: p.serviceType,
+            image_after: p.imageAfter,
+            image_before: p.imageBefore ?? null,
+            size: p.size,
+            category: p.category,
+            pinned: !!p.pinned,
+          };
+          const { data, error } = await supabase.functions.invoke('portfolio-admin', {
+            body: { action: 'add', payload },
+            headers: { 'x-admin-token': adminToken }
+          });
+          if (error || !data?.ok) {
+            console.warn('Import failed for', p, error || data?.error);
+            continue;
+          }
+          imported += 1;
+        }
+
+        // Refresh store from Supabase
+        const refreshed = await fetchProjects();
+        const mapped: Project[] = refreshed.map(p => ({
+          id: p.id,
+          businessName: p.business_name,
+          businessType: p.business_type,
+          serviceType: p.service_type,
+          imageAfter: p.image_after,
+          imageBefore: p.image_before ?? undefined,
+          size: p.size,
+          category: p.category,
+          pinned: p.pinned,
+          createdAt: p.created_at,
+        }));
+        portfolioStore.setProjects(mapped);
+        setHasUnsavedChanges(true);
+        toast({ title: 'ייבוא הושלם', description: `${imported} פרויקטים נוספו ל-Supabase` });
+      } catch (e) {
+        toast({ title: 'שגיאה', description: 'ייבוא נכשל', variant: 'destructive' });
+      }
+    };
+    void run();
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -430,6 +495,16 @@ const AdminPortfolioPage = () => {
                 >
                   <RotateCcw className="w-3 h-3 mr-2" />
                   נקה הכל
+                </Button>
+
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={handleImportLocalToSupabase}
+                  className="w-full justify-start font-assistant text-xs bg-secondary text-white hover:bg-secondary/90"
+                >
+                  <Upload className="w-3 h-3 mr-2" />
+                  ייבוא כל הפרויקטים המקומיים ל‑Supabase
                 </Button>
               </CardContent>
             </Card>
