@@ -39,7 +39,8 @@ const convertToSupabaseUpdate = (project: Project) => ({
 });
 
 // Convert frontend project to Supabase format for insert  
-const convertToSupabaseInsert = (project: Omit<Project, 'id'>) => ({
+const convertToSupabaseInsert = (project: Project) => ({
+  id: Number(project.id),
   business_name: project.businessName,
   business_type: project.businessType,
   service_type: project.serviceType,
@@ -132,7 +133,7 @@ class PortfolioStore {
       } else {
         // Insert new project  
         const supabaseProject = convertToSupabaseInsert(project);
-        const { data, error } = await supabase
+        const { data, error } = await (supabase as any)
           .from('projects')
           .insert(supabaseProject)
           .select()
@@ -217,11 +218,25 @@ class PortfolioStore {
       await this.loadConfig();
     }
     
+    // Determine next ID (DB requires explicit id)
+    let dbMaxId = 0;
+    try {
+      const { data: maxRow } = await (supabase as any)
+        .from('projects')
+        .select('id')
+        .order('id', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      dbMaxId = maxRow?.id ? Number(maxRow.id) : 0;
+    } catch {}
+    const localMaxId = this.config.items.length > 0 ? Math.max(...this.config.items.map(p => Number(p.id))) : 0;
+    const nextId = Math.max(dbMaxId, localMaxId) + 1;
+
     const newProject: Project = {
       createdAt: new Date().toISOString(),
       pinned: false,
       ...project,
-      id: '0' // Temporary ID, will be replaced by Supabase
+      id: String(nextId)
     };
 
     const success = await this.saveProjectToSupabase(newProject);
