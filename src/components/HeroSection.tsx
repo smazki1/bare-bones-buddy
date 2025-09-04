@@ -46,8 +46,8 @@ const HeroSection = () => {
           />
         ))}
         
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
+        {/* Overlay - גרדיינט חזק יותר לקריאות טובה */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/40" />
       </motion.div>
 
       {/* Floating Particles */}
@@ -78,43 +78,58 @@ const HeroSection = () => {
 
       {/* Hero Content */}
       <div className="relative z-20 flex items-center justify-center min-h-screen px-4">
-        <div className="text-center max-w-4xl mx-auto">
-          <motion.h1
-            dir="rtl"
-            style={{ unicodeBidi: 'isolate-override' }}
-            className="text-5xl md:text-7xl font-assistant font-bold text-white mb-6 leading-tight"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2 }}
-          >
-            <span dir="rtl">מנות מושלמות.</span>{' '}
-            <span className="bg-gradient-to-r from-secondary to-secondary/80 bg-clip-text text-transparent">
-              תמונות מושלמות.
-            </span>
-          </motion.h1>
+        <div className="text-center max-w-5xl mx-auto">
+          {/* רקע עדין למובייל בלבד */}
+          <div className="relative">
+            <div className="md:hidden absolute inset-0 bg-black/35 backdrop-blur-sm rounded-2xl -m-4"></div>
+            
+            <motion.h1
+              dir="rtl"
+              className="relative text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-assistant font-extrabold text-white mb-6 leading-tight tracking-tight drop-shadow-2xl"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.2 }}
+            >
+              יוצרים תמונות מקצועיות למסעדות ועסקים —<br className="hidden sm:block" />
+              <span className="inline-block bg-gradient-to-r from-secondary/90 to-secondary bg-white/15 md:bg-transparent rounded-lg px-2 py-1 md:px-0 md:py-0 mx-1 md:mx-0">
+                מהר
+              </span>
+              , 
+              <span className="inline-block bg-gradient-to-r from-orange-400/90 to-orange-300 bg-white/15 md:bg-transparent rounded-lg px-2 py-1 md:px-0 md:py-0 mx-1 md:mx-0">
+                זול
+              </span>
+              ,<br className="hidden lg:block" /> באיכות גבוהה 
+              <span className="inline-block bg-gradient-to-r from-green-400/90 to-green-300 bg-white/15 md:bg-transparent rounded-lg px-2 py-1 md:px-0 md:py-0 mx-1 md:mx-0">
+                ובלי מאמץ
+              </span>
+            </motion.h1>
+          </div>
 
           <motion.p
-            className="text-xl md:text-2xl text-white/90 mb-8 font-open-sans max-w-2xl mx-auto"
+            className="text-lg md:text-xl lg:text-2xl text-white/95 mb-8 font-open-sans max-w-4xl mx-auto leading-relaxed drop-shadow-lg"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.4 }}
           >
-            <span className="font-semibold md:font-normal">יוצרים תמונות מקצועיות</span> למסעדות ועסקים –
-            <span className="mx-1 font-bold text-secondary">מהר</span>,
-            <span className="mx-1 font-bold text-orange-400">זול</span>,
-            <span className="mx-1 font-bold text-green-400">באיכות גבוהה</span>
-            ובלי מאמץ
+            מה שלקח <span className="font-semibold">שבועות</span> עם צלם — אצלנו מוכן 
+            <span className="inline-block bg-black/25 md:bg-transparent rounded px-2 py-1 md:px-0 md:py-0 mx-1 font-bold text-secondary drop-shadow-md">
+              תוך ימים
+            </span>
+            , וב־
+            <span className="inline-block bg-black/25 md:bg-transparent rounded px-2 py-1 md:px-0 md:py-0 mx-1 font-extrabold text-red-400 drop-shadow-md">
+              90% פחות כסף
+            </span>
           </motion.p>
 
           <motion.div
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12"
+            className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.6 }}
           >
             <Button 
               size="lg" 
-              className="bg-secondary hover:bg-secondary/90 text-white px-8 py-6 text-lg font-assistant font-semibold shadow-warm"
+              className="bg-secondary hover:bg-secondary/90 text-white px-8 py-6 text-lg font-assistant font-semibold shadow-warm transition-all duration-300 hover:scale-105"
               onClick={() => navigate('/services')}
             >
               התחילו עכשיו
@@ -122,22 +137,11 @@ const HeroSection = () => {
             <Button 
               variant="outline" 
               size="lg"
-              className="bg-white text-primary hover:bg-white/90 px-8 py-6 text-lg font-assistant border-0"
+              className="bg-white/95 text-primary hover:bg-white px-8 py-6 text-lg font-assistant border-0 shadow-lg transition-all duration-300 hover:scale-105"
               onClick={() => navigate('/portfolio')}
             >
               ראה דוגמאות
             </Button>
-          </motion.div>
-
-          <motion.div
-            className="text-white/80 font-open-sans text-lg"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 0.8 }}
-          >
-            מה שלקח <span className="font-semibold">שבועות</span> עם צלם – אצלנו מוכן תוך
-            <span className="mx-1 font-bold text-secondary">ימים</span>,
-            ב-<span className="font-extrabold text-red-500">90%</span> פחות כסף
           </motion.div>
         </div>
       </div>
