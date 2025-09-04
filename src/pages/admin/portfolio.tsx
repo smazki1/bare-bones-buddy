@@ -359,7 +359,7 @@ const AdminPortfolioPage = () => {
                   {stats?.byServiceType && Object.entries(stats.byServiceType).map(([service, count]) => (
                     <div key={service} className="flex justify-between items-center text-xs">
                       <span className="text-muted-foreground">{service}</span>
-                      <span>{count}</span>
+                      <span>{count as number}</span>
                     </div>
                   ))}
                 </div>
