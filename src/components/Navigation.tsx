@@ -24,6 +24,7 @@ const Navigation = ({ theme = 'light' }: NavigationProps) => {
   const navItems = [
     { name: 'דוגמאות', href: '/portfolio' },
     { name: 'שירותים', href: '/services' },
+    { name: 'איך זה עובד', href: '/faq' },
     { name: 'צור קשר', href: '/contact' },
   ];
 
