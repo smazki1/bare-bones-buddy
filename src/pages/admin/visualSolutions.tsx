@@ -9,14 +9,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { useAdminAuth } from '@/hooks/useAdminAuth';
+import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 import AdminVisualSolutionsList from '@/components/admin/visualSolutions/AdminVisualSolutionsList';
 import AdminVisualSolutionsEditor from '@/components/admin/visualSolutions/AdminVisualSolutionsEditor';
 import { VisualSolutionsConfig, VisualSolutionCard, DEFAULT_VISUAL_SOLUTIONS_CONFIG } from '@/types/visualSolutions';
 import { visualSolutionsStore } from '@/data/visualSolutionsStore';
 
 const AdminVisualSolutions = () => {
-  const { isAuthenticated, isLoading } = useAdminAuth();
+  const { user, isLoading, isAdmin } = useSupabaseAuth();
   const { toast } = useToast();
   
   const [config, setConfig] = useState<VisualSolutionsConfig>(DEFAULT_VISUAL_SOLUTIONS_CONFIG);
@@ -25,11 +25,11 @@ const AdminVisualSolutions = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (user && isAdmin) {
       const loadedConfig = visualSolutionsStore.safeGetConfigOrDefaults();
       setConfig(loadedConfig);
     }
-  }, [isAuthenticated]);
+  }, [user, isAdmin]);
 
   const handleSectionChange = (field: 'sectionTitle' | 'sectionSubtitle', value: string) => {
     setConfig(prev => {
@@ -201,7 +201,7 @@ const AdminVisualSolutions = () => {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!user || !isAdmin) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="w-full max-w-md">

@@ -1,22 +1,30 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAdminAuth } from '@/hooks/useAdminAuth';
+import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Settings, Image, Users, FileText, Lock } from 'lucide-react';
+import { Settings, Image, Users, FileText, Lock, Mail } from 'lucide-react';
+import { AdminUserManager } from '@/components/admin/AdminUserManager';
 
-const AdminLogin = ({ onLogin }: { onLogin: (password: string) => boolean }) => {
+const AdminLogin = ({ onSignIn }: { onSignIn: (email: string, password: string) => Promise<{ error: any }> }) => {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (onLogin(password)) {
-      setError('');
-    } else {
-      setError('סיסמה שגויה');
+    setIsLoading(true);
+    setError('');
+    
+    const { error } = await onSignIn(email, password);
+    
+    if (error) {
+      setError(error.message || 'שגיאה בהתחברות');
     }
+    
+    setIsLoading(false);
   };
 
   return (
@@ -35,22 +43,32 @@ const AdminLogin = ({ onLogin }: { onLogin: (password: string) => boolean }) => 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Input
+                type="email"
+                placeholder="כתובת אימייל"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="text-right"
+                dir="rtl"
+                required
+              />
+              <Input
                 type="password"
                 placeholder="סיסמה"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="text-right"
                 dir="rtl"
+                required
               />
               {error && (
                 <p className="text-sm text-destructive text-right">{error}</p>
               )}
             </div>
-            <Button type="submit" className="w-full font-assistant">
-              כניסה
+            <Button type="submit" className="w-full font-assistant" disabled={isLoading}>
+              {isLoading ? 'מתחבר...' : 'כניסה'}
             </Button>
             <p className="text-xs text-muted-foreground text-center">
-              סיסמה זמנית: admin
+              כניסה עם חשבון מנהל מאושר בלבד
             </p>
           </form>
         </CardContent>
@@ -59,7 +77,7 @@ const AdminLogin = ({ onLogin }: { onLogin: (password: string) => boolean }) => 
   );
 };
 
-const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
+const AdminDashboard = ({ onLogout, userEmail }: { onLogout: () => void; userEmail?: string }) => {
   const adminSections = [
     {
       title: 'ניהול פתרונות עסקיים',
@@ -118,13 +136,19 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
             <p className="text-muted-foreground font-open-sans">
               ניהול תוכן האתר ופתרונות עסקיים
             </p>
+            {userEmail && (
+              <p className="text-sm text-muted-foreground font-open-sans flex items-center gap-2 mt-2">
+                <Mail className="h-4 w-4" />
+                מחובר כ: {userEmail}
+              </p>
+            )}
           </div>
           <Button variant="outline" onClick={onLogout} className="font-assistant">
             יציאה
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {adminSections.map((section) => {
             const IconComponent = section.icon;
             
@@ -165,6 +189,11 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
             );
           })}
         </div>
+
+        {/* Admin User Management - Only for super admin */}
+        {userEmail === 'admin@food-vision.co.il' && (
+          <AdminUserManager currentUserEmail={userEmail} />
+        )}
       </div>
     </div>
   );
@@ -210,7 +239,7 @@ const AdminSettings = () => {
 };
 
 const AdminIndex = () => {
-  const { isAuthenticated, isLoading, login, logout } = useAdminAuth();
+  const { user, isLoading, isAdmin, signIn, signOut } = useSupabaseAuth();
 
   if (isLoading) {
     return (
@@ -223,11 +252,11 @@ const AdminIndex = () => {
     );
   }
 
-  if (!isAuthenticated) {
-    return <AdminLogin onLogin={login} />;
+  if (!user || !isAdmin) {
+    return <AdminLogin onSignIn={signIn} />;
   }
 
-  return <AdminDashboard onLogout={logout} />;
+  return <AdminDashboard onLogout={signOut} userEmail={user.email} />;
 };
 
 export default AdminIndex;

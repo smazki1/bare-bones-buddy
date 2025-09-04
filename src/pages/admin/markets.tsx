@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
-import { useAdminAuth } from '@/hooks/useAdminAuth';
+import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import AdminMarketsEditor from '@/components/admin/markets/AdminMarketsEditor';
 
 const AdminMarketsPage = () => {
-  const { isAuthenticated, isLoading } = useAdminAuth();
+  const { user, isLoading, isAdmin } = useSupabaseAuth();
 
   if (isLoading) {
     return (
@@ -18,7 +18,7 @@ const AdminMarketsPage = () => {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!user || !isAdmin) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">

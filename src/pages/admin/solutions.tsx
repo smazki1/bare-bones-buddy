@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAdminAuth } from '@/hooks/useAdminAuth';
+import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 import { solutionsStore } from '@/data/solutionsStore';
 import { SolutionsConfig, SolutionCard } from '@/types/solutions';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,7 @@ import AdminSolutionsList from '@/components/admin/solutions/AdminSolutionsList'
 import AdminSolutionsEditor from '@/components/admin/solutions/AdminSolutionsEditor';
 
 const AdminSolutions = () => {
-  const { isAuthenticated, isLoading } = useAdminAuth();
+  const { user, isLoading, isAdmin } = useSupabaseAuth();
   const { toast } = useToast();
   const [config, setConfig] = useState<SolutionsConfig>(solutionsStore.safeGetConfigOrDefaults());
   const [editingCard, setEditingCard] = useState<SolutionCard | null>(null);
@@ -23,13 +23,13 @@ const AdminSolutions = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (user && isAdmin) {
       const storedConfig = solutionsStore.getConfig();
       if (storedConfig) {
         setConfig(storedConfig);
       }
     }
-  }, [isAuthenticated]);
+  }, [user, isAdmin]);
 
   const handleSectionChange = (field: 'sectionTitle' | 'sectionSubtitle', value: string) => {
     setConfig(prev => {
@@ -217,7 +217,7 @@ const AdminSolutions = () => {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!user || !isAdmin) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="w-full max-w-md">

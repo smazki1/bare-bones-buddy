@@ -131,6 +131,45 @@ export type Database = {
         }
         Relationships: []
       }
+      projects: {
+        Row: {
+          business_name: string
+          business_type: string
+          category: string
+          created_at: string
+          id: number
+          image_after: string
+          image_before: string | null
+          pinned: boolean
+          service_type: string
+          size: string
+        }
+        Insert: {
+          business_name: string
+          business_type: string
+          category: string
+          created_at?: string
+          id?: never
+          image_after: string
+          image_before?: string | null
+          pinned?: boolean
+          service_type: string
+          size: string
+        }
+        Update: {
+          business_name?: string
+          business_type?: string
+          category?: string
+          created_at?: string
+          id?: never
+          image_after?: string
+          image_before?: string | null
+          pinned?: boolean
+          service_type?: string
+          size?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -45,14 +45,33 @@ export const fetchProjectsFromSupabase = async (): Promise<Project[]> => {
   }
 };
 
-// Call the portfolio-admin Edge Function
+// Call the portfolio-admin Edge Function with proper authentication
 export const callPortfolioAdmin = async (action: string, payload: any): Promise<any> => {
   try {
+    // Get current session to verify admin access
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session?.user) {
+      throw new Error('User not authenticated. Please log in.');
+    }
+
+    // Verify admin status
+    const { data: adminCheck } = await supabase
+      .from('admin_users')
+      .select('user_id')
+      .eq('user_id', session.user.id)
+      .single();
+
+    if (!adminCheck) {
+      throw new Error('Access denied. Admin privileges required.');
+    }
+
+    // Get admin token from localStorage/sessionStorage as fallback
     const adminToken = localStorage.getItem('admin_token') || 
                      sessionStorage.getItem('admin_token');
     
     if (!adminToken) {
-      throw new Error('Admin token not found. Please log in as admin.');
+      throw new Error('Admin token not found. Please configure admin token in settings.');
     }
 
     const response = await supabase.functions.invoke('portfolio-admin', {
@@ -63,19 +82,16 @@ export const callPortfolioAdmin = async (action: string, payload: any): Promise<
     });
 
     if (response.error) {
-      console.error('Edge function error:', response.error);
-      throw new Error(response.error.message || 'Edge function error');
+      throw new Error(response.error.message || 'Function call failed');
     }
 
-    const result = response.data;
-    
-    if (!result.ok) {
-      throw new Error(result.error || 'Unknown error');
+    if (!response.data?.ok) {
+      throw new Error(response.data?.error || 'Unknown error occurred');
     }
 
-    return result.data;
-  } catch (error) {
-    console.error('Portfolio admin call error:', error);
+    return response.data.data;
+  } catch (error: any) {
+    console.error('Error calling portfolio admin function:', error);
     throw error;
   }
 };

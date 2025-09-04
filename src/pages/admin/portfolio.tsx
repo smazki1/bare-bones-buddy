@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAdminAuth } from '@/hooks/useAdminAuth';
+import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,7 +15,7 @@ import { portfolioMockData } from '@/data/portfolioMock';
 import { useToast } from '@/hooks/use-toast';
 
 const AdminPortfolioPage = () => {
-  const { isAuthenticated, isLoading } = useAdminAuth();
+  const { user, isLoading, isAdmin } = useSupabaseAuth();
   const { toast } = useToast();
   
   const [projects, setProjects] = useState<Project[]>([]);
@@ -32,10 +32,10 @@ const AdminPortfolioPage = () => {
 
   // Initialize data
   useEffect(() => {
-    if (isAuthenticated) {
+    if (user && isAdmin) {
       loadData();
     }
-  }, [isAuthenticated]);
+  }, [user, isAdmin]);
 
   // Listen for real-time updates
   useEffect(() => {
@@ -219,7 +219,7 @@ const AdminPortfolioPage = () => {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!user || !isAdmin) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
