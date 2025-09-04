@@ -9,7 +9,7 @@ import { ArrowRight, Plus, Upload, Download, RotateCcw, Image, BarChart3 } from 
 import AdminPortfolioEditor from '@/components/admin/portfolio/AdminPortfolioEditor';
 import AdminPortfolioList from '@/components/admin/portfolio/AdminPortfolioList';
 import { portfolioStore, PORTFOLIO_UPDATE_EVENT } from '@/data/portfolioStore';
-import { supabase, getSupabase, fetchProjects } from '@/lib/supabase';
+// Supabase sync removed: local-only mode
 import { Project } from '@/data/portfolioMock';
 import { portfolioMockData } from '@/data/portfolioMock';
 import { useToast } from '@/hooks/use-toast';
@@ -61,113 +61,42 @@ const AdminPortfolioPage = () => {
   };
 
   const handleSaveProject = (projectData: Omit<Project, 'id'> | Project) => {
-    const run = async () => {
-      try {
-        let adminToken = localStorage.getItem('aiMaster:adminToken') || '';
-        if (!adminToken) {
-          const entered = window.prompt('נא להזין ADMIN_TOKEN לניהול (יישמר בדפדפן שלך):');
-          if (!entered) {
-            toast({ title: 'בוטל', description: 'נדרש טוקן ניהול', variant: 'destructive' });
-            return;
-          }
-          adminToken = entered;
-          localStorage.setItem('aiMaster:adminToken', adminToken);
-        }
-
-        const action = 'id' in projectData ? 'update' : 'add';
-        const payload = 'id' in projectData
-          ? {
-              id: Number((projectData as Project).id),
-              business_name: projectData.businessName,
-              business_type: projectData.businessType,
-              service_type: projectData.serviceType,
-              image_after: projectData.imageAfter,
-              image_before: projectData.imageBefore ?? null,
-              size: projectData.size,
-              category: projectData.category,
-              pinned: !!(projectData as Project).pinned,
-            }
-          : {
-              business_name: (projectData as Omit<Project, 'id'>).businessName,
-              business_type: (projectData as Omit<Project, 'id'>).businessType,
-              service_type: (projectData as Omit<Project, 'id'>).serviceType,
-              image_after: (projectData as Omit<Project, 'id'>).imageAfter,
-              image_before: (projectData as Omit<Project, 'id'>).imageBefore || null,
-              size: (projectData as Omit<Project, 'id'>).size,
-              category: (projectData as Omit<Project, 'id'>).category,
-              pinned: false,
-            };
-        const client = getSupabase() || supabase;
-        const { data, error } = await client!.functions.invoke('portfolio-admin', {
-          body: { action, payload },
-          headers: { 'x-admin-token': adminToken }
+    try {
+      if ('id' in projectData) {
+        portfolioStore.updateProject(projectData.id, {
+          businessName: projectData.businessName,
+          businessType: projectData.businessType,
+          serviceType: projectData.serviceType,
+          imageAfter: projectData.imageAfter,
+          imageBefore: projectData.imageBefore,
+          size: projectData.size,
+          category: projectData.category,
+          pinned: projectData.pinned,
         });
-        if (error || !data?.ok) throw error || new Error(data?.error || 'edge error');
-
-        // Refresh from Supabase to sync IDs/order
-        const remote = await fetchProjects();
-        const mapped: Project[] = remote.map(p => ({
-          id: p.id,
-          businessName: p.business_name,
-          businessType: p.business_type,
-          serviceType: p.service_type,
-          imageAfter: p.image_after,
-          imageBefore: p.image_before ?? undefined,
-          size: p.size,
-          category: p.category,
-          pinned: p.pinned,
-          createdAt: p.created_at,
-        }));
-        portfolioStore.setProjects(mapped);
-
-        toast({ title: 'הצלחה', description: action === 'add' ? 'פרויקט חדש נוסף' : 'הפרויקט עודכן' });
-        setIsEditorOpen(false);
-        setEditingProject(null);
-        setHasUnsavedChanges(true);
-      } catch (error) {
-        toast({ title: 'שגיאה', description: 'שגיאה בשמירת הפרויקט', variant: 'destructive' });
+      } else {
+        portfolioStore.addProject(projectData);
       }
-    };
-    void run();
+      toast({ title: 'הצלחה', description: 'הפרויקט נשמר' });
+      setIsEditorOpen(false);
+      setEditingProject(null);
+      setHasUnsavedChanges(true);
+    } catch (error) {
+      toast({ title: 'שגיאה', description: 'שגיאה בשמירת הפרויקט', variant: 'destructive' });
+    }
   };
 
   const handleDeleteProject = (id: string | number) => {
-    const run = async () => {
-      try {
-        let adminToken = localStorage.getItem('aiMaster:adminToken') || '';
-        if (!adminToken) {
-          const entered = window.prompt('נא להזין ADMIN_TOKEN לניהול (יישמר בדפדפן שלך):');
-          if (!entered) { toast({ title: 'בוטל', description: 'נדרש טוקן ניהול', variant: 'destructive' }); return; }
-          adminToken = entered; localStorage.setItem('aiMaster:adminToken', adminToken);
-        }
-        const client = getSupabase() || supabase;
-        const { data, error } = await client!.functions.invoke('portfolio-admin', {
-          body: { action: 'delete', payload: { id: Number(id) } },
-          headers: { 'x-admin-token': adminToken }
-        });
-        if (error || !data?.ok) throw error || new Error(data?.error || 'edge error');
-
-        const remote = await fetchProjects();
-        const mapped: Project[] = remote.map(p => ({
-          id: p.id,
-          businessName: p.business_name,
-          businessType: p.business_type,
-          serviceType: p.service_type,
-          imageAfter: p.image_after,
-          imageBefore: p.image_before ?? undefined,
-          size: p.size,
-          category: p.category,
-          pinned: p.pinned,
-          createdAt: p.created_at,
-        }));
-        portfolioStore.setProjects(mapped);
+    try {
+      const ok = portfolioStore.deleteProject(id);
+      if (ok) {
         toast({ title: 'הצלחה', description: 'הפרויקט נמחק בהצלחה' });
         setHasUnsavedChanges(true);
-      } catch (error) {
-        toast({ title: 'שגיאה', description: 'שגיאה במחיקת הפרויקט', variant: 'destructive' });
+      } else {
+        toast({ title: 'שגיאה', description: 'פרויקט לא נמצא', variant: 'destructive' });
       }
-    };
-    void run();
+    } catch (error) {
+      toast({ title: 'שגיאה', description: 'שגיאה במחיקת הפרויקט', variant: 'destructive' });
+    }
   };
 
   const handleDuplicateProject = (project: Project) => {
@@ -277,71 +206,7 @@ const AdminPortfolioPage = () => {
     }
   };
 
-  // One-time migration: import all current local projects (and any currently visible in catalog)
-  const handleImportLocalToSupabase = () => {
-    const run = async () => {
-      try {
-        let adminToken = localStorage.getItem('aiMaster:adminToken') || '';
-        if (!adminToken) {
-          const entered = window.prompt('נא להזין ADMIN_TOKEN לניהול (יישמר בדפדפן שלך):');
-          if (!entered) { toast({ title: 'בוטל', description: 'נדרש טוקן ניהול', variant: 'destructive' }); return; }
-          adminToken = entered; localStorage.setItem('aiMaster:adminToken', adminToken);
-        }
-
-        // Fetch remote to avoid duplicates
-        const remote = await fetchProjects();
-        const existing = new Set(remote.map(p => `${p.image_after}`));
-
-        // Use everything we have locally (store already contains mock + any admin items)
-        const local = portfolioStore.getProjects();
-        let imported = 0;
-        for (const p of local) {
-          if (existing.has(p.imageAfter)) continue;
-          const payload = {
-            business_name: p.businessName,
-            business_type: p.businessType,
-            service_type: p.serviceType,
-            image_after: p.imageAfter,
-            image_before: p.imageBefore ?? null,
-            size: p.size,
-            category: p.category,
-            pinned: !!p.pinned,
-          };
-          const client = getSupabase() || supabase;
-          const { data, error } = await client!.functions.invoke('portfolio-admin', {
-            body: { action: 'add', payload },
-            headers: { 'x-admin-token': adminToken }
-          });
-          if (error || !data?.ok) {
-            console.warn('Import failed for', p, error || data?.error);
-            continue;
-          }
-          imported += 1;
-        }
-
-        // Refresh store from Supabase
-        const refreshed = await fetchProjects();
-        const mapped: Project[] = refreshed.map(p => ({
-          id: p.id,
-          businessName: p.business_name,
-          businessType: p.business_type,
-          serviceType: p.service_type,
-          imageAfter: p.image_after,
-          imageBefore: p.image_before ?? undefined,
-          size: p.size,
-          category: p.category,
-          pinned: p.pinned,
-          createdAt: p.created_at,
-        }));
-        portfolioStore.setProjects(mapped);
-        setHasUnsavedChanges(true);
-        toast({ title: 'ייבוא הושלם', description: `${imported} פרויקטים נוספו ל-Supabase` });
-      } catch (e) {
-        toast({ title: 'שגיאה', description: 'ייבוא נכשל', variant: 'destructive' });
-      }
-    };
-    void run();
-  };
+  // Supabase import removed – local-only mode
 
   if (isLoading) {
     return (
@@ -521,15 +386,7 @@ const AdminPortfolioPage = () => {
                   נקה הכל
                 </Button>
 
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={handleImportLocalToSupabase}
-                  className="w-full justify-start font-assistant text-xs bg-secondary text-white hover:bg-secondary/90"
-                >
-                  <Upload className="w-3 h-3 mr-2" />
-                  ייבוא כל הפרויקטים המקומיים ל‑Supabase
-                </Button>
+                
               </CardContent>
             </Card>
           </div>

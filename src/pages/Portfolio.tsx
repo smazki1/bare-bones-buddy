@@ -10,7 +10,7 @@ import PortfolioCTA from '@/components/portfolio/PortfolioCTA';
 import { useInfiniteScrollPortfolio } from '@/utils/useInfiniteScrollPortfolio';
 import { Project } from '@/data/portfolioMock';
 import { portfolioStore, PORTFOLIO_UPDATE_EVENT } from '@/data/portfolioStore';
-import { fetchProjects } from '@/lib/supabase';
+// Remote fetch disabled: local-only portfolio
 
 const ITEMS_PER_PAGE = 12;
 const MAX_ITEMS_DISPLAY = 24;
@@ -23,37 +23,14 @@ const Portfolio = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [allProjects, setAllProjects] = useState<Project[]>([]);
 
-  // Load projects from Supabase first, fallback to local store
+  // Load projects from local store only (persistent via IndexedDB/localStorage)
   useEffect(() => {
-    const loadProjects = async () => {
-      try {
-        const remote = await fetchProjects();
-        // Map DB to local Project shape for UI (keep fallback fields)
-        const mapped: Project[] = remote.map(p => ({
-          id: p.id,
-          businessName: p.business_name,
-          businessType: p.business_type,
-          serviceType: p.service_type,
-          imageAfter: p.image_after,
-          imageBefore: p.image_before ?? undefined,
-          size: p.size,
-          category: p.category,
-          pinned: p.pinned,
-          createdAt: p.created_at,
-        }));
-        if (mapped.length > 0) {
-          setAllProjects(mapped);
-          return;
-        }
-      } catch (_) {
-        // ignore and fallback to local store
-      }
+    const loadProjects = () => {
       const storedProjects = portfolioStore.getProjects();
-      console.log('Using local store data:', storedProjects.length, 'projects');
       setAllProjects(storedProjects);
     };
 
-    void loadProjects();
+    loadProjects();
 
     // Listen for real-time updates from admin
     const handleUpdate = () => {

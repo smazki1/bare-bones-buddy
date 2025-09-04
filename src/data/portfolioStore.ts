@@ -42,8 +42,11 @@ class PortfolioStore {
       const idbConfig = await get<PortfolioConfig>(IDB_KEY);
       if (idbConfig) {
         this.config = idbConfig;
-        // Keep localStorage in sync for backward-compat
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.config));
+        // Best-effort mirror to localStorage (ignore quota failures)
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(this.config));
+        } catch {}
+        this.dispatchUpdateEvent();
         return;
       }
 
@@ -62,6 +65,7 @@ class PortfolioStore {
         this.config = DEFAULT_CONFIG;
         await this.saveConfig();
       }
+      this.dispatchUpdateEvent();
     } catch (error) {
       console.error('Error loading portfolio config:', error);
       this.config = DEFAULT_CONFIG;
@@ -72,8 +76,12 @@ class PortfolioStore {
   private async saveConfig(): Promise<void> {
     try {
       this.config.updatedAt = new Date().toISOString();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.config));
+      // Save to IndexedDB first (reliable for large payloads like images)
       await set(IDB_KEY, this.config);
+      // Best-effort mirror to localStorage; ignore quota errors
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.config));
+      } catch {}
       this.dispatchUpdateEvent();
     } catch (error) {
       console.error('Error saving portfolio config:', error);
