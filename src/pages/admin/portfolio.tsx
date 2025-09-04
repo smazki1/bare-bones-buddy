@@ -9,7 +9,7 @@ import { ArrowRight, Plus, Upload, Download, RotateCcw, Image, BarChart3 } from 
 import AdminPortfolioEditor from '@/components/admin/portfolio/AdminPortfolioEditor';
 import AdminPortfolioList from '@/components/admin/portfolio/AdminPortfolioList';
 import { portfolioStore, PORTFOLIO_UPDATE_EVENT } from '@/data/portfolioStore';
-import { supabase, fetchProjects } from '@/lib/supabase';
+import { supabase, getSupabase, fetchProjects } from '@/lib/supabase';
 import { Project } from '@/data/portfolioMock';
 import { portfolioMockData } from '@/data/portfolioMock';
 import { useToast } from '@/hooks/use-toast';
@@ -75,8 +75,30 @@ const AdminPortfolioPage = () => {
         }
 
         const action = 'id' in projectData ? 'update' : 'add';
-        const payload = 'id' in projectData ? projectData : projectData;
-        const { data, error } = await supabase.functions.invoke('portfolio-admin', {
+        const payload = 'id' in projectData
+          ? {
+              id: Number((projectData as Project).id),
+              business_name: projectData.businessName,
+              business_type: projectData.businessType,
+              service_type: projectData.serviceType,
+              image_after: projectData.imageAfter,
+              image_before: projectData.imageBefore ?? null,
+              size: projectData.size,
+              category: projectData.category,
+              pinned: !!(projectData as Project).pinned,
+            }
+          : {
+              business_name: (projectData as Omit<Project, 'id'>).businessName,
+              business_type: (projectData as Omit<Project, 'id'>).businessType,
+              service_type: (projectData as Omit<Project, 'id'>).serviceType,
+              image_after: (projectData as Omit<Project, 'id'>).imageAfter,
+              image_before: (projectData as Omit<Project, 'id'>).imageBefore || null,
+              size: (projectData as Omit<Project, 'id'>).size,
+              category: (projectData as Omit<Project, 'id'>).category,
+              pinned: false,
+            };
+        const client = getSupabase() || supabase;
+        const { data, error } = await client!.functions.invoke('portfolio-admin', {
           body: { action, payload },
           headers: { 'x-admin-token': adminToken }
         });
@@ -118,8 +140,9 @@ const AdminPortfolioPage = () => {
           if (!entered) { toast({ title: 'בוטל', description: 'נדרש טוקן ניהול', variant: 'destructive' }); return; }
           adminToken = entered; localStorage.setItem('aiMaster:adminToken', adminToken);
         }
-        const { data, error } = await supabase.functions.invoke('portfolio-admin', {
-          body: { action: 'delete', payload: { id } },
+        const client = getSupabase() || supabase;
+        const { data, error } = await client!.functions.invoke('portfolio-admin', {
+          body: { action: 'delete', payload: { id: Number(id) } },
           headers: { 'x-admin-token': adminToken }
         });
         if (error || !data?.ok) throw error || new Error(data?.error || 'edge error');
@@ -284,7 +307,8 @@ const AdminPortfolioPage = () => {
             category: p.category,
             pinned: !!p.pinned,
           };
-          const { data, error } = await supabase.functions.invoke('portfolio-admin', {
+          const client = getSupabase() || supabase;
+          const { data, error } = await client!.functions.invoke('portfolio-admin', {
             body: { action: 'add', payload },
             headers: { 'x-admin-token': adminToken }
           });

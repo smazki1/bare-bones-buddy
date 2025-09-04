@@ -11,6 +11,20 @@ if (typeof supabaseUrl === 'string' && supabaseUrl && typeof supabaseAnonKey ===
   });
 }
 
+// Lazily initialize from localStorage if env/window are not available (e.g., GitHub Pages)
+export function getSupabase(): SupabaseClient | null {
+  if (supabase) return supabase;
+  try {
+    const lsUrl = typeof window !== 'undefined' ? localStorage.getItem('aiMaster:supabaseUrl') || '' : '';
+    const lsKey = typeof window !== 'undefined' ? localStorage.getItem('aiMaster:supabaseAnon') || '' : '';
+    if (lsUrl && lsKey) {
+      supabase = createClient(lsUrl, lsKey, { auth: { persistSession: false } });
+      return supabase;
+    }
+  } catch {}
+  return null;
+}
+
 export { supabase };
 
 export type DbProject = {
@@ -27,11 +41,12 @@ export type DbProject = {
 };
 
 export async function fetchProjects(): Promise<DbProject[]> {
-  if (!supabase) {
+  const client = getSupabase() || supabase;
+  if (!client) {
     // Env not configured on this host; return empty to keep UI functional
     return [];
   }
-  const { data, error } = await supabase
+  const { data, error } = await client
     .from('projects')
     .select('*')
     .order('pinned', { ascending: false })

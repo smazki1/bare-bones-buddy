@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { Button } from '@/components/ui/button';
@@ -167,6 +167,45 @@ const AdminDashboard = ({ onLogout }: { onLogout: () => void }) => {
         </div>
       </div>
     </div>
+  );
+};
+
+const AdminSettings = () => {
+  const [url, setUrl] = useState('');
+  const [key, setKey] = useState('');
+  const [token, setToken] = useState('');
+
+  useEffect(() => {
+    try {
+      setUrl(localStorage.getItem('aiMaster:supabaseUrl') || '');
+      setKey(localStorage.getItem('aiMaster:supabaseAnon') || '');
+      setToken(localStorage.getItem('aiMaster:adminToken') || '');
+    } catch {}
+  }, []);
+
+  const save = () => {
+    try {
+      if (url) localStorage.setItem('aiMaster:supabaseUrl', url);
+      if (key) localStorage.setItem('aiMaster:supabaseAnon', key);
+      if (token) localStorage.setItem('aiMaster:adminToken', token);
+      window.alert('הוגדרו מפתחות ניהול בהצלחה');
+    } catch {
+      window.alert('שגיאה בשמירה');
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-sm font-assistant">הגדרות ניהול (דפדפן זה)</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <input className="w-full border px-2 py-1 text-sm" placeholder="SUPABASE_URL" value={url} onChange={e => setUrl(e.target.value)} />
+        <input className="w-full border px-2 py-1 text-sm" placeholder="SUPABASE_ANON_KEY" value={key} onChange={e => setKey(e.target.value)} />
+        <input className="w-full border px-2 py-1 text-sm" placeholder="ADMIN_TOKEN" value={token} onChange={e => setToken(e.target.value)} />
+        <Button size="sm" onClick={save} className="font-assistant text-xs">שמור</Button>
+      </CardContent>
+    </Card>
   );
 };
 
