@@ -7,23 +7,23 @@ import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 const services = [
   {
     icon: Gift,
-    title: 'חבילת מבצע השקה',
-    description: 'סרטון מקצועי במחיר השקה מיוחד',
+    title: 'מבצע השקה',
+    description: 'סרטון מקצועי במחיר מיוחד',
     includes: 'סרטון מקצועי מלא ואיכותי, בלי התחייבות, מבצע ללקוחות חדשים בלבד',
-    suitableFor: 'כל מסעדה שמסוקרנת מהשירות',
-    deliveryTime: '2–3 ימים',
+    suitableFor: 'עסקים שרוצים לבלוט ברשתות החברתיות',
+    deliveryTime: '3–7 ימי עסקים',
     price: '₪99',
-    originalPrice: '₪299',
+    originalPrice: 'במקום ₪299',
     popular: false,
-    buttonText: 'אני רוצה לנסות ב־99₪!'
+    buttonText: 'אני רוצה לקבל פרטים נוספים'
   },
   {
     icon: Target,
-    title: 'חבילת ניסיון',
+    title: 'חבילת מבצע השקה',
     description: 'לנסות בלי סיכון',
-    includes: '10-12 תמונות מקצועיות, פגישת אפיון אישית, זיכוי מלא 499₪, זיכוי מלא בחבילה הבאה',
+    includes: '10-12 תמונות מקצועיות, פגישת אפיון אישית, זיכוי מלא 499₪ בחבילה הבאה',
     suitableFor: 'כל סוגי העסקים שרוצים לראות איך זה עובד',
-    deliveryTime: '3-5 ימים',
+    deliveryTime: '3–5 ימי עסקים',
     price: '₪499',
     popular: false,
     buttonText: 'התחל בלי סיכון - זיכוי מלא!'
@@ -34,7 +34,7 @@ const services = [
     description: 'תמונות מקצועיות למסעדה',
     includes: '60 תמונות, 10–12 מנות, גדלים מותאמים לכל הפלטפורמות',
     suitableFor: 'בתי קפה, ביסטרו, מסעדות קטנות',
-    deliveryTime: '5–7 ימים',
+    deliveryTime: '5–7 ימי עסקים',
     price: '₪1,239',
     originalPrice: '₪740 לאחר זיכוי',
     popular: false
@@ -45,7 +45,7 @@ const services = [
     description: 'הכי פופולרי – המותג שלכם בכל מקום',
     includes: '150 תמונות מקצועיות, 25–30 מנות מהתפריט, 5 סרטונים, תמונות לאפליקציות משלוחים',
     suitableFor: 'מסעדות שרוצות נוכחות דיגיטלית חזקה',
-    deliveryTime: '7–10 ימים',
+    deliveryTime: '7–10 ימי עסקים',
     price: '₪1,689',
     originalPrice: '₪1,190 לאחר זיכוי',
     popular: true
@@ -77,7 +77,7 @@ const services = [
     description: 'יצירת תוכן יומי מקצועי',
     includes: '30-50 תמונות, גדלים שונים, hashtags',
     suitableFor: 'כל סוגי העסקים',
-    deliveryTime: '3-5 ימים',
+    deliveryTime: '3–5 ימי עסקים',
     price: '₪890',
     popular: false
   },
@@ -87,7 +87,7 @@ const services = [
     description: 'סרטונים קצרים ומושכים',
     includes: '10-15 סרטונים, פורמטים שונים',
     suitableFor: 'עסקים דינמיים',
-    deliveryTime: '5-7 ימים',
+    deliveryTime: '5–7 ימי עסקים',
     price: '₪1,290',
     popular: false
   },
@@ -97,7 +97,7 @@ const services = [
     description: 'קטלוג מושלם למכירות',
     includes: 'עד 100 מוצרים, עיצוב אחיד',
     suitableFor: 'יצרנים, סיטונאים',
-    deliveryTime: '7-10 ימים',
+    deliveryTime: '7–10 ימי עסקים',
     price: '₪1,890',
     popular: false
   },
@@ -107,7 +107,7 @@ const services = [
     description: 'חבילה מקיפה ומותאמת',
     includes: 'הכל + ייעוץ אישי',
     suitableFor: 'עסקים גדולים',
-    deliveryTime: '10-14 ימים',
+    deliveryTime: '10–14 ימי עסקים',
     price: '₪2,990',
     popular: false
   }
