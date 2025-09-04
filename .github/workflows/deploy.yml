@@ -24,8 +24,7 @@ jobs:
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
+        # Note: do not auto-enable Pages here to avoid permission errors
 
       - name: Setup Node
         uses: actions/setup-node@v4
