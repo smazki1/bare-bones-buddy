@@ -84,11 +84,15 @@ const BusinessSolutionsCard = ({ item, index }: { item: SolutionCard; index: num
 };
 
 const BusinessSolutionsSection = () => {
-  const [config, setConfig] = useState<SolutionsConfig | null>(null);
+  const [config, setConfig] = useState<SolutionsConfig>(() => 
+    solutionsStore.safeGetConfigOrDefaults()
+  );
 
   useEffect(() => {
     const updateConfig = () => {
-      setConfig(solutionsStore.safeGetConfigOrDefaults());
+      const newConfig = solutionsStore.safeGetConfigOrDefaults();
+      console.log('BusinessSolutions: Loading config with', newConfig.items.length, 'total items');
+      setConfig(newConfig);
     };
 
     updateConfig();
@@ -109,11 +113,12 @@ const BusinessSolutionsSection = () => {
     };
   }, []);
 
-  if (!config) return null;
   // Guard: ensure items array is safe to iterate
-  const items = Array.isArray(config.items) ? config.items : [];
+  const items = Array.isArray(config?.items) ? config.items : [];
   
   const enabledSolutions = items.filter(item => item.enabled).sort((a, b) => a.order - b.order);
+  
+  console.log('BusinessSolutions: Rendering', enabledSolutions.length, 'enabled solutions out of', items.length, 'total items');
 
   return (
     <section className="py-16 md:py-24 bg-background">
