@@ -139,7 +139,7 @@ const BusinessSolutionsSection = () => {
   // Guard: ensure items array is safe to iterate
   const items = Array.isArray(config.items) ? config.items : [];
   
-  const enabledSolutions = items.filter(item => item.enabled && (item.imageSrc || item.videoSrc)).sort((a, b) => a.order - b.order);
+  const enabledSolutions = items.filter(item => item.enabled).sort((a, b) => a.order - b.order);
 
   return (
     <section className="py-16 md:py-24 bg-background">
