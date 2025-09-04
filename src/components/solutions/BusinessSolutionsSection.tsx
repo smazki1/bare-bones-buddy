@@ -7,25 +7,6 @@ import { SolutionsConfig, SolutionCard } from '@/types/solutions';
 
 
 const BusinessSolutionsCard = ({ item, index }: { item: SolutionCard; index: number }) => {
-  const [isInView, setIsInView] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsInView(true);
-        }
-      },
-      { threshold: 0.2 }
-    );
-
-    if (cardRef.current) {
-      observer.observe(cardRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
 
   const cardVariants = {
     hidden: { 
@@ -39,16 +20,7 @@ const BusinessSolutionsCard = ({ item, index }: { item: SolutionCard; index: num
   };
 
   const CardContent = () => (
-    <motion.div
-      ref={cardRef}
-      variants={cardVariants}
-      initial="hidden"
-      animate={isInView ? "visible" : "hidden"}
-      transition={{
-        duration: 0.35,
-        delay: index * 0.08,
-        ease: "easeOut"
-      }}
+    <div
       className="group relative aspect-[16/11] rounded-2xl overflow-hidden shadow-soft cursor-pointer transform transition-transform duration-200 hover:scale-105 min-w-[280px] md:min-w-0"
     >
       {/* Background Media */}
@@ -62,6 +34,8 @@ const BusinessSolutionsCard = ({ item, index }: { item: SolutionCard; index: num
           poster={item.imageSrc || '/placeholder.svg'}
         >
           <source src={item.videoSrc} type="video/mp4" />
+          {/* Fallback image if video fails */}
+          <img src={item.imageSrc || '/placeholder.svg'} alt={item.title} className="absolute inset-0 w-full h-full object-cover" />
         </video>
       ) : (
         <img
@@ -80,7 +54,7 @@ const BusinessSolutionsCard = ({ item, index }: { item: SolutionCard; index: num
           {item.title}
         </h3>
       </div>
-    </motion.div>
+    </div>
   );
 
   // Generate href at render time - prioritize custom href over auto-generated
@@ -191,7 +165,7 @@ const BusinessSolutionsSection = () => {
           </div>
 
           {/* Dots indicator */}
-          {enabledSolutions.length > 1 && (
+          {enabledSolutions.length > 0 && (
             <div className="flex justify-center mt-6 gap-2">
               {enabledSolutions.map((_, index) => (
                 <div
