@@ -59,13 +59,13 @@ const BusinessSolutionsCard = ({ item, index }: { item: SolutionCard; index: num
           loop
           muted
           playsInline
-          poster={item.imageSrc}
+          poster={item.imageSrc || '/placeholder.svg'}
         >
           <source src={item.videoSrc} type="video/mp4" />
         </video>
       ) : (
         <img
-          src={item.imageSrc}
+          src={item.imageSrc || '/placeholder.svg'}
           alt={item.title}
           className="absolute inset-0 w-full h-full object-cover"
         />
@@ -136,8 +136,10 @@ const BusinessSolutionsSection = () => {
   }, []);
 
   if (!config) return null;
+  // Guard: ensure items array is safe to iterate
+  const items = Array.isArray(config.items) ? config.items : [];
   
-  const enabledSolutions = config.items.filter(item => item.enabled).sort((a, b) => a.order - b.order);
+  const enabledSolutions = items.filter(item => item.enabled && (item.imageSrc || item.videoSrc)).sort((a, b) => a.order - b.order);
 
   return (
     <section className="py-16 md:py-24 bg-background">

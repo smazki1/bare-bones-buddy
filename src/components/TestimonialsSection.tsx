@@ -57,7 +57,7 @@ const TestimonialsSection = () => {
             הלקוחות שלנו
           </h2>
           <p className="text-xl text-muted-foreground font-open-sans max-w-2xl mx-auto">
-            עסקי מזון שבחרו בנו ורואים תוצאות מדהימות
+            עסקים שהבינו שתמונות טובות = יותר לקוחות
           </p>
         </motion.div>
 

@@ -99,7 +99,11 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.4 }}
           >
-            יוצרים תמונות מקצועיות למסעדות ועסקים - מהר, זול, באיכות גבוהה ובלי מאמץ
+            <span className="font-semibold md:font-normal">יוצרים תמונות מקצועיות</span> למסעדות ועסקים –
+            <span className="mx-1 font-bold text-secondary">מהר</span>,
+            <span className="mx-1 font-bold text-orange-400">זול</span>,
+            <span className="mx-1 font-bold text-green-400">באיכות גבוהה</span>
+            ובלי מאמץ
           </motion.p>
 
           <motion.div
@@ -131,7 +135,9 @@ const HeroSection = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.8 }}
           >
-            מה שלקח שבועות עם צלם - אצלנו מוכן תוך ימים, ב-90% פחות כסף
+            מה שלקח <span className="font-semibold">שבועות</span> עם צלם – אצלנו מוכן תוך
+            <span className="mx-1 font-bold text-secondary">ימים</span>,
+            ב-<span className="font-extrabold text-red-500">90%</span> פחות כסף
           </motion.div>
         </div>
       </div>

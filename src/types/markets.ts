@@ -14,8 +14,8 @@ export type MarketsConfig = {
 };
 
 export const DEFAULT_MARKETS_CONFIG: MarketsConfig = {
-  sectionTitle: "השווקים שאנחנו עובדים איתם",
-  sectionSubtitle: "אנחנו מתמחים בסוגי מוצרים ושירותים מגוונים בתחום המזון",
+  sectionTitle: "עובדים עם עסקים מכל הסוגים",
+  sectionSubtitle: "בין אם אתה בעל מסעדה, מנהל בחנות אונליין, או בתחום אירועים - אנחנו יוצרים תמונות שמוכרות",
   items: [
     {
       id: 'restaurants',

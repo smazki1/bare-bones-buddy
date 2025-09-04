@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { motion } from 'framer-motion';
 import PackageCard from './PackageCard';
@@ -78,7 +78,7 @@ const defaultPackages: PackageItem[] = [
   }
 ];
 
-const PackagesSection = () => {
+const PackagesSection = ({ autoOpenId }: { autoOpenId?: string } = {}) => {
   const [selectedPackage, setSelectedPackage] = useState<PackageItem | null>(null);
   const { ref, isIntersecting } = useIntersectionObserver({
     threshold: 0.1,
@@ -106,6 +106,13 @@ const PackagesSection = () => {
       y: 0
     }
   };
+
+  useEffect(() => {
+    if (autoOpenId) {
+      const target = defaultPackages.find(p => p.id === autoOpenId);
+      if (target) setSelectedPackage(target);
+    }
+  }, [autoOpenId]);
 
   return (
     <>

@@ -7,7 +7,7 @@ import PortfolioHero from '@/components/portfolio/PortfolioHero';
 import FilterPills from '@/components/portfolio/FilterPills';
 import MasonryGrid from '@/components/portfolio/MasonryGrid';
 import PortfolioCTA from '@/components/portfolio/PortfolioCTA';
-import { useInfiniteScrollPortfolio } from '@/utils/useInfiniteScrollPortfolio';
+// Infinite scroll disabled; using manual "Load more" button
 import { Project } from '@/data/portfolioMock';
 import { portfolioStore, PORTFOLIO_UPDATE_EVENT } from '@/data/portfolioStore';
 // Remote fetch disabled: local-only portfolio
@@ -75,12 +75,10 @@ const Portfolio = () => {
     setIsLoading(false);
   };
 
-  // Infinite scroll hook
-  const { sentinelRef } = useInfiniteScrollPortfolio({
-    hasNextPage,
-    isFetching: isLoading,
-    fetchNextPage
-  });
+  // Manual loader
+  const handleLoadMore = () => {
+    void fetchNextPage();
+  };
 
   // Handle filter change
   const handleFilterChange = (filter: string) => {
@@ -140,8 +138,18 @@ const Portfolio = () => {
               hasReachedMaxItems={hasReachedMaxItems}
             />
             
-            {/* Infinite scroll sentinel - only show if haven't reached max items */}
-            {!hasReachedMaxItems && <div ref={sentinelRef} className="h-10" />}
+            {/* Load more button instead of auto infinite scroll */}
+            {hasNextPage && (
+              <div className="flex justify-center mt-8">
+                <button
+                  onClick={handleLoadMore}
+                  disabled={isLoading}
+                  className="bg-secondary hover:bg-secondary/90 disabled:opacity-50 text-white font-assistant font-semibold px-8 py-3 rounded-xl shadow-warm"
+                >
+                  ראה עוד דוגמאות
+                </button>
+              </div>
+            )}
             
             {/* Loading indicator for pagination */}
             {isLoading && visibleProjects.length > 0 && !hasReachedMaxItems && (

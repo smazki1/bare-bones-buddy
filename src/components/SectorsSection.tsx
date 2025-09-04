@@ -103,7 +103,7 @@ const SectorsSection = () => {
           className="text-center mt-16"
         >
           <div className="bg-background/80 backdrop-blur-sm rounded-2xl p-8 border border-border/50 max-w-md mx-auto">
-            <p className="text-muted-foreground font-open-sans mb-6 text-lg">
+            <p className="text-muted-foreground font-open-sans mb-6 text-lg" dir="rtl">
               לא מוצא את הקטגוריה שלך?
             </p>
             <Button 
@@ -111,7 +111,7 @@ const SectorsSection = () => {
               size="lg"
               className="bg-secondary hover:bg-secondary/90 text-white font-assistant font-semibold px-8 py-4 rounded-xl transition-all duration-300 hover:scale-105 shadow-elegant hover:shadow-warm"
             >
-              <Link to="/contact">
+              <Link to="/contact#top">
                 צור קשר ונמצא פתרון!
               </Link>
             </Button>
