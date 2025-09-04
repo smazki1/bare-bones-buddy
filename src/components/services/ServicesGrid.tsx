@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Instagram, Video, BookOpen, Menu, Globe, Crown, Clock, Users, Target, Camera, Flame, Gift, Zap } from 'lucide-react';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
+import { Link } from 'react-router-dom';
 
 const services = [
   {
@@ -244,12 +245,23 @@ const ServicesGrid = () => {
           transition={{ duration: 0.8, delay: 0.8 }}
           className="text-center mt-16"
         >
-          <Button 
-            size="lg"
-            className="bg-secondary hover:bg-secondary/90 text-white font-assistant text-lg px-8 py-6"
-          >
-            קבל הצעת מחיר מותאמת אישית
-          </Button>
+          <div className="inline-flex items-center gap-4">
+            <Button 
+              asChild
+              size="lg"
+              className="bg-secondary hover:bg-secondary/90 text-white font-assistant text-lg px-8 py-6"
+            >
+              <Link to="/contact">קבל הצעת מחיר מותאמת אישית</Link>
+            </Button>
+            <Button 
+              asChild
+              variant="outline"
+              size="lg"
+              className="bg-white text-primary hover:bg-white/90 font-assistant text-lg px-8 py-6 border border-primary/20"
+            >
+              <Link to="/faq">איך זה עובד</Link>
+            </Button>
+          </div>
         </motion.div>
       </div>
     </section>
