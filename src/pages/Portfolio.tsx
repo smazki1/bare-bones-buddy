@@ -8,6 +8,7 @@ import FilterPills from '@/components/portfolio/FilterPills';
 import MasonryGrid from '@/components/portfolio/MasonryGrid';
 import PortfolioCTA from '@/components/portfolio/PortfolioCTA';
 import { useInfiniteScrollPortfolio } from '@/utils/useInfiniteScrollPortfolio';
+import { fetchProjectsFromSupabase } from '@/lib/supabase-projects';
 import { fullPortfolioData, Project } from '@/data/portfolioMock';
 import { portfolioStore, PORTFOLIO_UPDATE_EVENT } from '@/data/portfolioStore';
 
@@ -22,10 +23,24 @@ const Portfolio = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [allProjects, setAllProjects] = useState<Project[]>([]);
 
-  // Load projects from store
+  // Load projects from Supabase first, fallback to local store
   useEffect(() => {
-    const loadProjects = () => {
+    const loadProjects = async () => {
+      try {
+        // First try to fetch from Supabase
+        const supabaseProjects = await fetchProjectsFromSupabase();
+        if (supabaseProjects && supabaseProjects.length > 0) {
+          console.log('Using Supabase data:', supabaseProjects.length, 'projects');
+          setAllProjects(supabaseProjects);
+          return;
+        }
+      } catch (error) {
+        console.warn('Failed to fetch from Supabase, using local store:', error);
+      }
+      
+      // Fallback to local store
       const storedProjects = portfolioStore.getProjects();
+      console.log('Using local store data:', storedProjects.length, 'projects');
       setAllProjects(storedProjects);
     };
 
