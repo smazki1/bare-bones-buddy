@@ -86,8 +86,7 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.2 }}
           >
-            יוצרים תמונות מקצועיות למסעדות ועסקים —<br className="hidden sm:block" />
-            <strong>מהר</strong>, <strong>זול</strong>, באיכות גבוהה <strong>ובלי מאמץ</strong>
+            מנות מושלמות. תמונות מושלמות.
           </motion.h1>
 
           <motion.p
