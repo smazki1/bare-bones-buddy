@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
@@ -8,8 +8,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Camera, Sparkles, Shield, Zap, Flame, Phone, Palette, Users, Rocket, TrendingUp, PackageCheck, Upload, Eye, Download } from 'lucide-react';
-import { useRef } from 'react';
+import { Camera, Sparkles, Shield, Zap, Flame, Phone, Palette, Users, Rocket, TrendingUp, PackageCheck } from 'lucide-react';
+ 
 
 const FAQ = () => {
   const { ref: faqRef, isIntersecting } = useIntersectionObserver({ threshold: 0.1 });
@@ -55,34 +55,39 @@ const FAQ = () => {
     }
   ];
 
-  const processContainerRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: processContainerRef,
-    offset: ["start end", "end start"]
-  });
+  
 
   const processSteps = [
     {
-      icon: <Upload className="w-12 h-12" />,
-      title: "העלאת התמונות",
-      description: "4-6 תמונות מזוויות שונות של המנה שלכם",
+      icon: <Flame className="w-8 h-8" />,
+      title: "🔥 הנוסחה המנצחת",
+      description: "10-15 תמונות מזוויות מגוונות = תוצאות מרהיבות. ככל שהתמונות יותר שונות זו מזו (זוויות, תאורות, רקעים), כך ה-AI שלנו יוצר תוצאות יותר מדהימות.",
       step: "01",
-      color: "from-blue-500 to-purple-600"
     },
     {
-      icon: <Eye className="w-12 h-12" />,
-      title: "בחירת סגנון ופורמט",
-      description: "מהמאגר שלנו או העלו השראה משלכם",
+      icon: <Phone className="w-8 h-8" />,
+      title: "📱 הצילום: פשוט וחכם",
+      description: "בטלפון, במטבח, בחנות - לא משנה איפה. רק וודאו שהמנה/מוצר נראה אטרקטיבי ושיש מגוון. אנחנו נספק הדרכה מדויקת איך לצלם.",
       step: "02",
-      color: "from-green-500 to-blue-600"
     },
     {
-      icon: <Download className="w-12 h-12" />,
-      title: "קבלת התמונות",
-      description: "תוך 48-72 שעות - מוכנות לכל שימוש",
+      icon: <Palette className="w-8 h-8" />,
+      title: "🎨 הסגנון: שלכם לחלוטין",
+      description: "בחרו מהמאגר שלנו או העלו השראות משלכם. אנחנו מתאימים את התוצאה בדיוק לזהות המותג שלכם.",
       step: "03",
-      color: "from-orange-500 to-red-600"
-    }
+    },
+    {
+      icon: <Users className="w-8 h-8" />,
+      title: "👨‍🎨 הייעוץ: אישי ומקצועי",
+      description: "פגישה עם המעצב שלנו כדי להבטיח שהתוצאה תהיה בדיוק מה שאתם רוצים, לפני שהתהליך מתחיל.",
+      step: "04",
+    },
+    {
+      icon: <Rocket className="w-8 h-8" />,
+      title: "⚡ התוצאה: מהירה ומרשימה",
+      description: "ימים ספורים ויש לכם ספרייה של תמונות ברמת סטודיו. לכל מטרה, לכל פלטפורמה, לכל עונה.",
+      step: "05",
+    },
   ];
 
   const whyFoodVisionPoints = [
@@ -127,8 +132,8 @@ const FAQ = () => {
           </div>
         </section>
 
-        {/* How It Works Section - Interactive Process */}
-        <section ref={processContainerRef} className="py-32 overflow-hidden">
+        {/* How It Works Section - Alternating Timeline */}
+        <section ref={processRef} className="py-20">
           <div className="container mx-auto px-4">
             <motion.div
               initial={{ opacity: 0, y: 50 }}
@@ -143,64 +148,39 @@ const FAQ = () => {
                 3 שלבים פשוטים לתמונות מושלמות
               </p>
             </motion.div>
-
-            <div className="max-w-6xl mx-auto">
-              <div className="grid md:grid-cols-3 gap-8">
-                {processSteps.map((step, index) => {
-                  const yOffset = useTransform(
-                    scrollYProgress,
-                    [0, 0.5, 1],
-                    [100 * (index + 1), 0, -100 * (index + 1)]
-                  );
-                  
-                  return (
-                    <motion.div
-                      key={index}
-                      style={{ y: yOffset }}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={processIntersecting ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
-                      transition={{ duration: 0.6, delay: index * 0.15 }}
-                      className="relative group"
-                    >
-                      {/* Step Number */}
-                      <div className="absolute -top-6 right-6 z-10">
-                        <div className="bg-primary text-white w-12 h-12 rounded-full flex items-center justify-center font-assistant font-bold text-lg shadow-lg">
-                          {step.step}
-                        </div>
-                      </div>
-
-                      {/* Card */}
-                      <div className="bg-card rounded-3xl p-8 shadow-elegant hover:shadow-2xl transition-all duration-500 group-hover:scale-105 border border-border relative overflow-hidden">
-                        {/* Background Gradient */}
-                        <div className={`absolute inset-0 bg-gradient-to-br ${step.color} opacity-5 group-hover:opacity-10 transition-opacity duration-300`}></div>
-                        
-                        <div className="relative z-10 text-center">
-                          {/* Icon */}
-                          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-secondary/10 to-primary/10 rounded-2xl mb-6 group-hover:from-secondary/20 group-hover:to-primary/20 transition-all duration-300">
-                            <div className="text-primary group-hover:scale-110 transition-transform duration-300">
-                              {step.icon}
-                            </div>
+            <div className="max-w-3xl lg:max-w-4xl mx-auto">
+              <div className="relative">
+                {/* Center vertical line (desktop only) */}
+                <div className="absolute right-1/2 -translate-x-1/2 h-full w-0.5 bg-gradient-to-b from-secondary/20 via-primary/20 to-secondary/20 hidden md:block" aria-hidden="true"></div>
+                <div className="space-y-16">
+                  {processSteps.map((step, index) => {
+                    const even = index % 2 === 1;
+                    return (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.2 }}
+                        transition={{ duration: 0.5, delay: index * 0.1 }}
+                        className={`relative flex md:items-center flex-col ${even ? 'md:flex-row-reverse' : 'md:flex-row'} timeline-item`}
+                      >
+                        {/* Icon in the center */}
+                        <div className={`md:absolute ${even ? 'md:left-1/2 md:translate-x-1/2' : 'md:right-1/2 md:-translate-x-1/2'} z-10 mb-4 md:mb-0`}>
+                          <div className="bg-gradient-to-br from-secondary to-primary rounded-full w-24 h-24 flex items-center justify-center text-white ring-8 ring-background shadow-lg">
+                            {step.icon}
                           </div>
-                          
-                          {/* Title */}
-                          <h3 className="text-2xl font-assistant font-bold text-primary mb-4 group-hover:text-secondary transition-colors duration-300">
-                            {step.title}
-                          </h3>
-                          
-                          {/* Description */}
-                          <p className="text-muted-foreground font-open-sans leading-relaxed">
-                            {step.description}
-                          </p>
                         </div>
-
-                        {/* Connecting Line */}
-                        {index < processSteps.length - 1 && (
-                          <div className="absolute top-1/2 -left-4 w-8 h-0.5 bg-gradient-to-l from-primary/30 to-transparent hidden md:block"></div>
-                        )}
-                      </div>
-                    </motion.div>
-                  );
-                })}
+                        {/* Card side */}
+                        <div className={`md:w-1/2 ${even ? 'md:pl-16' : 'md:pr-16'} timeline-content`}>
+                          <div className="bg-card p-6 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-border text-right">
+                            <h3 className="text-2xl font-assistant font-bold text-primary mb-3">{step.title}</h3>
+                            <p className="text-muted-foreground font-open-sans leading-relaxed">{step.description}</p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
