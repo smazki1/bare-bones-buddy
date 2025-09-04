@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const ADMIN_PASSWORD = 'admin';
+const ADMIN_PASSWORD = (import.meta as any)?.env?.VITE_ADMIN_PASSWORD || 'admin';
 const SESSION_KEY = 'aiMaster:adminAuth';
 
 export const useAdminAuth = () => {
@@ -9,7 +9,7 @@ export const useAdminAuth = () => {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const stored = sessionStorage.getItem(SESSION_KEY);
+      const stored = localStorage.getItem(SESSION_KEY);
       setIsAuthenticated(stored === 'true');
     }
     setIsLoading(false);
@@ -17,7 +17,7 @@ export const useAdminAuth = () => {
 
   const login = (password: string): boolean => {
     if (password === ADMIN_PASSWORD) {
-      sessionStorage.setItem(SESSION_KEY, 'true');
+      localStorage.setItem(SESSION_KEY, 'true');
       setIsAuthenticated(true);
       return true;
     }
@@ -25,7 +25,7 @@ export const useAdminAuth = () => {
   };
 
   const logout = () => {
-    sessionStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(SESSION_KEY);
     setIsAuthenticated(false);
   };
 
