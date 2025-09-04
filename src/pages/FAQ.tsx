@@ -8,12 +8,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Camera, Palette, Users, Zap, Target, CheckCircle2, Clock, Phone } from 'lucide-react';
+import { Camera, Sparkles, Shield, Zap, Flame, Phone, Palette, Users, Rocket, TrendingUp, PackageCheck } from 'lucide-react';
 
 const FAQ = () => {
-  const { ref: faqRef, isIntersecting } = useIntersectionObserver({ threshold: 0.2 });
-  const { ref: processRef, isIntersecting: processIntersecting } = useIntersectionObserver({ threshold: 0.2 });
-  const { ref: benefitsRef, isIntersecting: benefitsIntersecting } = useIntersectionObserver({ threshold: 0.2 });
+  const { ref: faqRef, isIntersecting } = useIntersectionObserver({ threshold: 0.1 });
+  const { ref: processRef, isIntersecting: processIntersecting } = useIntersectionObserver({ threshold: 0.1 });
+  const { ref: benefitsRef, isIntersecting: benefitsIntersecting } = useIntersectionObserver({ threshold: 0.1 });
+  const { ref: whyRef, isIntersecting: whyIntersecting } = useIntersectionObserver({ threshold: 0.2 });
 
   const faqs = [
     {
@@ -29,10 +30,6 @@ const FAQ = () => {
       answer: 'בהחלט! התמונות שלנו עומדות בסטנדרטים הטכניים של כל הפלטפורמות - וולט, 10ביס, גט, דומינוס, ואתרי משלוחים אחרים. אנחנו מייצרים את התמונות ברזולוציה גבוהה ובפורמטים מותאמים לכל פלטפורמה.'
     },
     {
-      question: 'איך אתם מבטיחים שהתמונות יראו אמיתיות?',
-      answer: 'יש לנו תהליך בקרת איכות מחמיר: כל תמונה עוברת בדיקה ידנית של מומחה, אנחנו משתמשים בטכנולוגיית AI המתמחה במזון, ודואגים שכל פרט - הצללים, התאורה, והרכיבים - ייראה טבעי ומושך.'
-    },
-    {
       question: 'כמה זה עולה בהשוואה לצלם?',
       answer: 'השירות שלנו עולה כ-80% פחות מצלם מקצועי! במקום לשלם אלפי שקלים על יום צילומים, תקבלו תמונות מקצועיות תוך ימים ספורים במחיר שמתחיל מ-99₪ לתמונה בודדת. זה חיסכון משמעותי בזמן ובכסף.'
     },
@@ -45,36 +42,62 @@ const FAQ = () => {
       answer: 'אתם צריכים לשלוח לנו תמונות בסיסיות של המנות (אפילו מהטלפון), רשימת המנות שרוצים לצלם, ופרטים על הסגנון הרצוי. אם יש לכם תמונות קיימות - נהדר. אם לא - אנחנו נסביר איך לצלם תמונות פשוטות שיעזרו לנו.'
     },
     {
-      question: 'מה עם מנות מורכבות או מיוחדות?',
-      answer: 'זה בדיוק המקום שבו אנחנו מצטיינים! מנות מורכבות, מיוחדות, או עונתיות - הטכנולוגיה שלנו יכולה להתמודד עם כל סוג של מנה. אנחנו כבר עבדנו עם מנות מרוקאיות, יפניות, טבעוניות, וכל מה שביניהן.'
-    },
-    {
       question: 'האם זה מתאים לרשת עם כמה סניפים?',
       answer: 'בהחלט! אנחנו מתמחים ברשתות מזון ובעלי כמה סניפים. התמונות נבנות פעם אחת ויכולות לשמש את כל הסניפים. יש לנו מחירים מיוחדים לרשתות ואפשרויות ניהול מרכזי של כל התמונות.'
-    },
-    {
-      question: 'אילו פלטפורמות נתמכות?',
-      answer: 'התמונות מותאמות לכל הפלטפורמות: אתרים, אפליקציות משלוחים (וולט, 10ביס, גט), רשתות חברתיות (אינסטגרם, פייסבוק, טיקטוק), תפריטים דיגיטליים, ומודעות. אנחנו מספקים כמה גרסאות של כל תמונה.'
     },
     {
       question: 'למי שייכות זכויות השימוש?',
       answer: 'זכויות השימוש שייכות לכם במלואן! אתם יכולים להשתמש בתמונות כמה שאתם רוצים, לערוך אותן, ואפילו להעביר אותן לסוכנות השיווק שלכם. אין הגבלות זמן או שימוש.'
     },
     {
-      question: 'מה לגבי מנות מורכבות (קריסטלים, עשן, גובה רב)?',
-      answer: 'הטכנולוגיה שלנו מסוגלת ליצור אפקטים מיוחדים כמו עשן מסתובב, מרקמים מורכבים, ואפילו מנות בגובה רב או בזוויות מיוחדות. אנחנו יכולים להוסיף אפקטים ויזואליים שקשה להשיג אפילו בצילום רגיל.'
-    },
-    {
-      question: 'האם יש סיכון שהתוצאה לא תהיה משביעת רצון?',
-      answer: 'אנו מפעילים בקרת איכות ידנית ומתחרים בעצמנו מול סטנדרטים של צלמי מזון מקצועיים. במקרה נדיר של תוצאה לא משביעת רצון, ניצור גרסה חדשה על חשבוננו או נחזיר את הכסף במלואו.'
-    },
-    {
       question: 'אני סוכנות שיווק. איך השירות שלכם משתלב בתהליך העבודה שלי מול לקוחות?',
       answer: 'אנחנו עובדים עם הרבה סוכנויות שיווק! אתם יכולים להציג את השירות ללקוחות, לנהל את התהליך בשמם, ואנחנו נספק לכם תמחור מיוחד וכלים לניהול פרויקטים מרובים. יש לנו ממשק מיוחד לסוכנויות.'
+    }
+  ];
+
+  const newProcessSteps = [
+    {
+      icon: <Flame className="w-8 h-8 text-white" />,
+      title: '🔥 הנוסחה המנצחת',
+      description: '10-15 תמונות מזוויות מגוונות = תוצאות מרהיבות. זה הסוד. ככל שהתמונות יותר שונות זו מזו (זוויות, תאורות, רקעים), כך ה-AI שלנו יוצר תוצאות יותר מדהימות.',
     },
     {
-      question: 'האם אני יכול למכור את השירות שלכם הלאה ללקוחות שלי (Resell)?',
-      answer: 'כן! יש לנו תוכנית שותפים מיוחדת לסוכנויות ויועצים עסקיים. אתם יכולים להציע את השירות ללקוחות שלכם עם המרווח שלכם. נספק לכם חומרי שיווק, תמיכה טכנית, ומחירים מיוחדים.'
+      icon: <Phone className="w-8 h-8 text-white" />,
+      title: '📱 הצילום: פשוט וחכם',
+      description: 'בטלפון, במטבח, בחנות - לא משנה איפה. רק וודאו שהמנה/מוצר נראה אטרקטיבי ושיש מגוון. אנחנו נספק הדרכה מדויקת איך לצלם.',
+    },
+    {
+      icon: <Palette className="w-8 h-8 text-white" />,
+      title: '🎨 הסגנון: שלכם לחלוטין',
+      description: 'בחרו מהמאגר שלנו או העלו השראות משלכם. אנחנו מתאימים את התוצאה בדיוק לזהות המותג שלכם.',
+    },
+    {
+      icon: <Users className="w-8 h-8 text-white" />,
+      title: '👨‍🎨 הייעוץ: אישי ומקצועי',
+      description: 'פגישה עם המעצב שלנו כדי להבטיח שהתוצאה תהיה בדיוק מה שאתם רוצים, לפני שהתהליך מתחיל.',
+    },
+    {
+      icon: <Rocket className="w-8 h-8 text-white" />,
+      title: '⚡ התוצאה: מהירה ומרשימה',
+      description: 'ימים ספורים ויש לכם ספרייה של תמונות ברמת סטודיו. לכל מטרה, לכל פלטפורמה, לכל עונה.',
+    },
+  ];
+
+  const whyFoodVisionPoints = [
+    {
+      icon: <TrendingUp className="w-10 h-10 text-secondary" />,
+      title: 'מכירות גבוהות יותר במשלוחים',
+      description: 'התמונות שלנו מותאמות בצורה מושלמת לוולט, 10ביס וכל אפליקציות המשלוחים, כדי למשוך את העין ולהגדיל את יחס ההמרה וההזמנות.'
+    },
+    {
+      icon: <PackageCheck className="w-10 h-10 text-secondary" />,
+      title: 'תוצאות מבוססות מנות אמיתיות',
+      description: 'זה לא תמונות "מזויפות" או גנריות. אנחנו לוקחים את המנות האמיתיות שלכם ומשדרגים אותן לרמה מקצועית, תוך שמירה על האופי והייחודיות שלהן.'
+    },
+    {
+      icon: <Zap className="w-10 h-10 text-secondary" />,
+      title: 'מהיר פי 10 מצלם רגיל',
+      description: 'קבלו גלריה שלמה של תמונות מוכנות תוך 48-72 שעות בלבד. תשכחו משבועות של תיאומים, צילומים ועריכות אינסופיות.'
     }
   ];
 
@@ -90,97 +113,102 @@ const FAQ = () => {
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
-              className="text-center mb-16"
+              className="text-center"
             >
               <h1 className="text-5xl md:text-6xl font-assistant font-bold text-primary mb-6">
-                איך זה עובד
+                מצילום בטלפון לסטודיו מקצועי
               </h1>
               <p className="text-xl text-muted-foreground font-open-sans max-w-2xl mx-auto">
-                כל מה שאתם צריכים לדעת על השירות שלנו
+                התהליך שחוסך לכם זמן, כסף ועצבים
               </p>
             </motion.div>
           </div>
         </section>
 
-        {/* Process Section */}
+        {/* New Process Section */}
         <section ref={processRef} className="py-20">
           <div className="container mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              animate={processIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-              transition={{ duration: 0.8 }}
-              className="text-center mb-16"
-            >
-              <h2 className="text-4xl md:text-5xl font-assistant font-bold text-primary mb-4">
-                איך זה עובד?
-              </h2>
-              <p className="text-xl text-secondary font-open-sans font-semibold">
-                3 צעדים פשוטים
-              </p>
-            </motion.div>
-
-            <div className="max-w-5xl mx-auto">
-              <div className="grid md:grid-cols-3 gap-8">
-                {/* Step 1 */}
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={processIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                  transition={{ duration: 0.6 }}
-                  className="bg-card rounded-3xl p-8 shadow-elegant text-center"
-                >
-                  <div className="bg-secondary rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
-                    <Camera className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-assistant font-bold text-foreground mb-4">
-                    מעלים 4-6 תמונות
-                  </h3>
-                  <p className="text-muted-foreground font-open-sans leading-relaxed">
-                    העלו תמונות של המנות המרכזיות שלכם מזוויות שונות. אפילו תמונות מהטלפון מספיקות - אנחנו נדריך אתכם איך לצלם נכון
-                  </p>
-                </motion.div>
-
-                {/* Step 2 */}
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={processIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                  transition={{ duration: 0.6, delay: 0.1 }}
-                  className="bg-card rounded-3xl p-8 shadow-elegant text-center"
-                >
-                  <div className="bg-secondary rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
-                    <Palette className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-assistant font-bold text-foreground mb-4">
-                    בוחרים סגנון ומרק
-                  </h3>
-                  <p className="text-muted-foreground font-open-sans leading-relaxed">
-                    בוחרים איפה שתשתמשו בתמונות: מערכות משלוח/רשתות חברתיות/תפריטים + בוחרים סגנון התמונות או הסגנון הרצוי שלכם
-                  </p>
-                </motion.div>
-
-                {/* Step 3 */}
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={processIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                  className="bg-card rounded-3xl p-8 shadow-elegant text-center"
-                >
-                  <div className="bg-secondary rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
-                    <CheckCircle2 className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-assistant font-bold text-foreground mb-4">
-                    מקבלים תמונות
-                  </h3>
-                  <p className="text-muted-foreground font-open-sans leading-relaxed">
-                    תוך 48-72 שעות תקבלו ספרייה של תמונות מקצועיות תוך 48 שעות + זכויות שימוש מלאות ללא הגבלת זמן
-                  </p>
-                </motion.div>
+            <div className="max-w-3xl mx-auto">
+              <div className="relative">
+                {/* The vertical line */}
+                <div className="absolute left-1/2 -translate-x-1/2 h-full w-0.5 bg-gradient-to-b from-secondary/20 via-primary/20 to-secondary/20" aria-hidden="true"></div>
+                
+                <div className="space-y-16">
+                  {newProcessSteps.map((item, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 50 }}
+                      animate={processIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+                      transition={{ duration: 0.6, delay: index * 0.2 }}
+                      className="relative flex items-center"
+                    >
+                      <div className="absolute left-1/2 -translate-x-1/2 z-10">
+                        <div className="bg-gradient-to-br from-secondary to-primary rounded-full w-24 h-24 flex items-center justify-center text-white ring-8 ring-background shadow-lg">
+                          {item.icon}
+                        </div>
+                      </div>
+                      <div className={`w-[calc(50%-3rem)] ${index % 2 === 0 ? 'pr-8 text-right' : 'pl-8 text-left'}`}></div>
+                      <div className={`w-[calc(50%+3rem)] p-6 rounded-2xl ${index % 2 === 0 ? 'pl-32' : 'pr-32 text-right'}`}>
+                        <div className="bg-card p-6 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-border">
+                          <h3 className="text-2xl font-assistant font-bold text-primary mb-3">
+                            {item.title}
+                          </h3>
+                          <p className="text-muted-foreground font-open-sans leading-relaxed">
+                            {item.description}
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Why Food Vision Section */}
-        <section ref={benefitsRef} className="py-20 bg-gradient-subtle">
+        {/* Why FoodVision Section */}
+        <section ref={whyRef} className="py-20 bg-gradient-subtle">
+          <div className="container mx-auto px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={whyIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+              transition={{ duration: 0.8 }}
+              className="text-center mb-16"
+            >
+              <h2 className="text-4xl md:text-5xl font-assistant font-bold text-primary mb-4">
+                למה FoodVision?
+              </h2>
+              <p className="text-xl text-muted-foreground font-open-sans max-w-2xl mx-auto">
+                מותאם מושלם לעולם המשלוחים והשיווק הדיגיטלי
+              </p>
+            </motion.div>
+
+            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {whyFoodVisionPoints.map((item, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={whyIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+                  transition={{ duration: 0.6, delay: index * 0.2 }}
+                  className="bg-card p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-border text-center"
+                >
+                  <div className="inline-flex items-center justify-center p-4 bg-secondary/10 rounded-full mb-6">
+                    {item.icon}
+                  </div>
+                  <h3 className="text-xl font-assistant font-bold text-primary mb-3">
+                    {item.title}
+                  </h3>
+                  <p className="text-muted-foreground font-open-sans leading-relaxed">
+                    {item.description}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Benefits Section - Comparison */}
+        <section ref={benefitsRef} className="py-20">
           <div className="container mx-auto px-4">
             <motion.div
               initial={{ opacity: 0, y: 50 }}
@@ -189,70 +217,89 @@ const FAQ = () => {
               className="text-center mb-16"
             >
               <h2 className="text-4xl md:text-5xl font-assistant font-bold text-primary mb-4">
-                למה FoodVision?
+                השוואה: צילום מסורתי מול FoodVision
               </h2>
               <p className="text-xl text-muted-foreground font-open-sans max-w-2xl mx-auto">
-                השירות המושלם עבור עסקי המזון במאה ה-21
+                המספרים שמראים למה הטכנולוגיה שלנו משנה את המשחק
               </p>
             </motion.div>
-
-            <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-8">
+            <div className="max-w-6xl mx-auto">
+              <div className="grid md:grid-cols-2 gap-12">
+                <motion.div
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={benefitsIntersecting ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
+                  transition={{ duration: 0.6 }}
+                  className="bg-card rounded-2xl p-8 shadow-elegant border-2 border-muted/20"
+                >
+                  <h3 className="text-2xl font-assistant font-bold text-muted-foreground mb-6 text-center">
+                    📷 צילום מסורתי
+                  </h3>
+                  <ul className="space-y-4">
+                    {[
+                      'עלות: 3,000-8,000 ₪ ליום',
+                      'זמן: 1-2 שבועות (תיאום + צילום + עריכה)',
+                      'הכנה: הכנת מנות מושלמות',
+                      'ציוד: השכרת סטודיו וציוד', 
+                      'מגבלות: תלוי בזמינות צלם',
+                      'תיקונים: עלות נוספת',
+                      'גמישות: קשה לשנות לאחר הצילום'
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-center text-muted-foreground font-open-sans">
+                        <span className="w-2 h-2 bg-muted-foreground rounded-full mr-3 flex-shrink-0"></span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={benefitsIntersecting ? { opacity: 1, x: 0 } : { opacity: 0, x: 30 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  className="bg-gradient-to-br from-secondary/5 to-primary/5 rounded-2xl p-8 shadow-elegant border-2 border-secondary"
+                >
+                  <h3 className="text-2xl font-assistant font-bold text-primary mb-6 text-center">
+                    🚀 FoodVision
+                  </h3>
+                  <ul className="space-y-4">
+                    {[
+                      'עלות: החל מ-99 ₪ (חיסכון של 80%)',
+                      'זמן: 48-72 שעות בלבד',
+                      'הכנה: תמונות בסיסיות (אפילו מהטלפון)',
+                      'ציוד: לא צריך כלום',
+                      'מגבלות: זמינות מיידית',
+                      'תיקונים: 3 סיבובים חינם',
+                      'גמישות: קל לעדכן ולשנות'
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-center text-foreground font-open-sans">
+                        <span className="w-2 h-2 bg-secondary rounded-full mr-3 flex-shrink-0"></span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              </div>
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={benefitsIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                transition={{ duration: 0.6 }}
-                className="bg-card rounded-2xl p-8 shadow-elegant text-center"
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="mt-12 text-center"
               >
-                <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
-                  <Target className="w-8 h-8 text-blue-600" />
+                <div className="bg-gradient-to-r from-secondary/10 to-primary/10 rounded-2xl p-8">
+                  <h3 className="text-2xl font-assistant font-bold text-foreground mb-4">
+                    💡 התוצאה
+                  </h3>
+                  <p className="text-lg font-open-sans text-muted-foreground max-w-3xl mx-auto">
+                    <strong>80% חיסכון בעלויות</strong>, <strong>90% חיסכון בזמן</strong>, ותמונות שנראות טוב יותר ממנות אמיתיות. 
+                    הלקוחות שלנו מדווחים על <strong>עלייה של 40% בהזמנות</strong> אחרי החלפת התמונות.
+                  </p>
                 </div>
-                <h3 className="text-xl font-assistant font-bold text-foreground mb-4">
-                  מותאם מושלם לעולם המשלוחים
-                </h3>
-                <p className="text-muted-foreground font-open-sans leading-relaxed">
-                  מכירות גבוהות יותר בוולט, 10ביס וכל אפליקציות המשלוחים
-                </p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={benefitsIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-                className="bg-card rounded-2xl p-8 shadow-elegant text-center"
-              >
-                <div className="bg-gradient-to-br from-green-500/10 to-green-600/10 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
-                  <CheckCircle2 className="w-8 h-8 text-green-600" />
-                </div>
-                <h3 className="text-xl font-assistant font-bold text-foreground mb-4">
-                  תוצאות מבוססות מנות אמיתיות
-                </h3>
-                <p className="text-muted-foreground font-open-sans leading-relaxed">
-                  לא תמונות "מזויפות" - אלא שדרוג מקצועי של המנות שלכם
-                </p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={benefitsIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="bg-card rounded-2xl p-8 shadow-elegant text-center"
-              >
-                <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/10 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
-                  <Zap className="w-8 h-8 text-orange-600" />
-                </div>
-                <h3 className="text-xl font-assistant font-bold text-foreground mb-4">
-                  מהיר פי 10 מצלם רגיל
-                </h3>
-                <p className="text-muted-foreground font-open-sans leading-relaxed">
-                  48 שעות במקום שבועות של תיאומים וצילומים
-                </p>
               </motion.div>
             </div>
           </div>
         </section>
 
         {/* FAQ Section */}
-        <section ref={faqRef} className="py-20">
+        <section ref={faqRef} className="py-20 bg-gradient-subtle">
           <div className="container mx-auto px-4">
             <motion.div
               initial={{ opacity: 0, y: 50 }}
@@ -267,7 +314,6 @@ const FAQ = () => {
                 כל מה שרציתם לדעת על התהליך והשירות שלנו
               </p>
             </motion.div>
-
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={isIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
@@ -291,14 +337,13 @@ const FAQ = () => {
                     </AccordionItem>
                   ))}
                 </Accordion>
-
                 <div className="mt-12 text-center">
                   <div className="bg-secondary/5 rounded-xl p-6">
                     <h3 className="text-xl font-assistant font-bold text-foreground mb-2">
                       מוכנים להתחיל?
                     </h3>
                     <p className="text-muted-foreground font-open-sans mb-4">
-                      בואו נתחיל ליצור תמונות מושלמות למסעדה שלכם
+                      בואו ניצור תמונות מושלמות שיזניקו לכם את המכירות
                     </p>
                     <a 
                       href="https://wa.me/972527772807?text=אני מעוניין לשמוע עוד על השירות שלכם"
