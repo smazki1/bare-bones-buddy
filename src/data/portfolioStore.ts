@@ -82,10 +82,10 @@ class PortfolioStore {
           manualOrderByCategory: {}
         };
       } else {
-        // If DB empty, use existing mock data (no seeding from public runtime)
+        // If DB empty, keep empty list (admin page will seed DB)
         if (!projects || projects.length === 0) {
           this.config = {
-            items: fullPortfolioData,
+            items: [],
             initialized: true,
             updatedAt: new Date().toISOString(),
             manualOrderByCategory: {}
@@ -118,36 +118,22 @@ class PortfolioStore {
 
   private async saveProjectToSupabase(project: Project): Promise<boolean> {
     try {
-      if (project.id && Number(project.id) > 0) {
-        // Update existing project
-        const supabaseProject = convertToSupabaseUpdate(project);
-        const { error } = await supabase
-          .from('projects')
-          .update(supabaseProject)
-          .eq('id', Number(project.id));
-        
-        if (error) {
-          console.error('Error updating project in Supabase:', error);
-          return false;
-        }
-      } else {
-        // Insert new project  
-        const supabaseProject = convertToSupabaseInsert(project);
-        const { data, error } = await (supabase as any)
-          .from('projects')
-          .insert(supabaseProject)
-          .select()
-          .single();
-        
-        if (error) {
-          console.error('Error inserting project to Supabase:', error);
-          return false;
-        }
-        
-        // Update local project ID with the one from Supabase
+      // Upsert handles both insert and update paths
+      const supabaseProject = convertToSupabaseInsert(project);
+      const { data, error } = await (supabase as any)
+        .from('projects')
+        .upsert(supabaseProject, { onConflict: 'id' })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error upserting project in Supabase:', error);
+        return false;
+      }
+
+      if (data?.id) {
         project.id = data.id.toString();
       }
-      
       return true;
     } catch (error) {
       console.error('Error saving project to Supabase:', error);
