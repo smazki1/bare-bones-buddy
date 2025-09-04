@@ -112,107 +112,69 @@ const FAQ = () => {
               className="text-center mb-16"
             >
               <h2 className="text-4xl md:text-5xl font-assistant font-bold text-primary mb-4">
-                מצילום בטלפון לסטודיו מקצועי
+                איך זה עובד?
               </h2>
-              <p className="text-xl text-muted-foreground font-open-sans max-w-2xl mx-auto">
-                התהליך שחוסך לכם זמן, כסף ועצבים
+              <p className="text-xl text-secondary font-open-sans font-semibold">
+                3 צעדים פשוטים
               </p>
             </motion.div>
 
-            <div className="max-w-6xl mx-auto space-y-12">
-              {/* הנוסחה המנצחת */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={processIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                transition={{ duration: 0.6 }}
-                className="bg-gradient-to-br from-secondary/10 to-primary/10 rounded-3xl p-8 shadow-elegant"
-              >
-                <div className="text-center">
-                  <h3 className="text-3xl font-assistant font-bold text-primary mb-4 flex items-center justify-center gap-3">
-                    🔥 הנוסחה המנצחת
-                  </h3>
-                  <p className="text-lg font-open-sans text-foreground leading-relaxed">
-                    <strong>10-15 תמונות מזוויות מגוונות = תוצאות מרהיבות.</strong> זה הסוד. ככל שהתמונות יותר שונות זו מזו (זוויות, תאורות, רקעים), כך ה-AI שלנו יוצר תוצאות יותר מדהימות.
-                  </p>
-                </div>
-              </motion.div>
-
-              {/* הצילום */}
-              <motion.div
-                initial={{ opacity: 0, x: -50 }}
-                animate={processIntersecting ? { opacity: 1, x: 0 } : { opacity: 0, x: -50 }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-                className="grid md:grid-cols-2 gap-8 items-center"
-              >
-                <div>
-                  <h3 className="text-3xl font-assistant font-bold text-primary mb-4 flex items-center gap-3">
-                    📱 הצילום: פשוט וחכם
-                  </h3>
-                  <p className="text-lg font-open-sans text-muted-foreground leading-relaxed">
-                    בטלפון, במטבח, בחנות - לא משנה איפה. רק וודאו שהמנה/מוצר נראה אטרקטיבי ושיש מגוון. אנחנו נספק הדרכה מדויקת איך לצלם.
-                  </p>
-                </div>
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 flex items-center justify-center">
-                  <Phone className="w-20 h-20 text-blue-500" />
-                </div>
-              </motion.div>
-
-              {/* הסגנון */}
-              <motion.div
-                initial={{ opacity: 0, x: 50 }}
-                animate={processIntersecting ? { opacity: 1, x: 0 } : { opacity: 0, x: 50 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="grid md:grid-cols-2 gap-8 items-center"
-              >
-                <div className="order-2 md:order-1">
-                  <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 flex items-center justify-center">
-                    <Palette className="w-20 h-20 text-purple-500" />
+            <div className="max-w-5xl mx-auto">
+              <div className="grid md:grid-cols-3 gap-8">
+                {/* Step 1 */}
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={processIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+                  transition={{ duration: 0.6 }}
+                  className="bg-card rounded-3xl p-8 shadow-elegant text-center"
+                >
+                  <div className="bg-secondary rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
+                    <Camera className="w-8 h-8 text-white" />
                   </div>
-                </div>
-                <div className="order-1 md:order-2">
-                  <h3 className="text-3xl font-assistant font-bold text-primary mb-4 flex items-center gap-3">
-                    🎨 הסגנון: שלכם לחלוטין
+                  <h3 className="text-xl font-assistant font-bold text-foreground mb-4">
+                    מעלים 4-6 תמונות
                   </h3>
-                  <p className="text-lg font-open-sans text-muted-foreground leading-relaxed">
-                    בחרו מהמאגר שלנו או העלו השראות משלכם. אנחנו מתאימים בדיוק לזהות המותג שלכם.
+                  <p className="text-muted-foreground font-open-sans leading-relaxed">
+                    העלו תמונות של המנות המרכזיות שלכם מזוויות שונות. אפילו תמונות מהטלפון מספיקות - אנחנו נדריך אתכם איך לצלם נכון
                   </p>
-                </div>
-              </motion.div>
+                </motion.div>
 
-              {/* הייעוץ */}
-              <motion.div
-                initial={{ opacity: 0, x: -50 }}
-                animate={processIntersecting ? { opacity: 1, x: 0 } : { opacity: 0, x: -50 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-                className="grid md:grid-cols-2 gap-8 items-center"
-              >
-                <div>
-                  <h3 className="text-3xl font-assistant font-bold text-primary mb-4 flex items-center gap-3">
-                    👨‍🎨 הייעוץ: אישי ומקצועי
+                {/* Step 2 */}
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={processIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+                  transition={{ duration: 0.6, delay: 0.1 }}
+                  className="bg-card rounded-3xl p-8 shadow-elegant text-center"
+                >
+                  <div className="bg-secondary rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
+                    <Palette className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-assistant font-bold text-foreground mb-4">
+                    בוחרים סגנון ומרק
                   </h3>
-                  <p className="text-lg font-open-sans text-muted-foreground leading-relaxed">
-                    פגישה עם המעצב שלנו להבטיח שהתוצאה תהיה בדיוק מה שאתם רוצים.
+                  <p className="text-muted-foreground font-open-sans leading-relaxed">
+                    בוחרים איפה שתשתמשו בתמונות: מערכות משלוח/רשתות חברתיות/תפריטים + בוחרים סגנון התמונות או הסגנון הרצוי שלכם
                   </p>
-                </div>
-                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 flex items-center justify-center">
-                  <Users className="w-20 h-20 text-green-500" />
-                </div>
-              </motion.div>
+                </motion.div>
 
-              {/* התוצאה */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={processIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                className="bg-gradient-to-br from-secondary/15 to-primary/15 rounded-3xl p-8 shadow-elegant text-center"
-              >
-                <h3 className="text-3xl font-assistant font-bold text-primary mb-4 flex items-center justify-center gap-3">
-                  ⚡ התוצאה: מהירה ומרשימה
-                </h3>
-                <p className="text-lg font-open-sans text-foreground leading-relaxed max-w-3xl mx-auto">
-                  ימים ספורים ויש לכם ספרייה של תמונות ברמת סטודיו. <strong>לכל מטרה, לכל פלטפורמה, לכל עונה.</strong>
-                </p>
-              </motion.div>
+                {/* Step 3 */}
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={processIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  className="bg-card rounded-3xl p-8 shadow-elegant text-center"
+                >
+                  <div className="bg-secondary rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
+                    <CheckCircle2 className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-assistant font-bold text-foreground mb-4">
+                    מקבלים תמונות
+                  </h3>
+                  <p className="text-muted-foreground font-open-sans leading-relaxed">
+                    תוך 48-72 שעות תקבלו ספרייה של תמונות מקצועיות תוך 48 שעות + זכויות שימוש מלאות ללא הגבלת זמן
+                  </p>
+                </motion.div>
+              </div>
             </div>
           </div>
         </section>
