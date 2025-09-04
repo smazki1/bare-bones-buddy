@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
@@ -8,12 +8,12 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Camera, Sparkles, Shield, Zap, Flame, Phone, Palette, Users, Rocket, TrendingUp, PackageCheck } from 'lucide-react';
+import { Camera, Sparkles, Shield, Zap, Flame, Phone, Palette, Users, Rocket, TrendingUp, PackageCheck, Upload, Eye, Download } from 'lucide-react';
+import { useRef } from 'react';
 
 const FAQ = () => {
   const { ref: faqRef, isIntersecting } = useIntersectionObserver({ threshold: 0.1 });
   const { ref: processRef, isIntersecting: processIntersecting } = useIntersectionObserver({ threshold: 0.1 });
-  const { ref: benefitsRef, isIntersecting: benefitsIntersecting } = useIntersectionObserver({ threshold: 0.1 });
   const { ref: whyRef, isIntersecting: whyIntersecting } = useIntersectionObserver({ threshold: 0.2 });
 
   const faqs = [
@@ -55,32 +55,34 @@ const FAQ = () => {
     }
   ];
 
-  const newProcessSteps = [
+  const processContainerRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: processContainerRef,
+    offset: ["start end", "end start"]
+  });
+
+  const processSteps = [
     {
-      icon: <Flame className="w-8 h-8 text-white" />,
-      title: '🔥 הנוסחה המנצחת',
-      description: '10-15 תמונות מזוויות מגוונות = תוצאות מרהיבות. זה הסוד. ככל שהתמונות יותר שונות זו מזו (זוויות, תאורות, רקעים), כך ה-AI שלנו יוצר תוצאות יותר מדהימות.',
+      icon: <Upload className="w-12 h-12" />,
+      title: "העלאת התמונות",
+      description: "4-6 תמונות מזוויות שונות של המנה שלכם",
+      step: "01",
+      color: "from-blue-500 to-purple-600"
     },
     {
-      icon: <Phone className="w-8 h-8 text-white" />,
-      title: '📱 הצילום: פשוט וחכם',
-      description: 'בטלפון, במטבח, בחנות - לא משנה איפה. רק וודאו שהמנה/מוצר נראה אטרקטיבי ושיש מגוון. אנחנו נספק הדרכה מדויקת איך לצלם.',
+      icon: <Eye className="w-12 h-12" />,
+      title: "בחירת סגנון ופורמט",
+      description: "מהמאגר שלנו או העלו השראה משלכם",
+      step: "02",
+      color: "from-green-500 to-blue-600"
     },
     {
-      icon: <Palette className="w-8 h-8 text-white" />,
-      title: '🎨 הסגנון: שלכם לחלוטין',
-      description: 'בחרו מהמאגר שלנו או העלו השראות משלכם. אנחנו מתאימים את התוצאה בדיוק לזהות המותג שלכם.',
-    },
-    {
-      icon: <Users className="w-8 h-8 text-white" />,
-      title: '👨‍🎨 הייעוץ: אישי ומקצועי',
-      description: 'פגישה עם המעצב שלנו כדי להבטיח שהתוצאה תהיה בדיוק מה שאתם רוצים, לפני שהתהליך מתחיל.',
-    },
-    {
-      icon: <Rocket className="w-8 h-8 text-white" />,
-      title: '⚡ התוצאה: מהירה ומרשימה',
-      description: 'ימים ספורים ויש לכם ספרייה של תמונות ברמת סטודיו. לכל מטרה, לכל פלטפורמה, לכל עונה.',
-    },
+      icon: <Download className="w-12 h-12" />,
+      title: "קבלת התמונות",
+      description: "תוך 48-72 שעות - מוכנות לכל שימוש",
+      step: "03",
+      color: "from-orange-500 to-red-600"
+    }
   ];
 
   const whyFoodVisionPoints = [
@@ -125,42 +127,80 @@ const FAQ = () => {
           </div>
         </section>
 
-        {/* New Process Section */}
-        <section ref={processRef} className="py-20">
+        {/* How It Works Section - Interactive Process */}
+        <section ref={processContainerRef} className="py-32 overflow-hidden">
           <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto">
-              <div className="relative">
-                {/* The vertical line */}
-                <div className="absolute left-1/2 -translate-x-1/2 h-full w-0.5 bg-gradient-to-b from-secondary/20 via-primary/20 to-secondary/20" aria-hidden="true"></div>
-                
-                <div className="space-y-16">
-                  {newProcessSteps.map((item, index) => (
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={processIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+              transition={{ duration: 0.8 }}
+              className="text-center mb-20"
+            >
+              <h2 className="text-4xl md:text-5xl font-assistant font-bold text-primary mb-6">
+                איך זה עובד?
+              </h2>
+              <p className="text-xl text-muted-foreground font-open-sans max-w-2xl mx-auto">
+                3 שלבים פשוטים לתמונות מושלמות
+              </p>
+            </motion.div>
+
+            <div className="max-w-6xl mx-auto">
+              <div className="grid md:grid-cols-3 gap-8">
+                {processSteps.map((step, index) => {
+                  const yOffset = useTransform(
+                    scrollYProgress,
+                    [0, 0.5, 1],
+                    [100 * (index + 1), 0, -100 * (index + 1)]
+                  );
+                  
+                  return (
                     <motion.div
                       key={index}
-                      initial={{ opacity: 0, y: 50 }}
-                      animate={processIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+                      style={{ y: yOffset }}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={processIntersecting ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
                       transition={{ duration: 0.6, delay: index * 0.2 }}
-                      className="relative flex items-center"
+                      className="relative group"
                     >
-                      <div className="absolute left-1/2 -translate-x-1/2 z-10">
-                        <div className="bg-gradient-to-br from-secondary to-primary rounded-full w-24 h-24 flex items-center justify-center text-white ring-8 ring-background shadow-lg">
-                          {item.icon}
+                      {/* Step Number */}
+                      <div className="absolute -top-6 right-6 z-10">
+                        <div className="bg-primary text-white w-12 h-12 rounded-full flex items-center justify-center font-assistant font-bold text-lg shadow-lg">
+                          {step.step}
                         </div>
                       </div>
-                      <div className={`w-[calc(50%-3rem)] ${index % 2 === 0 ? 'pr-8 text-right' : 'pl-8 text-left'}`}></div>
-                      <div className={`w-[calc(50%+3rem)] p-6 rounded-2xl ${index % 2 === 0 ? 'pl-32' : 'pr-32 text-right'}`}>
-                        <div className="bg-card p-6 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-border">
-                          <h3 className="text-2xl font-assistant font-bold text-primary mb-3">
-                            {item.title}
+
+                      {/* Card */}
+                      <div className="bg-card rounded-3xl p-8 shadow-elegant hover:shadow-2xl transition-all duration-500 group-hover:scale-105 border border-border relative overflow-hidden">
+                        {/* Background Gradient */}
+                        <div className={`absolute inset-0 bg-gradient-to-br ${step.color} opacity-5 group-hover:opacity-10 transition-opacity duration-300`}></div>
+                        
+                        <div className="relative z-10 text-center">
+                          {/* Icon */}
+                          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-secondary/10 to-primary/10 rounded-2xl mb-6 group-hover:from-secondary/20 group-hover:to-primary/20 transition-all duration-300">
+                            <div className="text-primary group-hover:scale-110 transition-transform duration-300">
+                              {step.icon}
+                            </div>
+                          </div>
+                          
+                          {/* Title */}
+                          <h3 className="text-2xl font-assistant font-bold text-primary mb-4 group-hover:text-secondary transition-colors duration-300">
+                            {step.title}
                           </h3>
+                          
+                          {/* Description */}
                           <p className="text-muted-foreground font-open-sans leading-relaxed">
-                            {item.description}
+                            {step.description}
                           </p>
                         </div>
+
+                        {/* Connecting Line */}
+                        {index < processSteps.length - 1 && (
+                          <div className="absolute top-1/2 -left-4 w-8 h-0.5 bg-gradient-to-l from-primary/30 to-transparent hidden md:block"></div>
+                        )}
                       </div>
                     </motion.div>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -203,97 +243,6 @@ const FAQ = () => {
                   </p>
                 </motion.div>
               ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Benefits Section - Comparison */}
-        <section ref={benefitsRef} className="py-20">
-          <div className="container mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              animate={benefitsIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-              transition={{ duration: 0.8 }}
-              className="text-center mb-16"
-            >
-              <h2 className="text-4xl md:text-5xl font-assistant font-bold text-primary mb-4">
-                השוואה: צילום מסורתי מול FoodVision
-              </h2>
-              <p className="text-xl text-muted-foreground font-open-sans max-w-2xl mx-auto">
-                המספרים שמראים למה הטכנולוגיה שלנו משנה את המשחק
-              </p>
-            </motion.div>
-            <div className="max-w-6xl mx-auto">
-              <div className="grid md:grid-cols-2 gap-12">
-                <motion.div
-                  initial={{ opacity: 0, x: -30 }}
-                  animate={benefitsIntersecting ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
-                  transition={{ duration: 0.6 }}
-                  className="bg-card rounded-2xl p-8 shadow-elegant border-2 border-muted/20"
-                >
-                  <h3 className="text-2xl font-assistant font-bold text-muted-foreground mb-6 text-center">
-                    📷 צילום מסורתי
-                  </h3>
-                  <ul className="space-y-4">
-                    {[
-                      'עלות: 3,000-8,000 ₪ ליום',
-                      'זמן: 1-2 שבועות (תיאום + צילום + עריכה)',
-                      'הכנה: הכנת מנות מושלמות',
-                      'ציוד: השכרת סטודיו וציוד', 
-                      'מגבלות: תלוי בזמינות צלם',
-                      'תיקונים: עלות נוספת',
-                      'גמישות: קשה לשנות לאחר הצילום'
-                    ].map((item, i) => (
-                      <li key={i} className="flex items-center text-muted-foreground font-open-sans">
-                        <span className="w-2 h-2 bg-muted-foreground rounded-full mr-3 flex-shrink-0"></span>
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, x: 30 }}
-                  animate={benefitsIntersecting ? { opacity: 1, x: 0 } : { opacity: 0, x: 30 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                  className="bg-gradient-to-br from-secondary/5 to-primary/5 rounded-2xl p-8 shadow-elegant border-2 border-secondary"
-                >
-                  <h3 className="text-2xl font-assistant font-bold text-primary mb-6 text-center">
-                    🚀 FoodVision
-                  </h3>
-                  <ul className="space-y-4">
-                    {[
-                      'עלות: החל מ-99 ₪ (חיסכון של 80%)',
-                      'זמן: 48-72 שעות בלבד',
-                      'הכנה: תמונות בסיסיות (אפילו מהטלפון)',
-                      'ציוד: לא צריך כלום',
-                      'מגבלות: זמינות מיידית',
-                      'תיקונים: 3 סיבובים חינם',
-                      'גמישות: קל לעדכן ולשנות'
-                    ].map((item, i) => (
-                      <li key={i} className="flex items-center text-foreground font-open-sans">
-                        <span className="w-2 h-2 bg-secondary rounded-full mr-3 flex-shrink-0"></span>
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </motion.div>
-              </div>
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={benefitsIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                className="mt-12 text-center"
-              >
-                <div className="bg-gradient-to-r from-secondary/10 to-primary/10 rounded-2xl p-8">
-                  <h3 className="text-2xl font-assistant font-bold text-foreground mb-4">
-                    💡 התוצאה
-                  </h3>
-                  <p className="text-lg font-open-sans text-muted-foreground max-w-3xl mx-auto">
-                    <strong>80% חיסכון בעלויות</strong>, <strong>90% חיסכון בזמן</strong>, ותמונות שנראות טוב יותר ממנות אמיתיות. 
-                    הלקוחות שלנו מדווחים על <strong>עלייה של 40% בהזמנות</strong> אחרי החלפת התמונות.
-                  </p>
-                </div>
-              </motion.div>
             </div>
           </div>
         </section>
