@@ -81,12 +81,66 @@ class PortfolioStore {
           manualOrderByCategory: {}
         };
       } else {
-        this.config = {
-          items: projects ? projects.map(convertFromSupabase) : [],
-          initialized: true,
-          updatedAt: new Date().toISOString(),
-          manualOrderByCategory: {}
-        };
+        // If empty DB, seed from mock data (admin will be able to edit later)
+        if (!projects || projects.length === 0) {
+          try {
+            const mapped = fullPortfolioData.map((p) => ({
+              id: Number(p.id),
+              business_name: p.businessName,
+              business_type: p.businessType,
+              service_type: p.serviceType,
+              image_after: p.imageAfter,
+              image_before: p.imageBefore,
+              size: p.size,
+              category: p.category,
+              pinned: p.pinned || false,
+              created_at: p.createdAt
+            }));
+            // Upsert by id to avoid duplicates if partially seeded
+            await (supabase as any)
+              .from('projects')
+              .upsert(mapped, { onConflict: 'id' });
+
+            // Re-fetch after seeding
+            const { data: seeded, error: refetchErr } = await supabase
+              .from('projects')
+              .select('*')
+              .order('pinned', { ascending: false })
+              .order('created_at', { ascending: false })
+              .order('id', { ascending: false });
+            if (!refetchErr) {
+              this.config = {
+                items: (seeded || []).map(convertFromSupabase),
+                initialized: true,
+                updatedAt: new Date().toISOString(),
+                manualOrderByCategory: {}
+              };
+            } else {
+              console.error('Error reloading projects after seed:', refetchErr);
+              this.config = {
+                items: fullPortfolioData,
+                initialized: true,
+                updatedAt: new Date().toISOString(),
+                manualOrderByCategory: {}
+              };
+            }
+          } catch (seedErr) {
+            console.error('Error seeding projects from mock:', seedErr);
+            this.config = {
+              items: fullPortfolioData,
+              initialized: true,
+              updatedAt: new Date().toISOString(),
+              manualOrderByCategory: {}
+            };
+          }
+        } else {
+          this.config = {
+            items: projects.map(convertFromSupabase),
+            initialized: true,
+            updatedAt: new Date().toISOString(),
+            manualOrderByCategory: {}
+          };
+        }
       }
       
       this.isLoaded = true;
