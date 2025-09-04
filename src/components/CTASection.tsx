@@ -47,19 +47,11 @@ const CTASection = () => {
             className="flex flex-col sm:flex-row gap-6 justify-center items-center"
           >
             <Button
+              asChild
               size="lg"
               className="bg-secondary hover:bg-secondary/90 text-white px-12 py-6 text-xl font-assistant font-bold shadow-warm hover:scale-105 transition-all duration-300"
             >
-              <MessageCircle className="w-6 h-6 ml-3" />
-              ראה איך המנות שלך ייראו
-            </Button>
-
-            <Button
-              variant="outline"
-              size="lg"
-              className="border-white/30 text-white hover:bg-white/10 px-8 py-6 text-lg font-assistant hover:scale-105 transition-all duration-300"
-            >
-              צפה בדוגמאות
+              <a href="/portfolio">צפה בדוגמאות</a>
             </Button>
           </motion.div>
 

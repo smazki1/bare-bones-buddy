@@ -55,7 +55,7 @@ const SectorsSection = () => {
 
         {/* Grid Layout for Cards */}
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-center">
             {enabledMarkets.map((market, index) => (
               <motion.div
                 key={market.id}
@@ -74,8 +74,8 @@ const SectorsSection = () => {
                     aria-label={`צפה בפורטפוליו של ${market.label}`}
                     className="block w-full h-full"
                   >
-                    <div className="bg-gradient-to-br from-primary/90 to-primary hover:from-primary hover:to-primary/95 rounded-2xl p-6 text-center transition-all duration-300 hover:scale-105 hover:shadow-warm shadow-elegant group-hover:shadow-xl min-h-[120px] flex items-center justify-center border border-primary/20">
-                      <h3 className="text-white font-assistant font-bold text-lg leading-relaxed">
+                    <div className="bg-gradient-to-br from-primary/90 to-primary hover:from-primary hover:to-primary/95 rounded-full px-6 py-3 text-center transition-all duration-300 hover:scale-105 hover:shadow-warm shadow-elegant group-hover:shadow-xl inline-flex items-center justify-center border border-primary/20 w-full">
+                      <h3 className="text-white font-assistant font-bold text-base leading-relaxed">
                         {market.label}
                       </h3>
                     </div>
