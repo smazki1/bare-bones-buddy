@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
@@ -8,7 +8,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { TrendingUp, PackageCheck, Upload, Eye, Download, Zap } from 'lucide-react';
+import { Camera, Sparkles, Shield, Zap, Flame, Phone, Palette, Users, Rocket, TrendingUp, PackageCheck, Upload, Eye, Download } from 'lucide-react';
+import { useRef } from 'react';
 
 const FAQ = () => {
   const { ref: faqRef, isIntersecting } = useIntersectionObserver({ threshold: 0.1 });
@@ -53,6 +54,12 @@ const FAQ = () => {
       answer: 'אנחנו עובדים עם הרבה סוכנויות שיווק! אתם יכולים להציג את השירות ללקוחות, לנהל את התהליך בשמם, ואנחנו נספק לכם תמחור מיוחד וכלים לניהול פרויקטים מרובים. יש לנו ממשק מיוחד לסוכנויות.'
     }
   ];
+
+  const processContainerRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: processContainerRef,
+    offset: ["start end", "end start"]
+  });
 
   const processSteps = [
     {
@@ -120,14 +127,14 @@ const FAQ = () => {
           </div>
         </section>
 
-        {/* How It Works Section - Simple Process */}
-        <section ref={processRef} className="py-20">
+        {/* How It Works Section - Interactive Process */}
+        <section ref={processContainerRef} className="relative py-32 overflow-hidden">
           <div className="container mx-auto px-4">
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               animate={processIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
               transition={{ duration: 0.8 }}
-              className="text-center mb-16"
+              className="text-center mb-20"
             >
               <h2 className="text-4xl md:text-5xl font-assistant font-bold text-primary mb-6">
                 איך זה עובד?
@@ -139,52 +146,61 @@ const FAQ = () => {
 
             <div className="max-w-6xl mx-auto">
               <div className="grid md:grid-cols-3 gap-8">
-                {processSteps.map((step, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={processIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                    transition={{ duration: 0.6, delay: index * 0.2 }}
-                    className="relative group"
-                  >
-                    {/* Step Number */}
-                    <div className="absolute -top-4 right-4 z-10">
-                      <div className="bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center font-assistant font-bold text-sm shadow-lg">
-                        {step.step}
-                      </div>
-                    </div>
-
-                    {/* Card */}
-                    <div className="bg-card rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-border relative overflow-hidden h-full">
-                      {/* Background Gradient */}
-                      <div className={`absolute inset-0 bg-gradient-to-br ${step.color} opacity-5 group-hover:opacity-10 transition-opacity duration-300`}></div>
-                      
-                      <div className="relative z-10 text-center h-full flex flex-col">
-                        {/* Icon */}
-                        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-secondary/10 to-primary/10 rounded-xl mb-4 mx-auto group-hover:from-secondary/20 group-hover:to-primary/20 transition-all duration-300">
-                          <div className="text-primary group-hover:scale-110 transition-transform duration-300">
-                            {step.icon}
-                          </div>
+                {processSteps.map((step, index) => {
+                  const yOffset = useTransform(
+                    scrollYProgress,
+                    [0, 0.5, 1],
+                    [40 * (index + 1), 0, -40 * (index + 1)]
+                  );
+                  
+                  return (
+                    <motion.div
+                      key={index}
+                      style={{ y: yOffset }}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={processIntersecting ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
+                      transition={{ duration: 0.6, delay: index * 0.2 }}
+                      className="relative group"
+                    >
+                      {/* Step Number */}
+                      <div className="absolute -top-6 right-6 z-10">
+                        <div className="bg-primary text-white w-12 h-12 rounded-full flex items-center justify-center font-assistant font-bold text-lg shadow-lg">
+                          {step.step}
                         </div>
-                        
-                        {/* Title */}
-                        <h3 className="text-xl font-assistant font-bold text-primary mb-3 group-hover:text-secondary transition-colors duration-300">
-                          {step.title}
-                        </h3>
-                        
-                        {/* Description */}
-                        <p className="text-muted-foreground font-open-sans leading-relaxed flex-grow">
-                          {step.description}
-                        </p>
                       </div>
 
-                      {/* Connecting Arrow */}
-                      {index < processSteps.length - 1 && (
-                        <div className="absolute top-1/2 -left-4 w-8 h-0.5 bg-gradient-to-l from-primary/30 to-transparent hidden lg:block"></div>
-                      )}
-                    </div>
-                  </motion.div>
-                ))}
+                      {/* Card */}
+                      <div className="bg-card rounded-3xl p-8 shadow-elegant hover:shadow-2xl transition-all duration-500 group-hover:scale-105 border border-border relative overflow-hidden">
+                        {/* Background Gradient */}
+                        <div className={`absolute inset-0 bg-gradient-to-br ${step.color} opacity-5 group-hover:opacity-10 transition-opacity duration-300`}></div>
+                        
+                        <div className="relative z-10 text-center">
+                          {/* Icon */}
+                          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-secondary/10 to-primary/10 rounded-2xl mb-6 group-hover:from-secondary/20 group-hover:to-primary/20 transition-all duration-300">
+                            <div className="text-primary group-hover:scale-110 transition-transform duration-300">
+                              {step.icon}
+                            </div>
+                          </div>
+                          
+                          {/* Title */}
+                          <h3 className="text-2xl font-assistant font-bold text-primary mb-4 group-hover:text-secondary transition-colors duration-300">
+                            {step.title}
+                          </h3>
+                          
+                          {/* Description */}
+                          <p className="text-muted-foreground font-open-sans leading-relaxed">
+                            {step.description}
+                          </p>
+                        </div>
+
+                        {/* Connecting Line */}
+                        {index < processSteps.length - 1 && (
+                          <div className="absolute top-1/2 -left-4 w-8 h-0.5 bg-gradient-to-l from-primary/30 to-transparent hidden md:block"></div>
+                        )}
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </div>
             </div>
           </div>
