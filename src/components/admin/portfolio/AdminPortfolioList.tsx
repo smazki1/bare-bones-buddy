@@ -10,6 +10,7 @@ import { Edit, Trash2, Search, Image, Eye, Copy, Pin } from 'lucide-react';
 import { Project } from '@/data/portfolioMock';
 import { categoryFilters } from '@/data/portfolioMock';
 import { portfolioStore } from '@/data/portfolioStore';
+// TODO: In a follow-up, route writes via Edge Function
 
 interface AdminPortfolioListProps {
   projects: Project[];

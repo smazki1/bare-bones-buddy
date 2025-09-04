@@ -9,6 +9,7 @@ import { ArrowRight, Plus, Upload, Download, RotateCcw, Image, BarChart3 } from 
 import AdminPortfolioEditor from '@/components/admin/portfolio/AdminPortfolioEditor';
 import AdminPortfolioList from '@/components/admin/portfolio/AdminPortfolioList';
 import { portfolioStore, PORTFOLIO_UPDATE_EVENT } from '@/data/portfolioStore';
+import { supabase, fetchProjects } from '@/lib/supabase';
 import { Project } from '@/data/portfolioMock';
 import { portfolioMockData } from '@/data/portfolioMock';
 import { useToast } from '@/hooks/use-toast';
@@ -60,49 +61,90 @@ const AdminPortfolioPage = () => {
   };
 
   const handleSaveProject = (projectData: Omit<Project, 'id'> | Project) => {
-    try {
-      if ('id' in projectData) {
-        // Update existing
-        portfolioStore.updateProject(projectData.id, projectData);
-        toast({
-          title: "הצלחה",
-          description: "הפרויקט עודכן בהצלחה"
+    const run = async () => {
+      try {
+        let adminToken = localStorage.getItem('aiMaster:adminToken') || '';
+        if (!adminToken) {
+          const entered = window.prompt('נא להזין ADMIN_TOKEN לניהול (יישמר בדפדפן שלך):');
+          if (!entered) {
+            toast({ title: 'בוטל', description: 'נדרש טוקן ניהול', variant: 'destructive' });
+            return;
+          }
+          adminToken = entered;
+          localStorage.setItem('aiMaster:adminToken', adminToken);
+        }
+
+        const action = 'id' in projectData ? 'update' : 'add';
+        const payload = 'id' in projectData ? projectData : projectData;
+        const { data, error } = await supabase.functions.invoke('portfolio-admin', {
+          body: { action, payload },
+          headers: { 'x-admin-token': adminToken }
         });
-      } else {
-        // Add new
-        portfolioStore.addProject(projectData);
-        toast({
-          title: "הצלחה",
-          description: "פרויקט חדש נוסף בהצלחה"
-        });
+        if (error || !data?.ok) throw error || new Error(data?.error || 'edge error');
+
+        // Refresh from Supabase to sync IDs/order
+        const remote = await fetchProjects();
+        const mapped: Project[] = remote.map(p => ({
+          id: p.id,
+          businessName: p.business_name,
+          businessType: p.business_type,
+          serviceType: p.service_type,
+          imageAfter: p.image_after,
+          imageBefore: p.image_before ?? undefined,
+          size: p.size,
+          category: p.category,
+          pinned: p.pinned,
+          createdAt: p.created_at,
+        }));
+        portfolioStore.setProjects(mapped);
+
+        toast({ title: 'הצלחה', description: action === 'add' ? 'פרויקט חדש נוסף' : 'הפרויקט עודכן' });
+        setIsEditorOpen(false);
+        setEditingProject(null);
+        setHasUnsavedChanges(true);
+      } catch (error) {
+        toast({ title: 'שגיאה', description: 'שגיאה בשמירת הפרויקט', variant: 'destructive' });
       }
-      setIsEditorOpen(false);
-      setEditingProject(null);
-      setHasUnsavedChanges(true);
-    } catch (error) {
-      toast({
-        title: "שגיאה",
-        description: "שגיאה בשמירת הפרויקט",
-        variant: "destructive"
-      });
-    }
+    };
+    void run();
   };
 
   const handleDeleteProject = (id: string | number) => {
-    try {
-      portfolioStore.deleteProject(id);
-      toast({
-        title: "הצלחה",
-        description: "הפרויקט נמחק בהצלחה"
-      });
-      setHasUnsavedChanges(true);
-    } catch (error) {
-      toast({
-        title: "שגיאה",
-        description: "שגיאה במחיקת הפרויקט",
-        variant: "destructive"
-      });
-    }
+    const run = async () => {
+      try {
+        let adminToken = localStorage.getItem('aiMaster:adminToken') || '';
+        if (!adminToken) {
+          const entered = window.prompt('נא להזין ADMIN_TOKEN לניהול (יישמר בדפדפן שלך):');
+          if (!entered) { toast({ title: 'בוטל', description: 'נדרש טוקן ניהול', variant: 'destructive' }); return; }
+          adminToken = entered; localStorage.setItem('aiMaster:adminToken', adminToken);
+        }
+        const { data, error } = await supabase.functions.invoke('portfolio-admin', {
+          body: { action: 'delete', payload: { id } },
+          headers: { 'x-admin-token': adminToken }
+        });
+        if (error || !data?.ok) throw error || new Error(data?.error || 'edge error');
+
+        const remote = await fetchProjects();
+        const mapped: Project[] = remote.map(p => ({
+          id: p.id,
+          businessName: p.business_name,
+          businessType: p.business_type,
+          serviceType: p.service_type,
+          imageAfter: p.image_after,
+          imageBefore: p.image_before ?? undefined,
+          size: p.size,
+          category: p.category,
+          pinned: p.pinned,
+          createdAt: p.created_at,
+        }));
+        portfolioStore.setProjects(mapped);
+        toast({ title: 'הצלחה', description: 'הפרויקט נמחק בהצלחה' });
+        setHasUnsavedChanges(true);
+      } catch (error) {
+        toast({ title: 'שגיאה', description: 'שגיאה במחיקת הפרויקט', variant: 'destructive' });
+      }
+    };
+    void run();
   };
 
   const handleDuplicateProject = (project: Project) => {

@@ -8,9 +8,9 @@ import FilterPills from '@/components/portfolio/FilterPills';
 import MasonryGrid from '@/components/portfolio/MasonryGrid';
 import PortfolioCTA from '@/components/portfolio/PortfolioCTA';
 import { useInfiniteScrollPortfolio } from '@/utils/useInfiniteScrollPortfolio';
-import { fetchProjectsFromSupabase } from '@/lib/supabase-projects';
-import { fullPortfolioData, Project } from '@/data/portfolioMock';
+import { Project } from '@/data/portfolioMock';
 import { portfolioStore, PORTFOLIO_UPDATE_EVENT } from '@/data/portfolioStore';
+import { fetchProjects } from '@/lib/supabase';
 
 const ITEMS_PER_PAGE = 12;
 const MAX_ITEMS_DISPLAY = 24;
@@ -27,24 +27,33 @@ const Portfolio = () => {
   useEffect(() => {
     const loadProjects = async () => {
       try {
-        // First try to fetch from Supabase
-        const supabaseProjects = await fetchProjectsFromSupabase();
-        if (supabaseProjects && supabaseProjects.length > 0) {
-          console.log('Using Supabase data:', supabaseProjects.length, 'projects');
-          setAllProjects(supabaseProjects);
+        const remote = await fetchProjects();
+        // Map DB to local Project shape for UI (keep fallback fields)
+        const mapped: Project[] = remote.map(p => ({
+          id: p.id,
+          businessName: p.business_name,
+          businessType: p.business_type,
+          serviceType: p.service_type,
+          imageAfter: p.image_after,
+          imageBefore: p.image_before ?? undefined,
+          size: p.size,
+          category: p.category,
+          pinned: p.pinned,
+          createdAt: p.created_at,
+        }));
+        if (mapped.length > 0) {
+          setAllProjects(mapped);
           return;
         }
-      } catch (error) {
-        console.warn('Failed to fetch from Supabase, using local store:', error);
+      } catch (_) {
+        // ignore and fallback to local store
       }
-      
-      // Fallback to local store
       const storedProjects = portfolioStore.getProjects();
       console.log('Using local store data:', storedProjects.length, 'projects');
       setAllProjects(storedProjects);
     };
 
-    loadProjects();
+    void loadProjects();
 
     // Listen for real-time updates from admin
     const handleUpdate = () => {
