@@ -40,19 +40,35 @@ serve(async (req) => {
     let result;
 
     switch (action) {
-      case 'add':
+      case 'add': {
+        // Allow optional explicit id and created_at. If not provided, compute next id.
+        let idToUse = payload.id;
+        if (!idToUse) {
+          const { data: maxRow } = await supabase
+            .from('projects')
+            .select('id')
+            .order('id', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          idToUse = (maxRow?.id || 0) + 1;
+        }
+
+        const insertPayload: any = {
+          id: idToUse,
+          business_name: payload.business_name,
+          business_type: payload.business_type,
+          service_type: payload.service_type,
+          image_after: payload.image_after,
+          image_before: payload.image_before || null,
+          size: payload.size,
+          category: payload.category,
+          pinned: payload.pinned || false,
+        };
+        if (payload.created_at) insertPayload.created_at = payload.created_at;
+
         const { data: insertData, error: insertError } = await supabase
           .from('projects')
-          .insert({
-            business_name: payload.business_name,
-            business_type: payload.business_type,
-            service_type: payload.service_type,
-            image_after: payload.image_after,
-            image_before: payload.image_before || null,
-            size: payload.size,
-            category: payload.category,
-            pinned: payload.pinned || false
-          })
+          .insert(insertPayload)
           .select()
           .single();
 
@@ -69,6 +85,7 @@ serve(async (req) => {
 
         result = { ok: true, data: insertData };
         break;
+      }
 
       case 'update':
         if (!payload.id) {

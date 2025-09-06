@@ -126,8 +126,8 @@ const AdminPortfolioPage = () => {
       setEditingProject(null);
       setHasUnsavedChanges(true);
       loadData(); // Refresh data
-    } catch (error) {
-      toast({ title: 'שגיאה', description: 'שגיאה בשמירת הפרויקט', variant: 'destructive' });
+    } catch (error: any) {
+      toast({ title: 'שגיאה', description: error?.message || 'שגיאה בשמירת הפרויקט', variant: 'destructive' });
     }
   };
 

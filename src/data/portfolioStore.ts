@@ -1,5 +1,6 @@
 import { Project, categoryFilters, fullPortfolioData } from './portfolioMock';
 import { supabase } from '@/integrations/supabase/client';
+import { callPortfolioAdmin } from '@/lib/supabase-projects';
 
 // Event for real-time updates between admin and frontend
 export const PORTFOLIO_UPDATE_EVENT = 'portfolioConfigUpdate';
@@ -116,9 +117,9 @@ class PortfolioStore {
     }
   }
 
-  private async saveProjectToSupabase(project: Project): Promise<boolean> {
+  private async saveProjectToSupabase(project: Project, mode: 'add' | 'update'): Promise<boolean> {
     try {
-      // Upsert handles both insert and update paths
+      // First try direct DB write (works when admin session passes RLS)
       const supabaseProject = convertToSupabaseInsert(project);
       const { data, error } = await (supabase as any)
         .from('projects')
@@ -126,14 +127,41 @@ class PortfolioStore {
         .select()
         .single();
 
-      if (error) {
-        console.error('Error upserting project in Supabase:', error);
-        return false;
+      if (!error) {
+        if (data?.id) project.id = data.id.toString();
+        return true;
       }
 
-      if (data?.id) {
-        project.id = data.id.toString();
-      }
+      console.warn('Direct upsert failed, attempting Edge Function fallback:', error?.message || error);
+
+      // Fallback via Edge Function (service role) – requires ADMIN_TOKEN in storage
+      const payload = mode === 'add'
+        ? {
+            id: Number(project.id),
+            business_name: project.businessName,
+            business_type: project.businessType,
+            service_type: project.serviceType,
+            image_after: project.imageAfter,
+            image_before: project.imageBefore || null,
+            size: project.size,
+            category: project.category,
+            pinned: project.pinned || false,
+            created_at: project.createdAt,
+          }
+        : {
+            id: Number(project.id),
+            business_name: project.businessName,
+            business_type: project.businessType,
+            service_type: project.serviceType,
+            image_after: project.imageAfter,
+            image_before: project.imageBefore || null,
+            size: project.size,
+            category: project.category,
+            pinned: project.pinned || false,
+          };
+
+      const res = await callPortfolioAdmin(mode, payload);
+      if (res?.id) project.id = res.id.toString();
       return true;
     } catch (error) {
       console.error('Error saving project to Supabase:', error);
@@ -148,11 +176,10 @@ class PortfolioStore {
         .delete()
         .eq('id', Number(id));
       
-      if (error) {
-        console.error('Error deleting project from Supabase:', error);
-        return false;
-      }
-      
+      if (!error) return true;
+
+      console.warn('Direct delete failed, attempting Edge Function fallback:', (error as any)?.message || error);
+      await callPortfolioAdmin('delete', { id: Number(id) });
       return true;
     } catch (error) {
       console.error('Error deleting project from Supabase:', error);
@@ -225,13 +252,14 @@ class PortfolioStore {
       id: String(nextId)
     };
 
-    const success = await this.saveProjectToSupabase(newProject);
+    const success = await this.saveProjectToSupabase(newProject, 'add');
     if (success) {
       this.config.items.unshift(newProject); // Add to beginning
       this.dispatchUpdateEvent();
+      return newProject;
     }
-    
-    return newProject;
+
+    throw new Error('Failed to save project. Check admin permissions or ADMIN_TOKEN.');
   }
 
   async updateProject(id: string | number, updates: Partial<Project>): Promise<boolean> {
@@ -248,7 +276,7 @@ class PortfolioStore {
       id: this.config.items[index].id // Preserve original ID
     };
     
-    const success = await this.saveProjectToSupabase(updatedProject);
+    const success = await this.saveProjectToSupabase(updatedProject, 'update');
     if (success) {
       this.config.items[index] = updatedProject;
       this.dispatchUpdateEvent();
