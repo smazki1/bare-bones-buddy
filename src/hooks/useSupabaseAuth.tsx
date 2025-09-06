@@ -17,8 +17,14 @@ export const useSupabaseAuth = () => {
         
         // Check admin status when session changes
         if (session?.user) {
-          setTimeout(() => {
-            checkAdminStatus(session.user.id);
+          setTimeout(async () => {
+            await checkAdminStatus(session.user.id);
+            // Link admin account by calling function
+            try {
+              await supabase.rpc('link_admin_user');
+            } catch (e) {
+              console.warn('Admin linking failed:', e);
+            }
           }, 0);
         } else {
           setIsAdmin(false);

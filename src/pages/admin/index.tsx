@@ -194,6 +194,9 @@ const AdminDashboard = ({ onLogout, userEmail }: { onLogout: () => void; userEma
         {userEmail === 'admin@food-vision.co.il' && (
           <AdminUserManager currentUserEmail={userEmail} />
         )}
+
+        {/* Admin Token Settings for Edge Functions */}
+        <AdminSettings />
       </div>
     </div>
   );
