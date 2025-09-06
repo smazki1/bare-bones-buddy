@@ -80,29 +80,37 @@ const AdminVisualSolutionsEditor = ({
   };
 
   const handleDrop = async (e: React.DragEvent, type: 'image' | 'video') => {
+    console.log('handleDrop called with type:', type);
     e.preventDefault();
     setDragActive(false);
     
     const files = Array.from(e.dataTransfer.files);
-    if (files.length === 0) return;
+    console.log('Files dropped:', files.length, files.map(f => f.name));
+    if (files.length === 0) {
+      console.log('No files in drop');
+      return;
+    }
     
     const file = files[0];
+    console.log('Processing dropped file:', file.name, file.type, file.size);
     setIsUploading(true);
     
     try {
       if (type === 'image') {
         if (!isValidImageFile(file)) {
-          console.log('Invalid image file dropped');
+          console.log('Invalid image file dropped:', file.name, file.type);
           return;
         }
+        console.log('Converting dropped image to data URL');
         const dataUrl = await convertFileToDataUrl(file);
         setFormData(prev => ({ ...prev, imageSrc: dataUrl }));
         console.log('Image replaced via drag & drop');
       } else {
         if (!isValidVideoFile(file)) {
-          console.log('Invalid video file dropped');
+          console.log('Invalid video file dropped:', file.name, file.type);
           return;
         }
+        console.log('Converting dropped video to data URL');
         const dataUrl = await convertFileToDataUrl(file);
         setFormData(prev => ({ ...prev, videoSrc: dataUrl }));
         console.log('Video replaced via drag & drop');
@@ -111,25 +119,37 @@ const AdminVisualSolutionsEditor = ({
       console.error('Error processing dropped file:', error);
     } finally {
       setIsUploading(false);
+      console.log('Drag & drop process completed');
     }
   };
 
   const handleImageFileSelect = async (file: File | null) => {
-    if (!file) return;
+    console.log('handleImageFileSelect called with:', file?.name);
+    if (!file) {
+      console.log('No file provided');
+      return;
+    }
     if (!isValidImageFile(file)) {
-      console.log('Invalid image file selected');
+      console.log('Invalid image file selected:', file.name, file.type);
       return;
     }
     
+    console.log('Starting image upload process for:', file.name);
     setIsUploading(true);
     try {
       const dataUrl = await convertFileToDataUrl(file);
-      setFormData(prev => ({ ...prev, imageSrc: dataUrl }));
+      console.log('Image converted to data URL, length:', dataUrl.length);
+      setFormData(prev => {
+        const newData = { ...prev, imageSrc: dataUrl };
+        console.log('FormData updated with new image');
+        return newData;
+      });
       console.log('Image updated successfully');
     } catch (error) {
       console.error('Error uploading image:', error);
     } finally {
       setIsUploading(false);
+      console.log('Upload process completed');
     }
   };
 
@@ -244,7 +264,15 @@ const AdminVisualSolutionsEditor = ({
                   onDrop={(e) => handleDrop(e, 'image')}
                   onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
                   onDragLeave={() => setDragActive(false)}
-                  onClick={() => !isUploading && imageInputRef.current?.click()}
+                  onClick={() => {
+                    console.log('Image upload area clicked');
+                    if (!isUploading) {
+                      console.log('Opening file picker');
+                      imageInputRef.current?.click();
+                    } else {
+                      console.log('Upload in progress, click ignored');
+                    }
+                  }}
                 >
                   {isUploading ? (
                     <div className="space-y-2">
@@ -288,7 +316,10 @@ const AdminVisualSolutionsEditor = ({
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={(e) => handleImageFileSelect(e.target.files?.[0] || null)}
+                  onChange={(e) => {
+                    console.log('Input onChange triggered', e.target.files?.[0]?.name);
+                    handleImageFileSelect(e.target.files?.[0] || null);
+                  }}
                 />
                 <Input
                   value={formData.imageSrc || ''}
