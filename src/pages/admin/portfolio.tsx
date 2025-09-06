@@ -107,7 +107,10 @@ const AdminPortfolioPage = () => {
 
   const handleSaveProject = async (projectData: Omit<Project, 'id'> | Project) => {
     try {
+      console.log('Saving project:', projectData);
+      
       if ('id' in projectData) {
+        console.log('Updating existing project:', projectData.id);
         await portfolioStore.updateProject(projectData.id, {
           businessName: projectData.businessName,
           businessType: projectData.businessType,
@@ -119,6 +122,7 @@ const AdminPortfolioPage = () => {
           pinned: projectData.pinned,
         });
       } else {
+        console.log('Adding new project');
         await portfolioStore.addProject(projectData);
       }
       toast({ title: 'הצלחה', description: 'הפרויקט נשמר' });
@@ -127,6 +131,7 @@ const AdminPortfolioPage = () => {
       setHasUnsavedChanges(true);
       loadData(); // Refresh data
     } catch (error: any) {
+      console.error('Error saving project:', error);
       toast({ title: 'שגיאה', description: error?.message || 'שגיאה בשמירת הפרויקט', variant: 'destructive' });
     }
   };

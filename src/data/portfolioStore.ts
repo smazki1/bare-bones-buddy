@@ -119,8 +119,12 @@ class PortfolioStore {
 
   private async saveProjectToSupabase(project: Project, mode: 'add' | 'update'): Promise<boolean> {
     try {
+      console.log('Attempting to save project to Supabase:', { mode, projectId: project.id, businessName: project.businessName });
+      
       // First try direct DB write (works when admin session passes RLS)
       const supabaseProject = convertToSupabaseInsert(project);
+      console.log('Supabase project data:', supabaseProject);
+      
       const { data, error } = await (supabase as any)
         .from('projects')
         .upsert(supabaseProject, { onConflict: 'id' })
@@ -128,11 +132,13 @@ class PortfolioStore {
         .single();
 
       if (!error) {
+        console.log('Direct upsert successful:', data);
         if (data?.id) project.id = data.id.toString();
         return true;
       }
 
-      console.warn('Direct upsert failed, attempting Edge Function fallback:', error?.message || error);
+      console.error('Direct upsert failed:', error);
+      console.warn('Attempting Edge Function fallback...');
 
       // Fallback via Edge Function (service role) – requires ADMIN_TOKEN in storage
       const payload = mode === 'add'
