@@ -268,7 +268,11 @@ const AdminVisualSolutionsEditor = ({
                     console.log('Image upload area clicked');
                     if (!isUploading) {
                       console.log('Opening file picker');
-                      imageInputRef.current?.click();
+                      if (imageInputRef.current) {
+                        // Allow selecting the same file again by resetting the value
+                        imageInputRef.current.value = '';
+                        imageInputRef.current.click();
+                      }
                     } else {
                       console.log('Upload in progress, click ignored');
                     }
@@ -319,6 +323,8 @@ const AdminVisualSolutionsEditor = ({
                   onChange={(e) => {
                     console.log('Input onChange triggered', e.target.files?.[0]?.name);
                     handleImageFileSelect(e.target.files?.[0] || null);
+                    // Reset to allow selecting the same file again
+                    e.currentTarget.value = '';
                   }}
                 />
                 <Input
@@ -340,7 +346,13 @@ const AdminVisualSolutionsEditor = ({
                   onDrop={(e) => handleDrop(e, 'video')}
                   onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
                   onDragLeave={() => setDragActive(false)}
-                  onClick={() => !isUploading && videoInputRef.current?.click()}
+                  onClick={() => {
+                    if (!isUploading && videoInputRef.current) {
+                      // Allow selecting the same file again by resetting the value
+                      videoInputRef.current.value = '';
+                      videoInputRef.current.click();
+                    }
+                  }}
                 >
                   {isUploading ? (
                     <div className="space-y-2">
@@ -384,7 +396,12 @@ const AdminVisualSolutionsEditor = ({
                   type="file"
                   accept="video/*"
                   className="hidden"
-                  onChange={(e) => handleVideoFileSelect(e.target.files?.[0] || null)}
+                  onChange={(e) => {
+                    console.log('Video input onChange triggered', e.target.files?.[0]?.name);
+                    handleVideoFileSelect(e.target.files?.[0] || null);
+                    // Reset to allow selecting the same file again
+                    e.currentTarget.value = '';
+                  }}
                 />
                 <Input
                   value={formData.videoSrc || ''}
