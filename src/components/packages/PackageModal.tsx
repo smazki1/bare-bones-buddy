@@ -220,12 +220,7 @@ const PackageModal = ({ package: pkg, onClose }: PackageModalProps) => {
                   </div>
                 )}
 
-                {/* Debug info (remove in production) */}
-                {process.env.NODE_ENV === 'development' && (
-                  <div className="bg-gray-100 p-4 rounded-lg text-sm">
-                    <p>Debug: {pinnedProjects.length} pinned projects found</p>
-                  </div>
-                )}
+                {/* Debug info removed per user request */}
 
                 {/* CTA */}
                 <motion.div
