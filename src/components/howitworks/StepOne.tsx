@@ -49,7 +49,7 @@ const FanCard: React.FC<{ idx: number; total: number; label: string; url?: strin
       animate={{ scale: 1, opacity: 1, rotate: angle, y: 0, transition: { type: "spring", stiffness: 160, damping: 20, delay: idx * 0.08 } }}
       whileHover={{ y: -10, scale: 1.05, transition: { type: "spring", stiffness: 300, damping: 16 } }}
     >
-      <img src={src} alt={label} className="w-full h-full object-cover" />
+      <img src={src} alt={label} className="w-full h-full object-cover" draggable={false} style={{ imageRendering: 'auto' }} />
       <div className="absolute top-1 right-1 text-white text-[10px] px-1.5 py-0.5 rounded" style={{ backgroundColor: COLORS.secondary }}>
         {label}
       </div>
@@ -78,7 +78,7 @@ const StepOne: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 md:gap-16 lg:gap-24 items-start">
           {/* Images (LEFT on desktop, SECOND on mobile) */}
           <div className="order-2 md:order-1 flex items-center justify-center py-10 md:py-0">
-            <div className="relative" style={{ width: 720, height: 480, maxWidth: "90vw", maxHeight: "70vh" }}>
+            <div className="relative" style={{ width: 640, height: 420, maxWidth: "90vw", maxHeight: "70vh" }}>
               {images.map((img, i) => (
                 <FanCard key={i} idx={i} total={images.length} label={img.label} url={img.url} />
               ))}
