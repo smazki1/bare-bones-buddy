@@ -95,7 +95,7 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.4 }}
           >
-            מה שלקח <strong className="text-secondary text-2xl md:text-3xl lg:text-4xl">שבועות</strong> עם צלם — אצלנו מוכן <strong className="text-secondary text-2xl md:text-3xl lg:text-4xl">תוך ימים</strong>, וב־<strong className="text-secondary text-2xl md:text-3xl lg:text-4xl">90% פחות כסף</strong>
+            מה שלקח <strong>שבועות</strong> עם צלם — אצלנו מוכן <strong>תוך ימים</strong>, וב־<strong className="text-secondary text-2xl md:text-3xl lg:text-4xl">90% פחות כסף</strong>
           </motion.p>
 
           <motion.div
