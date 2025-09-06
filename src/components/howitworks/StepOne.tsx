@@ -43,7 +43,7 @@ const FanCard: React.FC<{ idx: number; total: number; label: string; url?: strin
   const src = url || DEMO_IMG;
   return (
     <motion.div
-      className="absolute w-28 h-40 md:w-32 md:h-48 rounded-lg overflow-hidden shadow-2xl border-4"
+      className="absolute w-32 h-48 md:w-40 md:h-56 rounded-lg overflow-hidden shadow-2xl border-4"
       style={{ originX: "50%", originY: "150%", backgroundColor: COLORS.card, borderColor: COLORS.card }}
       initial={{ scale: 0.5, opacity: 0, rotate: angle, y: 140 }}
       animate={{ scale: 1, opacity: 1, rotate: angle, y: 0, transition: { type: "spring", stiffness: 160, damping: 20, delay: idx * 0.08 } }}
@@ -78,7 +78,7 @@ const StepOne: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 md:gap-16 lg:gap-24 items-start">
           {/* Images (LEFT on desktop, SECOND on mobile) */}
           <div className="order-2 md:order-1 flex items-center justify-center py-10 md:py-0">
-            <div className="relative" style={{ width: 640, height: 420, maxWidth: "90vw", maxHeight: "70vh" }}>
+            <div className="relative" style={{ width: 720, height: 480, maxWidth: "90vw", maxHeight: "70vh" }}>
               {images.map((img, i) => (
                 <FanCard key={i} idx={i} total={images.length} label={img.label} url={img.url} />
               ))}
