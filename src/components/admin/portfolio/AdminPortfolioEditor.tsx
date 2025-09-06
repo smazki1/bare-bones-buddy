@@ -263,13 +263,13 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject }: Admin
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="businessName" className="text-sm font-assistant font-medium">
-                שם העסק <span className="text-destructive">*</span>
+                שם המנה/המוצר <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="businessName"
                 value={formData.businessName}
                 onChange={(e) => setFormData(prev => ({ ...prev, businessName: e.target.value }))}
-                placeholder="למשל: מסעדת הזית הזהב"
+                placeholder="למשל: המבורגר הבית / לחם מחמצת שומשום"
                 className="text-right"
                 dir="rtl"
               />

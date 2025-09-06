@@ -301,7 +301,7 @@ const AdminPortfolioPage = () => {
               ניהול קטלוג הפרויקטים
             </h1>
             <p className="text-muted-foreground font-open-sans">
-              העלאה ועריכה של פרויקטים עם תמונות לפני ואחרי
+              העלאה ועריכה של פרויקטים עם תמונות לפני ואחרי — לפי שם המנה/המוצר
             </p>
           </div>
           {hasUnsavedChanges && (
