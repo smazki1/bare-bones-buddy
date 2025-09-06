@@ -34,11 +34,18 @@ const Portfolio = () => {
       }
     };
 
+    // Load initially
     loadProjects();
 
-    // Listen for real-time updates from admin
-    const handleUpdate = () => {
-      loadProjects();
+    // Listen for real-time updates from admin - now just sync local state
+    const handleUpdate = async () => {
+      try {
+        // Get updated projects from store (already updated by realtime)
+        const updatedProjects = await portfolioStore.getProjects();
+        setAllProjects(updatedProjects);
+      } catch (error) {
+        console.error('Error syncing projects:', error);
+      }
     };
 
     window.addEventListener(PORTFOLIO_UPDATE_EVENT, handleUpdate);

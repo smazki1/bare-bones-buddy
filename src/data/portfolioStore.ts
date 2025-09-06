@@ -55,9 +55,11 @@ const convertToSupabaseInsert = (project: Project) => ({
 class PortfolioStore {
   private config: PortfolioConfig = { items: [], initialized: false };
   private isLoaded = false;
+  private realtimeChannel: any = null;
 
   constructor() {
     this.loadConfig();
+    this.setupRealtimeSubscription();
   }
 
   private async loadConfig(): Promise<void> {
@@ -198,6 +200,69 @@ class PortfolioStore {
     }
   }
 
+  private setupRealtimeSubscription(): void {
+    // Setup Supabase realtime subscription for instant updates
+    this.realtimeChannel = supabase
+      .channel('portfolio-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'projects'
+        },
+        (payload) => {
+          console.log('Realtime update received:', payload.eventType);
+          this.handleRealtimeUpdate(payload);
+        }
+      )
+      .subscribe();
+  }
+
+  private async handleRealtimeUpdate(payload: any): Promise<void> {
+    const { eventType, new: newRecord, old: oldRecord } = payload;
+    
+    try {
+      switch (eventType) {
+        case 'INSERT':
+          if (newRecord) {
+            const newProject = convertFromSupabase(newRecord);
+            // Add to beginning of list if not already exists
+            const exists = this.config.items.some(p => p.id === newProject.id);
+            if (!exists) {
+              this.config.items.unshift(newProject);
+              this.dispatchUpdateEvent();
+            }
+          }
+          break;
+          
+        case 'UPDATE':
+          if (newRecord) {
+            const updatedProject = convertFromSupabase(newRecord);
+            const index = this.config.items.findIndex(p => p.id === updatedProject.id);
+            if (index !== -1) {
+              this.config.items[index] = updatedProject;
+              this.dispatchUpdateEvent();
+            }
+          }
+          break;
+          
+        case 'DELETE':
+          if (oldRecord) {
+            const deletedId = oldRecord.id.toString();
+            const initialLength = this.config.items.length;
+            this.config.items = this.config.items.filter(p => p.id !== deletedId);
+            if (this.config.items.length < initialLength) {
+              this.dispatchUpdateEvent();
+            }
+          }
+          break;
+      }
+    } catch (error) {
+      console.error('Error handling realtime update:', error);
+    }
+  }
+
   private dispatchUpdateEvent(): void {
     window.dispatchEvent(new CustomEvent(PORTFOLIO_UPDATE_EVENT));
   }
@@ -250,14 +315,26 @@ class PortfolioStore {
       ...project,
     };
 
-    const success = await this.saveProjectToSupabase(newProject, 'add');
-    if (success) {
-      this.config.items.unshift(newProject); // Add to beginning
-      this.dispatchUpdateEvent();
-      return newProject;
-    }
+    // Add to UI immediately for instant feedback (optimistic update)
+    this.config.items.unshift(newProject);
+    this.dispatchUpdateEvent();
 
-    throw new Error('Failed to save project. Check admin permissions or ADMIN_TOKEN.');
+    try {
+      const success = await this.saveProjectToSupabase(newProject, 'add');
+      if (!success) {
+        // Remove from UI if save failed
+        this.config.items = this.config.items.filter(p => p.id !== 'temp');
+        this.dispatchUpdateEvent();
+        throw new Error('Failed to save project. Check admin permissions or ADMIN_TOKEN.');
+      }
+      // Realtime will handle the final update with correct ID
+      return newProject;
+    } catch (error) {
+      // Remove from UI if save failed
+      this.config.items = this.config.items.filter(p => p.id !== 'temp');
+      this.dispatchUpdateEvent();
+      throw error;
+    }
   }
 
   async updateProject(id: string | number, updates: Partial<Project>): Promise<boolean> {
@@ -268,20 +345,33 @@ class PortfolioStore {
     const index = this.config.items.findIndex(p => p.id == id);
     if (index === -1) return false;
 
+    const originalProject = { ...this.config.items[index] };
     const updatedProject = { 
       ...this.config.items[index], 
       ...updates,
       id: this.config.items[index].id // Preserve original ID
     };
     
-    const success = await this.saveProjectToSupabase(updatedProject, 'update');
-    if (success) {
-      this.config.items[index] = updatedProject;
-      this.dispatchUpdateEvent();
+    // Apply optimistic update
+    this.config.items[index] = updatedProject;
+    this.dispatchUpdateEvent();
+
+    try {
+      const success = await this.saveProjectToSupabase(updatedProject, 'update');
+      if (!success) {
+        // Revert optimistic update if save failed
+        this.config.items[index] = originalProject;
+        this.dispatchUpdateEvent();
+        return false;
+      }
+      // Realtime will handle the final sync
       return true;
+    } catch (error) {
+      // Revert optimistic update if save failed
+      this.config.items[index] = originalProject;
+      this.dispatchUpdateEvent();
+      return false;
     }
-    
-    return false;
   }
 
   async deleteProject(id: string | number): Promise<boolean> {
