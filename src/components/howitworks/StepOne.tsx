@@ -37,46 +37,37 @@ const COLORS = {
   card: "#ffffff",
 };
 
-// --- New visual card for the "stacked" layout ---
+// --- New visual card for the "Vertical Stack" layout ---
 type StackedCardProps = { idx: number; label: string; url?: string };
 const StackedCard: React.FC<StackedCardProps> = ({ idx, label, url }) => {
-  const positions: { rotate: number; x: number; y: number }[] = [
-    { rotate: -8, x: -25, y: 10 },
-    { rotate: 5, x: 30, y: -25 },
-    { rotate: 10, x: -20, y: 30 },
-    { rotate: -4, x: 35, y: 40 },
+  // A clean, centered, vertically stacked layout (3 cards)
+  const positions: { y: number; scale: number; zIndex: number }[] = [
+    { y: 0, scale: 1.0, zIndex: 3 },
+    { y: 80, scale: 0.95, zIndex: 2 },
+    { y: 160, scale: 0.9, zIndex: 1 },
   ];
-  const { rotate, x, y } = positions[idx % positions.length];
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-  const posScale = isMobile ? 0.7 : 1; // keep images within the stage on mobile
+  const { y, scale, zIndex } = positions[idx];
   const src = url || DEMO_IMG;
 
   return (
     <motion.div
-      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-48 md:w-40 md:h-56 rounded-lg overflow-hidden shadow-2xl border-4"
-      style={{ backgroundColor: COLORS.card, borderColor: COLORS.card }}
-      initial={{ scale: 0, opacity: 0 }}
-      animate={{
-        scale: 1,
-        opacity: 1,
-        rotate,
-        x: x * posScale,
-        y: y * posScale,
-        transition: { type: "spring", stiffness: 120, damping: 20, delay: idx * 0.1 },
-      }}
-      whileHover={{ y: y * posScale - 10, scale: 1.08, rotate: 0, zIndex: 10, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)", transition: { type: "spring", stiffness: 200, damping: 15 } }}
+      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-56 md:w-48 md:h-64 rounded-lg overflow-hidden shadow-2xl border-4"
+      style={{ backgroundColor: COLORS.card, borderColor: COLORS.card, transformOrigin: 'center center' }}
+      initial={{ scale: 0.5, opacity: 0, y: 100 }}
+      animate={{ scale, opacity: 1, y, zIndex, transition: { type: 'spring', stiffness: 120, damping: 20, delay: idx * 0.1 } }}
+      whileHover={{ zIndex: 4, scale: 1.05, y: y - 10, boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', transition: { type: 'spring', stiffness: 300, damping: 20 } }}
     >
-      <img src={src} alt={label} className="w-full h-full object-contain bg-white" draggable={false} style={{ imageRendering: 'auto' }} />
+      <img src={src} alt={label} className="w-full h-full object-contain bg-white" />
     </motion.div>
   );
 };
 
 const StepOne: React.FC = () => {
+  // Use first 3 of the provided images for a clean vertical stack
   const images = [
     { label: "טלפון #1", url: normalizeGithubRaw("https://github.com/smazki1/images-stocks-/blob/c954d8e20f1323083129aef2032f662899812414/PHOTO-2025-05-22-22-13-52.jpg") },
     { label: "תוצאה #1", url: normalizeGithubRaw("https://github.com/smazki1/images-stocks-/blob/c954d8e20f1323083129aef2032f662899812414/PHOTO-2025-05-22-22-13-51.jpg") },
     { label: "תוצאה #2", url: normalizeGithubRaw("https://github.com/smazki1/images-stocks-/blob/c954d8e20f1323083129aef2032f662899812414/PHOTO-2025-05-22-22-13-51%202.jpg") },
-    { label: "תוצאה #3", url: normalizeGithubRaw("https://github.com/smazki1/images-stocks-/blob/c954d8e20f1323083129aef2032f662899812414/PHOTO-2025-05-22-22-13-50.jpg") },
   ];
 
   return (
@@ -89,10 +80,11 @@ const StepOne: React.FC = () => {
         </div>
 
         {/* 2-col layout: Mobile order = card first, images second */}
-        <div className="grid grid-cols-1 md:grid-cols-2 md:gap-16 lg:gap-24 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-2 md:gap-16 lg:gap-24 items-center">
           {/* Images (LEFT on desktop, SECOND on mobile) */}
-          <div className="order-2 md:order-1 flex items-center justify-center py-10 md:py-0 min-h-[420px] md:min-h-[500px]">
-            <div className="relative w-full h-full max-w-lg mx-auto">
+          {/* Increased min-height to accommodate the vertical stack */}
+          <div className="order-2 md:order-1 flex items-center justify-center py-10 md:py-0 min-h-[480px] md:min-h-[500px]">
+            <div className="relative w-full h-full max-w-xs md:max-w-sm mx-auto">
               {images.map((img, i) => (
                 <StackedCard key={i} idx={i} label={img.label} url={img.url} />
               ))}
