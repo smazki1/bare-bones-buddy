@@ -39,13 +39,13 @@ const COLORS = {
 
 // --- Visual card for the "fan" layout ---
 const FanCard: React.FC<{ idx: number; total: number; label: string; url?: string }> = ({ idx, total, label, url }) => {
-  const angle = (idx - (total - 1) / 2) * 10; // slightly tighter spread for better fit
+  const angle = (idx - (total - 1) / 2) * 12; // restore wider spread so rear images are visible
   const src = url || DEMO_IMG;
   return (
     <motion.div
-      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-48 md:w-40 md:h-56 rounded-lg overflow-hidden shadow-2xl border-4"
-      style={{ originX: "50%", originY: "50%", backgroundColor: COLORS.card, borderColor: COLORS.card }}
-      initial={{ scale: 0.5, opacity: 0, rotate: angle, y: 0 }}
+      className="absolute left-1/2 -translate-x-1/2 bottom-2 md:bottom-6 w-32 h-48 md:w-40 md:h-56 rounded-lg overflow-hidden shadow-2xl border-4"
+      style={{ originX: "50%", originY: "150%", backgroundColor: COLORS.card, borderColor: COLORS.card }}
+      initial={{ scale: 0.5, opacity: 0, rotate: angle, y: 20 }}
       animate={{ scale: 1, opacity: 1, rotate: angle, y: 0, transition: { type: "spring", stiffness: 160, damping: 20, delay: idx * 0.08 } }}
       whileHover={{ y: -10, scale: 1.05, transition: { type: "spring", stiffness: 300, damping: 16 } }}
     >
@@ -78,7 +78,7 @@ const StepOne: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 md:gap-16 lg:gap-24 items-start">
           {/* Images (LEFT on desktop, SECOND on mobile) */}
           <div className="order-2 md:order-1 flex items-center justify-center py-10 md:py-0">
-            <div className="relative w-[85vw] max-w-[360px] h-[240px] md:w-[640px] md:h-[420px]">
+            <div className="relative w-[85vw] max-w-[360px] h-[280px] md:w-[640px] md:h-[420px] mx-auto">
               {images.map((img, i) => (
                 <FanCard key={i} idx={i} total={images.length} label={img.label} url={img.url} />
               ))}
