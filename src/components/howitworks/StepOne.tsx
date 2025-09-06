@@ -43,9 +43,9 @@ const FanCard: React.FC<{ idx: number; total: number; label: string; url?: strin
   const src = url || DEMO_IMG;
   return (
     <motion.div
-      className="absolute w-32 h-48 md:w-40 md:h-56 rounded-lg overflow-hidden shadow-2xl border-4"
-      style={{ originX: "50%", originY: "150%", backgroundColor: COLORS.card, borderColor: COLORS.card }}
-      initial={{ scale: 0.5, opacity: 0, rotate: angle, y: 120 }}
+      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-48 md:w-40 md:h-56 rounded-lg overflow-hidden shadow-2xl border-4"
+      style={{ originX: "50%", originY: "50%", backgroundColor: COLORS.card, borderColor: COLORS.card }}
+      initial={{ scale: 0.5, opacity: 0, rotate: angle, y: 0 }}
       animate={{ scale: 1, opacity: 1, rotate: angle, y: 0, transition: { type: "spring", stiffness: 160, damping: 20, delay: idx * 0.08 } }}
       whileHover={{ y: -10, scale: 1.05, transition: { type: "spring", stiffness: 300, damping: 16 } }}
     >
