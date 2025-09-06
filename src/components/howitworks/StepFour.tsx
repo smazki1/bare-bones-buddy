@@ -20,16 +20,16 @@ const normalizeGithubRaw = (url: string) => {
 
 // Demo images (can be replaced later)
 const DEMO_FINAL_IMG = normalizeGithubRaw(
-  "https://github.com/smazki1/images-stocks-/blob/daa0d66d578d1a825ea235e7bb27f16cd8520764/29779897-3.jpg"
+  "https://github.com/smazki1/images-stocks-/blob/550dc93d54426ae879504ae38af795c3ac368ffd/29779915-2.jpg"
 );
 const DEMO_FINAL_IMG_2 = normalizeGithubRaw(
-  "https://github.com/smazki1/images-stocks-/blob/daa0d66d578d1a825ea235e7bb27f16cd8520764/29779915-2.jpg"
+  "https://github.com/smazki1/images-stocks-/blob/550dc93d54426ae879504ae38af795c3ac368ffd/26889960-2.jpg"
 );
 const DEMO_FINAL_IMG_3 = normalizeGithubRaw(
-  "https://github.com/smazki1/images-stocks-/blob/daa0d66d578d1a825ea235e7bb27f16cd8520764/29779857-3.jpg"
+  "https://github.com/smazki1/images-stocks-/blob/550dc93d54426ae879504ae38af795c3ac368ffd/29780131-2.jpg"
 );
 const DEMO_FINAL_IMG_4 = normalizeGithubRaw(
-  "https://github.com/smazki1/images-stocks-/blob/daa0d66d578d1a825ea235e7bb27f16cd8520764/26889960-2.jpg"
+  "https://github.com/smazki1/images-stocks-/blob/550dc93d54426ae879504ae38af795c3ac368ffd/29780125-1.jpg"
 );
 
 const COLORS = {
