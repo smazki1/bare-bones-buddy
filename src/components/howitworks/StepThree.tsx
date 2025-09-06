@@ -38,8 +38,8 @@ const StepThree: React.FC = () => {
       <div className="container mx-auto px-4">
         {/* 2-col layout: Mobile order = card first, icon second */}
         <div className="grid grid-cols-1 md:grid-cols-2 md:gap-16 lg:gap-24 items-start">
-          {/* Icon (LEFT on desktop, SECOND on mobile) */}
-          <div className="order-2 md:order-1 flex items-center justify-center py-10 md:py-0">
+          {/* Icon (LEFT on desktop, HIDDEN on mobile) */}
+          <div className="order-2 md:order-1 hidden md:flex items-center justify-center py-10 md:py-0">
             <div className="relative" style={{ width: 640, height: 420, maxWidth: "90vw", maxHeight: "70vh" }}>
               {/* Center the icon within the visual stage */}
               <div
