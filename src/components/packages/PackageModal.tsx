@@ -43,28 +43,46 @@ const PackageModal = ({ package: pkg, onClose }: PackageModalProps) => {
       try {
         const { portfolioStore } = await import('@/data/portfolioStore');
         const projects = await portfolioStore.getProjects();
-        console.log('All projects:', projects.length);
+        console.log('PackageModal: All projects loaded:', projects.length);
+        console.log('PackageModal: Sample project structure:', projects[0]);
         
         const pinned = projects.filter(p => p.pinned);
-        console.log('Pinned projects:', pinned.length, pinned);
+        console.log('PackageModal: Pinned projects found:', pinned.length);
+        console.log('PackageModal: Pinned projects details:', pinned.map(p => ({
+          id: p.id,
+          businessName: p.businessName,
+          imageAfter: p.imageAfter,
+          imageBefore: p.imageBefore,
+          pinned: p.pinned
+        })));
         
         const top3 = pinned.slice(0, 3);
         setPinnedProjects(top3);
-        console.log('Top 3 pinned:', top3);
+        console.log('PackageModal: Top 3 pinned selected:', top3.length);
         
         const imgs: string[] = [];
-        top3.forEach(p => {
-          if (p.imageAfter) {
+        top3.forEach((p, index) => {
+          console.log(`PackageModal: Processing project ${index + 1}:`, {
+            id: p.id,
+            imageAfter: p.imageAfter,
+            imageBefore: p.imageBefore
+          });
+          
+          if (p.imageAfter && p.imageAfter.trim() !== '') {
+            console.log(`PackageModal: Adding imageAfter for project ${p.id}:`, p.imageAfter);
             imgs.push(p.imageAfter);
-          } else if (p.imageBefore) {
+          } else if (p.imageBefore && p.imageBefore.trim() !== '') {
+            console.log(`PackageModal: Adding imageBefore for project ${p.id}:`, p.imageBefore);
             imgs.push(p.imageBefore);
+          } else {
+            console.warn(`PackageModal: No valid images found for project ${p.id}`);
           }
         });
         
-        console.log('Example images:', imgs);
+        console.log('PackageModal: Final example images array:', imgs);
         setExampleImages(imgs);
       } catch (error) {
-        console.error('Error loading pinned projects:', error);
+        console.error('PackageModal: Error loading pinned projects:', error);
         setExampleImages([]);
         setPinnedProjects([]);
       }
