@@ -116,10 +116,10 @@ const StepFour: React.FC = () => {
         {/* CTA Button - appears after images on all screen sizes */}
         <div className="text-center mt-8 md:mt-12">
           <a
-            href="#packages"
-            className="inline-block bg-secondary hover:bg-secondary/90 text-white px-8 py-3 rounded-xl font-assistant font-bold text-base md:text-lg transition-all duration-200 hover:scale-105 shadow-warm"
+            href="/services"
+            className="inline-block bg-secondary hover:bg-secondary/90 text-white px-10 py-4 rounded-xl font-assistant font-bold text-lg md:text-xl transition-all duration-200 hover:scale-105 shadow-warm"
           >
-            אני רוצה תמונות כאלו
+            אני רוצה תמונות כאלו לעסק שלי
           </a>
         </div>
       </div>
