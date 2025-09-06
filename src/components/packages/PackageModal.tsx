@@ -32,9 +32,17 @@ const PackageModal = ({ package: pkg, onClose }: PackageModalProps) => {
     window.open(url, '_blank');
   };
 
+  const handleImageToggle = (index: number) => {
+    setShowBefore(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
+
   // Pull first 3 pinned portfolio projects for examples
   const [exampleImages, setExampleImages] = useState<string[]>([]);
   const [pinnedProjects, setPinnedProjects] = useState<any[]>([]);
+  const [showBefore, setShowBefore] = useState<Record<number, boolean>>({});
   
   useEffect(() => {
     let removeListener: (() => void) | null = null;
@@ -60,30 +68,12 @@ const PackageModal = ({ package: pkg, onClose }: PackageModalProps) => {
         setPinnedProjects(top3);
         console.log('PackageModal: Top 3 pinned selected:', top3.length);
         
-        const imgs: string[] = [];
-        top3.forEach((p, index) => {
-          console.log(`PackageModal: Processing project ${index + 1}:`, {
-            id: p.id,
-            imageAfter: p.imageAfter,
-            imageBefore: p.imageBefore
-          });
-          
-          if (p.imageAfter && p.imageAfter.trim() !== '') {
-            console.log(`PackageModal: Adding imageAfter for project ${p.id}:`, p.imageAfter);
-            imgs.push(p.imageAfter);
-          } else if (p.imageBefore && p.imageBefore.trim() !== '') {
-            console.log(`PackageModal: Adding imageBefore for project ${p.id}:`, p.imageBefore);
-            imgs.push(p.imageBefore);
-          } else {
-            console.warn(`PackageModal: No valid images found for project ${p.id}`);
-          }
-        });
+        // Just store projects, we'll handle images in render
+        console.log('PackageModal: Projects ready for display:', top3.length);
         
-        console.log('PackageModal: Final example images array:', imgs);
-        setExampleImages(imgs);
+        // No need to set example images anymore
       } catch (error) {
         console.error('PackageModal: Error loading pinned projects:', error);
-        setExampleImages([]);
         setPinnedProjects([]);
       }
     };
@@ -179,35 +169,54 @@ const PackageModal = ({ package: pkg, onClose }: PackageModalProps) => {
                   </div>
                 </div>
 
-                {/* Example Results */}
-                {exampleImages.length > 0 && (
+                {/* Example Work */}
+                {pinnedProjects.length > 0 && (
                   <div>
-                    <h3 className="text-xl font-bold text-foreground mb-6">דוגמאות לתוצאות:</h3>
+                    <h3 className="text-xl font-bold text-foreground mb-6">דוגמאות לעבודות שלנו:</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {exampleImages.map((image, index) => (
-                        <motion.div
-                          key={index}
-                          className="aspect-[4/3] rounded-xl overflow-hidden bg-card border border-border/50 shadow-md"
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: 0.2 + index * 0.1 }}
-                        >
-                          <img
-                            src={image}
-                            alt={`דוגמה ${index + 1} לחבילת ${pkg.name}`}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                            loading="lazy"
-                            onError={(e) => {
-                              console.error('Failed to load image:', image);
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                        </motion.div>
-                      ))}
+                      {pinnedProjects.map((project, index) => {
+                        const currentImage = showBefore[index] && project.imageBefore 
+                          ? project.imageBefore 
+                          : project.imageAfter;
+                        
+                        return (
+                          <motion.div
+                            key={project.id}
+                            className="relative aspect-[4/3] rounded-xl overflow-hidden bg-card border border-border/50 shadow-md cursor-pointer group"
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.2 + index * 0.1 }}
+                            onClick={() => handleImageToggle(index)}
+                          >
+                            <img
+                              src={currentImage}
+                              alt={`${project.businessName} - ${showBefore[index] ? 'לפני' : 'אחרי'}`}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              loading="lazy"
+                              onError={(e) => {
+                                console.error('Failed to load image:', currentImage);
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                            
+                            {/* Before/After Badge */}
+                            {project.imageBefore && (
+                              <div className="absolute top-3 right-3 bg-background/90 text-foreground border rounded-full px-2 py-1 text-xs font-medium">
+                                {showBefore[index] ? 'לפני' : 'אחרי'}
+                              </div>
+                            )}
+                            
+                            {/* Project name overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                            <div className="absolute bottom-3 left-3 right-3 text-white">
+                              <p className="text-sm font-medium text-shadow-sm">
+                                {project.businessName}
+                              </p>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
                     </div>
-                    <p className="text-sm text-muted-foreground mt-2 text-center">
-                      {pinnedProjects.length} דוגמאות מתוך תיק העבודות שלנו
-                    </p>
                   </div>
                 )}
 
@@ -215,7 +224,6 @@ const PackageModal = ({ package: pkg, onClose }: PackageModalProps) => {
                 {process.env.NODE_ENV === 'development' && (
                   <div className="bg-gray-100 p-4 rounded-lg text-sm">
                     <p>Debug: {pinnedProjects.length} pinned projects found</p>
-                    <p>Debug: {exampleImages.length} example images loaded</p>
                   </div>
                 )}
 
