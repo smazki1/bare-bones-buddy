@@ -46,7 +46,7 @@ const SingleCard: React.FC<{
   animationDelay?: number;
 }> = ({ url = DEMO_FINAL_IMG, label = "התוצאה", animationDelay = 0 }) => (
   <motion.div
-    className="relative w-28 h-40 md:w-32 md:h-48 rounded-lg overflow-hidden shadow-lg border-4"
+    className="relative w-32 h-48 md:w-40 md:h-56 rounded-lg overflow-hidden shadow-lg border-4"
     style={{ backgroundColor: COLORS.card, borderColor: COLORS.card }}
     initial={{ scale: 0.8, opacity: 0, y: 50 }}
     animate={{
