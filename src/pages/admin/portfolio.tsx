@@ -82,9 +82,24 @@ const AdminPortfolioPage = () => {
       setHasUnsavedChanges(false);
     };
 
+    // Listen for toast messages from portfolio store
+    const handleToast = (event: any) => {
+      const { type, message } = event.detail;
+      toast({
+        title: type === 'success' ? 'הצלחה' : 'שגיאה',
+        description: message,
+        variant: type === 'success' ? 'default' : 'destructive'
+      });
+    };
+
     window.addEventListener(PORTFOLIO_UPDATE_EVENT, handleUpdate);
-    return () => window.removeEventListener(PORTFOLIO_UPDATE_EVENT, handleUpdate);
-  }, []);
+    window.addEventListener('showToast', handleToast);
+    
+    return () => {
+      window.removeEventListener(PORTFOLIO_UPDATE_EVENT, handleUpdate);
+      window.removeEventListener('showToast', handleToast);
+    };
+  }, [toast]);
 
   const handleAddProject = () => {
     setEditingProject(null);

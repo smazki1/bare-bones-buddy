@@ -49,7 +49,10 @@ const Portfolio = () => {
     };
 
     window.addEventListener(PORTFOLIO_UPDATE_EVENT, handleUpdate);
-    return () => window.removeEventListener(PORTFOLIO_UPDATE_EVENT, handleUpdate);
+    
+    return () => {
+      window.removeEventListener(PORTFOLIO_UPDATE_EVENT, handleUpdate);
+    };
   }, []);
 
   // Filter projects based on active filter

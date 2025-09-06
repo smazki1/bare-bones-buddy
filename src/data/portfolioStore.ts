@@ -327,12 +327,20 @@ class PortfolioStore {
         this.dispatchUpdateEvent();
         throw new Error('Failed to save project. Check admin permissions or ADMIN_TOKEN.');
       }
+      // Show success message
+      window.dispatchEvent(new CustomEvent('showToast', { 
+        detail: { type: 'success', message: 'הפרויקט נשמר בהצלחה!' } 
+      }));
       // Realtime will handle the final update with correct ID
       return newProject;
     } catch (error) {
       // Remove from UI if save failed
       this.config.items = this.config.items.filter(p => p.id !== 'temp');
       this.dispatchUpdateEvent();
+      // Show error message
+      window.dispatchEvent(new CustomEvent('showToast', { 
+        detail: { type: 'error', message: 'שגיאה בשמירת הפרויקט' } 
+      }));
       throw error;
     }
   }
@@ -478,6 +486,14 @@ class PortfolioStore {
   }
 
   // Force reload from Supabase
+  // Cleanup realtime subscription
+  cleanup(): void {
+    if (this.realtimeChannel) {
+      supabase.removeChannel(this.realtimeChannel);
+      this.realtimeChannel = null;
+    }
+  }
+
   async reload(): Promise<void> {
     this.isLoaded = false;
     await this.loadConfig();
