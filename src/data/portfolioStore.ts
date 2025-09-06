@@ -32,11 +32,10 @@ const convertToSupabaseUpdate = (project: Project) => ({
   business_type: project.businessType,
   service_type: project.serviceType,
   image_after: project.imageAfter,
-  image_before: project.imageBefore,
+  image_before: project.imageBefore || null,
   size: project.size,
   category: project.category,
   pinned: project.pinned || false,
-  created_at: project.createdAt
 });
 
 // Convert frontend project to Supabase format for insert  
@@ -120,55 +119,61 @@ class PortfolioStore {
   private async saveProjectToSupabase(project: Project, mode: 'add' | 'update'): Promise<boolean> {
     try {
       console.log('Attempting to save project to Supabase:', { mode, projectId: project.id, businessName: project.businessName });
-      
-      // First try direct DB write (works when admin session passes RLS)
-      const supabaseProject = convertToSupabaseInsert(project);
-      console.log('Supabase project data:', supabaseProject);
-      
-      const { data, error } = await (supabase as any)
-        .from('projects')
-        .upsert(supabaseProject, { onConflict: 'id' })
-        .select()
-        .single();
 
-      if (!error) {
-        console.log('Direct upsert successful:', data);
+      if (mode === 'add') {
+        // Insert without overriding identity columns
+        const insertPayload = {
+          business_name: project.businessName,
+          business_type: project.businessType,
+          service_type: project.serviceType,
+          image_after: project.imageAfter,
+          image_before: project.imageBefore || null,
+          size: project.size,
+          category: project.category,
+          pinned: project.pinned || false,
+        };
+
+        const { data, error } = await (supabase as any)
+          .from('projects')
+          .insert(insertPayload)
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Direct insert failed:', error);
+          console.warn('Attempting Edge Function fallback...');
+          const res = await callPortfolioAdmin('add', insertPayload);
+          if (res?.id) {
+            project.id = res.id.toString();
+            project.createdAt = res.created_at;
+            return true;
+          }
+          return false;
+        }
+
+        // Success
         if (data?.id) project.id = data.id.toString();
+        if (data?.created_at) project.createdAt = data.created_at;
+        return true;
+      } else {
+        // Update path – never touch identity or created_at
+        const updatePayload = convertToSupabaseUpdate(project);
+        const { data, error } = await (supabase as any)
+          .from('projects')
+          .update(updatePayload)
+          .eq('id', Number(project.id))
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Direct update failed:', error);
+          console.warn('Attempting Edge Function fallback...');
+          const res = await callPortfolioAdmin('update', { id: Number(project.id), ...updatePayload });
+          return !!res;
+        }
+
         return true;
       }
-
-      console.error('Direct upsert failed:', error);
-      console.warn('Attempting Edge Function fallback...');
-
-      // Fallback via Edge Function (service role) – requires ADMIN_TOKEN in storage
-      const payload = mode === 'add'
-        ? {
-            id: Number(project.id),
-            business_name: project.businessName,
-            business_type: project.businessType,
-            service_type: project.serviceType,
-            image_after: project.imageAfter,
-            image_before: project.imageBefore || null,
-            size: project.size,
-            category: project.category,
-            pinned: project.pinned || false,
-            created_at: project.createdAt,
-          }
-        : {
-            id: Number(project.id),
-            business_name: project.businessName,
-            business_type: project.businessType,
-            service_type: project.serviceType,
-            image_after: project.imageAfter,
-            image_before: project.imageBefore || null,
-            size: project.size,
-            category: project.category,
-            pinned: project.pinned || false,
-          };
-
-      const res = await callPortfolioAdmin(mode, payload);
-      if (res?.id) project.id = res.id.toString();
-      return true;
     } catch (error) {
       console.error('Error saving project to Supabase:', error);
       return false;
@@ -237,25 +242,12 @@ class PortfolioStore {
       await this.loadConfig();
     }
     
-    // Determine next ID (DB requires explicit id)
-    let dbMaxId = 0;
-    try {
-      const { data: maxRow } = await (supabase as any)
-        .from('projects')
-        .select('id')
-        .order('id', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      dbMaxId = maxRow?.id ? Number(maxRow.id) : 0;
-    } catch {}
-    const localMaxId = this.config.items.length > 0 ? Math.max(...this.config.items.map(p => Number(p.id))) : 0;
-    const nextId = Math.max(dbMaxId, localMaxId) + 1;
-
+    // Build new project; ID and created_at will be assigned by DB
     const newProject: Project = {
+      id: 'temp',
       createdAt: new Date().toISOString(),
       pinned: false,
       ...project,
-      id: String(nextId)
     };
 
     const success = await this.saveProjectToSupabase(newProject, 'add');
