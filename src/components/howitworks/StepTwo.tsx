@@ -6,8 +6,6 @@ import { Palette } from "lucide-react";
 const COLORS = {
   background: "#f8f7f4",
   card: "#ffffff",
-  primary: "#4a4e69",
-  text: "#22223b",
 };
 
 // ---------------------------
@@ -28,8 +26,8 @@ const StepTwo: React.FC = () => {
       <div className="container mx-auto px-4">
         {/* 2-col layout: Mobile order = card first, images second */}
         <div className="grid grid-cols-1 md:grid-cols-2 md:gap-16 lg:gap-24 items-start">
-          {/* Images (LEFT on desktop, SECOND on mobile) */}
-          <div className="order-2 md:order-1 flex items-center justify-center py-10 md:py-0">
+          {/* Images (RIGHT on desktop, SECOND on mobile) */}
+          <div className="order-2 md:order-2 flex items-center justify-center py-10 md:py-0">
             <div className="w-full max-w-md mx-auto">
               <div className="grid grid-cols-2 gap-4">
                 {images.map((img, i) => (
@@ -62,24 +60,23 @@ const StepTwo: React.FC = () => {
             </div>
           </div>
 
-          {/* Card (RIGHT on desktop, FIRST on mobile) */}
-          <div className="order-1 md:order-2">
+          {/* Card (LEFT on desktop, FIRST on mobile) */}
+          <div className="order-1 md:order-1">
             <div
               className="p-6 md:p-8 rounded-2xl"
               style={{ backgroundColor: COLORS.card, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.1)" }}
             >
               <div className="flex items-center mb-4 gap-4">
                 <div
-                  className="flex-shrink-0 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: COLORS.primary }}
+                  className="flex-shrink-0 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center bg-primary"
                 >
-                  <Palette className="w-6 h-6 md:w-8 md:h-8" style={{ color: COLORS.card }} />
+                  <Palette className="w-6 h-6 md:w-8 md:h-8 text-white" />
                 </div>
-                <h3 className="text-xl md:text-3xl font-bold text-right" style={{ color: COLORS.primary }}>
+                <h3 className="text-xl md:text-3xl font-bold text-right text-primary">
                   הסגנון שלכם: DNA של המותג
                 </h3>
               </div>
-              <p className="text-base md:text-lg leading-relaxed text-right" style={{ color: COLORS.text, opacity: 0.9 }}>
+              <p className="text-base md:text-lg leading-relaxed text-right text-foreground/90">
                 אתם בוחרים את הסגנון הויזואלי המדויק שמתאים למותג שלכם. בין אם זה נקי ומודרני, חם וכפרי,
                 יוקרתי ואלגנטי או נועז וצבעוני – אנחנו מתאימים את התמונות ל-DNA העיצובי שלכם כמו כפפה ליד.
               </p>
