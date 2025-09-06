@@ -81,7 +81,7 @@ const HeroSection = () => {
         <div className="text-center max-w-5xl mx-auto">
           <motion.h1
             dir="rtl"
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-assistant font-bold text-white mb-6 leading-tight tracking-tight drop-shadow-lg"
+            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-assistant font-bold text-white mb-6 leading-tight tracking-tight drop-shadow-lg"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.2 }}

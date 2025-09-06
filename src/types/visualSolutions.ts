@@ -17,8 +17,8 @@ export interface VisualSolutionsConfig {
 }
 
 export const DEFAULT_VISUAL_SOLUTIONS_CONFIG: VisualSolutionsConfig = {
-  sectionTitle: 'מה אפשר ליצור איתנו',
-  sectionSubtitle: 'כל מה שאתם צריכים ליצירת תוכן ויזואלי במקום אחד',
+  sectionTitle: 'כל מה שאתם צריכים ליצירת תוכן ויזואלי במקום אחד',
+  sectionSubtitle: 'פתרונות מקצועיים לכל הצרכים הויזואליים שלכם',
   items: [
     {
       id: 'menu-photos',

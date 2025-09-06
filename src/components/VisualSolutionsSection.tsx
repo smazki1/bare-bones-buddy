@@ -142,7 +142,7 @@ const VisualSolutionsSection = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-assistant font-bold text-primary mb-4">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-assistant font-bold text-primary mb-4 leading-tight max-w-4xl mx-auto">
             {config.sectionTitle}
           </h2>
           <p className="text-xl text-muted-foreground font-open-sans max-w-2xl mx-auto">
@@ -164,17 +164,16 @@ const VisualSolutionsSection = () => {
           </div>
         </div>
 
-        {/* Mobile/Tablet Horizontal Scroll */}
-        <div className="lg:hidden overflow-x-auto scrollbar-hide">
-          <div className="flex gap-6 pb-4" style={{ width: 'max-content' }}>
+        {/* Mobile/Tablet Grid Layout */}
+        <div className="lg:hidden">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {enabledSolutions.map((solution, index) => (
-              <div key={solution.id} className="flex-shrink-0 w-80">
-                <VisualSolutionCardComponent
-                  solution={solution}
-                  index={index}
-                  isIntersecting={isIntersecting}
-                />
-              </div>
+              <VisualSolutionCardComponent
+                key={solution.id}
+                solution={solution}
+                index={index}
+                isIntersecting={isIntersecting}
+              />
             ))}
           </div>
         </div>
