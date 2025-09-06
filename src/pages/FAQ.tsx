@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import InteractiveProcess from '@/components/InteractiveProcess';
 import {
   Accordion,
   AccordionContent,
@@ -13,7 +14,6 @@ import { Camera, Sparkles, Shield, Zap, Flame, Phone, Palette, Users, Rocket, Tr
 
 const FAQ = () => {
   const { ref: faqRef, isIntersecting } = useIntersectionObserver({ threshold: 0.1 });
-  const { ref: processRef, isIntersecting: processIntersecting } = useIntersectionObserver({ threshold: 0.1 });
   const { ref: whyRef, isIntersecting: whyIntersecting } = useIntersectionObserver({ threshold: 0.2 });
 
   const faqs = [
@@ -132,59 +132,8 @@ const FAQ = () => {
           </div>
         </section>
 
-        {/* How It Works Section - Alternating Timeline */}
-        <section ref={processRef} className="py-20">
-          <div className="container mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              animate={processIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-              transition={{ duration: 0.8 }}
-              className="text-center mb-20"
-            >
-              <h2 className="text-4xl md:text-5xl font-assistant font-bold text-primary mb-6">
-                איך זה עובד?
-              </h2>
-              <p className="text-xl text-muted-foreground font-open-sans max-w-2xl mx-auto">
-                3 שלבים פשוטים לתמונות מושלמות
-              </p>
-            </motion.div>
-            <div className="max-w-3xl lg:max-w-4xl mx-auto">
-              <div className="relative">
-                {/* Center vertical line (desktop only) */}
-                <div className="absolute right-1/2 -translate-x-1/2 h-full w-0.5 bg-gradient-to-b from-secondary/20 via-primary/20 to-secondary/20 hidden md:block" aria-hidden="true"></div>
-                <div className="space-y-16">
-                  {processSteps.map((step, index) => {
-                    const even = index % 2 === 1;
-                    return (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 30 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, amount: 0.2 }}
-                        transition={{ duration: 0.5, delay: index * 0.1 }}
-                        className={`relative flex md:items-center flex-col ${even ? 'md:flex-row-reverse' : 'md:flex-row'} timeline-item`}
-                      >
-                        {/* Icon in the center */}
-                        <div className={`md:absolute ${even ? 'md:left-1/2 md:translate-x-1/2' : 'md:right-1/2 md:-translate-x-1/2'} z-10 mb-4 md:mb-0`}>
-                          <div className="bg-gradient-to-br from-secondary to-primary rounded-full w-24 h-24 flex items-center justify-center text-white ring-8 ring-background shadow-lg">
-                            {step.icon}
-                          </div>
-                        </div>
-                        {/* Card side */}
-                        <div className={`md:w-1/2 ${even ? 'md:pl-16' : 'md:pr-16'} timeline-content`}>
-                          <div className="bg-card p-6 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-border text-right">
-                            <h3 className="text-2xl font-assistant font-bold text-primary mb-3">{step.title}</h3>
-                            <p className="text-muted-foreground font-open-sans leading-relaxed">{step.description}</p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* How It Works - Interactive */}
+        <InteractiveProcess />
 
         {/* Why FoodVision Section */}
         <section ref={whyRef} className="py-20 bg-gradient-subtle">
