@@ -2,7 +2,8 @@ import { motion } from 'framer-motion';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
-import InteractiveProcess from '@/components/InteractiveProcess';
+import StepOne from '@/components/howitworks/StepOne';
+import StepTwo from '@/components/howitworks/StepTwo';
 import {
   Accordion,
   AccordionContent,
@@ -132,8 +133,11 @@ const FAQ = () => {
           </div>
         </section>
 
-        {/* How It Works - Interactive */}
-        <InteractiveProcess />
+        {/* How It Works - Step 1 */}
+        <StepOne />
+
+        {/* How It Works - Step 2 */}
+        <StepTwo />
 
         {/* Why FoodVision Section */}
         <section ref={whyRef} className="py-20 bg-gradient-subtle">
