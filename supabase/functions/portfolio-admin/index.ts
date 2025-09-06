@@ -63,20 +63,8 @@ serve(async (req) => {
 
     switch (action) {
       case 'add': {
-        // Allow optional explicit id and created_at. If not provided, compute next id.
-        let idToUse = payload.id;
-        if (!idToUse) {
-          const { data: maxRow } = await supabase
-            .from('projects')
-            .select('id')
-            .order('id', { ascending: false })
-            .limit(1)
-            .maybeSingle();
-          idToUse = (maxRow?.id || 0) + 1;
-        }
-
+        // Insert without explicit ID - let DB auto-generate
         const insertPayload: any = {
-          id: idToUse,
           business_name: payload.business_name,
           business_type: payload.business_type,
           service_type: payload.service_type,
@@ -86,7 +74,8 @@ serve(async (req) => {
           category: payload.category,
           pinned: payload.pinned || false,
         };
-        if (payload.created_at) insertPayload.created_at = payload.created_at;
+        
+        console.log('Inserting with payload:', insertPayload);
 
         const { data: insertData, error: insertError } = await supabase
           .from('projects')
@@ -105,6 +94,7 @@ serve(async (req) => {
           );
         }
 
+        console.log('Insert successful:', insertData);
         result = { ok: true, data: insertData };
         break;
       }

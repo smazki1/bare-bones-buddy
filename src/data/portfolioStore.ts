@@ -32,11 +32,10 @@ const convertToSupabaseUpdate = (project: Project) => ({
   business_type: project.businessType,
   service_type: project.serviceType,
   image_after: project.imageAfter,
-  image_before: project.imageBefore,
+  image_before: project.imageBefore || null,
   size: project.size,
   category: project.category,
   pinned: project.pinned || false,
-  created_at: project.createdAt
 });
 
 // Convert frontend project to Supabase format for insert  
@@ -56,9 +55,11 @@ const convertToSupabaseInsert = (project: Project) => ({
 class PortfolioStore {
   private config: PortfolioConfig = { items: [], initialized: false };
   private isLoaded = false;
+  private realtimeChannel: any = null;
 
   constructor() {
     this.loadConfig();
+    this.setupRealtimeSubscription();
   }
 
   private async loadConfig(): Promise<void> {
@@ -119,50 +120,62 @@ class PortfolioStore {
 
   private async saveProjectToSupabase(project: Project, mode: 'add' | 'update'): Promise<boolean> {
     try {
-      // First try direct DB write (works when admin session passes RLS)
-      const supabaseProject = convertToSupabaseInsert(project);
-      const { data, error } = await (supabase as any)
-        .from('projects')
-        .upsert(supabaseProject, { onConflict: 'id' })
-        .select()
-        .single();
+      console.log('Attempting to save project to Supabase:', { mode, projectId: project.id, businessName: project.businessName });
 
-      if (!error) {
+      if (mode === 'add') {
+        // Insert without overriding identity columns
+        const insertPayload = {
+          business_name: project.businessName,
+          business_type: project.businessType,
+          service_type: project.serviceType,
+          image_after: project.imageAfter,
+          image_before: project.imageBefore || null,
+          size: project.size,
+          category: project.category,
+          pinned: project.pinned || false,
+        };
+
+        const { data, error } = await (supabase as any)
+          .from('projects')
+          .insert(insertPayload)
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Direct insert failed:', error);
+          console.warn('Attempting Edge Function fallback...');
+          const res = await callPortfolioAdmin('add', insertPayload);
+          if (res?.id) {
+            project.id = res.id.toString();
+            project.createdAt = res.created_at;
+            return true;
+          }
+          return false;
+        }
+
+        // Success
         if (data?.id) project.id = data.id.toString();
+        if (data?.created_at) project.createdAt = data.created_at;
+        return true;
+      } else {
+        // Update path – never touch identity or created_at
+        const updatePayload = convertToSupabaseUpdate(project);
+        const { data, error } = await (supabase as any)
+          .from('projects')
+          .update(updatePayload)
+          .eq('id', Number(project.id))
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Direct update failed:', error);
+          console.warn('Attempting Edge Function fallback...');
+          const res = await callPortfolioAdmin('update', { id: Number(project.id), ...updatePayload });
+          return !!res;
+        }
+
         return true;
       }
-
-      console.warn('Direct upsert failed, attempting Edge Function fallback:', error?.message || error);
-
-      // Fallback via Edge Function (service role) – requires ADMIN_TOKEN in storage
-      const payload = mode === 'add'
-        ? {
-            id: Number(project.id),
-            business_name: project.businessName,
-            business_type: project.businessType,
-            service_type: project.serviceType,
-            image_after: project.imageAfter,
-            image_before: project.imageBefore || null,
-            size: project.size,
-            category: project.category,
-            pinned: project.pinned || false,
-            created_at: project.createdAt,
-          }
-        : {
-            id: Number(project.id),
-            business_name: project.businessName,
-            business_type: project.businessType,
-            service_type: project.serviceType,
-            image_after: project.imageAfter,
-            image_before: project.imageBefore || null,
-            size: project.size,
-            category: project.category,
-            pinned: project.pinned || false,
-          };
-
-      const res = await callPortfolioAdmin(mode, payload);
-      if (res?.id) project.id = res.id.toString();
-      return true;
     } catch (error) {
       console.error('Error saving project to Supabase:', error);
       return false;
@@ -184,6 +197,69 @@ class PortfolioStore {
     } catch (error) {
       console.error('Error deleting project from Supabase:', error);
       return false;
+    }
+  }
+
+  private setupRealtimeSubscription(): void {
+    // Setup Supabase realtime subscription for instant updates
+    this.realtimeChannel = supabase
+      .channel('portfolio-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'projects'
+        },
+        (payload) => {
+          console.log('Realtime update received:', payload.eventType);
+          this.handleRealtimeUpdate(payload);
+        }
+      )
+      .subscribe();
+  }
+
+  private async handleRealtimeUpdate(payload: any): Promise<void> {
+    const { eventType, new: newRecord, old: oldRecord } = payload;
+    
+    try {
+      switch (eventType) {
+        case 'INSERT':
+          if (newRecord) {
+            const newProject = convertFromSupabase(newRecord);
+            // Add to beginning of list if not already exists
+            const exists = this.config.items.some(p => p.id === newProject.id);
+            if (!exists) {
+              this.config.items.unshift(newProject);
+              this.dispatchUpdateEvent();
+            }
+          }
+          break;
+          
+        case 'UPDATE':
+          if (newRecord) {
+            const updatedProject = convertFromSupabase(newRecord);
+            const index = this.config.items.findIndex(p => p.id === updatedProject.id);
+            if (index !== -1) {
+              this.config.items[index] = updatedProject;
+              this.dispatchUpdateEvent();
+            }
+          }
+          break;
+          
+        case 'DELETE':
+          if (oldRecord) {
+            const deletedId = oldRecord.id.toString();
+            const initialLength = this.config.items.length;
+            this.config.items = this.config.items.filter(p => p.id !== deletedId);
+            if (this.config.items.length < initialLength) {
+              this.dispatchUpdateEvent();
+            }
+          }
+          break;
+      }
+    } catch (error) {
+      console.error('Error handling realtime update:', error);
     }
   }
 
@@ -231,35 +307,42 @@ class PortfolioStore {
       await this.loadConfig();
     }
     
-    // Determine next ID (DB requires explicit id)
-    let dbMaxId = 0;
-    try {
-      const { data: maxRow } = await (supabase as any)
-        .from('projects')
-        .select('id')
-        .order('id', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      dbMaxId = maxRow?.id ? Number(maxRow.id) : 0;
-    } catch {}
-    const localMaxId = this.config.items.length > 0 ? Math.max(...this.config.items.map(p => Number(p.id))) : 0;
-    const nextId = Math.max(dbMaxId, localMaxId) + 1;
-
+    // Build new project; ID and created_at will be assigned by DB
     const newProject: Project = {
+      id: 'temp',
       createdAt: new Date().toISOString(),
       pinned: false,
       ...project,
-      id: String(nextId)
     };
 
-    const success = await this.saveProjectToSupabase(newProject, 'add');
-    if (success) {
-      this.config.items.unshift(newProject); // Add to beginning
-      this.dispatchUpdateEvent();
-      return newProject;
-    }
+    // Add to UI immediately for instant feedback (optimistic update)
+    this.config.items.unshift(newProject);
+    this.dispatchUpdateEvent();
 
-    throw new Error('Failed to save project. Check admin permissions or ADMIN_TOKEN.');
+    try {
+      const success = await this.saveProjectToSupabase(newProject, 'add');
+      if (!success) {
+        // Remove from UI if save failed
+        this.config.items = this.config.items.filter(p => p.id !== 'temp');
+        this.dispatchUpdateEvent();
+        throw new Error('Failed to save project. Check admin permissions or ADMIN_TOKEN.');
+      }
+      // Show success message
+      window.dispatchEvent(new CustomEvent('showToast', { 
+        detail: { type: 'success', message: 'הפרויקט נשמר בהצלחה!' } 
+      }));
+      // Realtime will handle the final update with correct ID
+      return newProject;
+    } catch (error) {
+      // Remove from UI if save failed
+      this.config.items = this.config.items.filter(p => p.id !== 'temp');
+      this.dispatchUpdateEvent();
+      // Show error message
+      window.dispatchEvent(new CustomEvent('showToast', { 
+        detail: { type: 'error', message: 'שגיאה בשמירת הפרויקט' } 
+      }));
+      throw error;
+    }
   }
 
   async updateProject(id: string | number, updates: Partial<Project>): Promise<boolean> {
@@ -270,20 +353,33 @@ class PortfolioStore {
     const index = this.config.items.findIndex(p => p.id == id);
     if (index === -1) return false;
 
+    const originalProject = { ...this.config.items[index] };
     const updatedProject = { 
       ...this.config.items[index], 
       ...updates,
       id: this.config.items[index].id // Preserve original ID
     };
     
-    const success = await this.saveProjectToSupabase(updatedProject, 'update');
-    if (success) {
-      this.config.items[index] = updatedProject;
-      this.dispatchUpdateEvent();
+    // Apply optimistic update
+    this.config.items[index] = updatedProject;
+    this.dispatchUpdateEvent();
+
+    try {
+      const success = await this.saveProjectToSupabase(updatedProject, 'update');
+      if (!success) {
+        // Revert optimistic update if save failed
+        this.config.items[index] = originalProject;
+        this.dispatchUpdateEvent();
+        return false;
+      }
+      // Realtime will handle the final sync
       return true;
+    } catch (error) {
+      // Revert optimistic update if save failed
+      this.config.items[index] = originalProject;
+      this.dispatchUpdateEvent();
+      return false;
     }
-    
-    return false;
   }
 
   async deleteProject(id: string | number): Promise<boolean> {
@@ -390,6 +486,14 @@ class PortfolioStore {
   }
 
   // Force reload from Supabase
+  // Cleanup realtime subscription
+  cleanup(): void {
+    if (this.realtimeChannel) {
+      supabase.removeChannel(this.realtimeChannel);
+      this.realtimeChannel = null;
+    }
+  }
+
   async reload(): Promise<void> {
     this.isLoaded = false;
     await this.loadConfig();

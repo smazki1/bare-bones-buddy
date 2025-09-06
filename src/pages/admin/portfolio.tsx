@@ -82,9 +82,24 @@ const AdminPortfolioPage = () => {
       setHasUnsavedChanges(false);
     };
 
+    // Listen for toast messages from portfolio store
+    const handleToast = (event: any) => {
+      const { type, message } = event.detail;
+      toast({
+        title: type === 'success' ? 'הצלחה' : 'שגיאה',
+        description: message,
+        variant: type === 'success' ? 'default' : 'destructive'
+      });
+    };
+
     window.addEventListener(PORTFOLIO_UPDATE_EVENT, handleUpdate);
-    return () => window.removeEventListener(PORTFOLIO_UPDATE_EVENT, handleUpdate);
-  }, []);
+    window.addEventListener('showToast', handleToast);
+    
+    return () => {
+      window.removeEventListener(PORTFOLIO_UPDATE_EVENT, handleUpdate);
+      window.removeEventListener('showToast', handleToast);
+    };
+  }, [toast]);
 
   const handleAddProject = () => {
     setEditingProject(null);
@@ -107,7 +122,10 @@ const AdminPortfolioPage = () => {
 
   const handleSaveProject = async (projectData: Omit<Project, 'id'> | Project) => {
     try {
+      console.log('Saving project:', projectData);
+      
       if ('id' in projectData) {
+        console.log('Updating existing project:', projectData.id);
         await portfolioStore.updateProject(projectData.id, {
           businessName: projectData.businessName,
           businessType: projectData.businessType,
@@ -119,6 +137,7 @@ const AdminPortfolioPage = () => {
           pinned: projectData.pinned,
         });
       } else {
+        console.log('Adding new project');
         await portfolioStore.addProject(projectData);
       }
       toast({ title: 'הצלחה', description: 'הפרויקט נשמר' });
@@ -127,6 +146,7 @@ const AdminPortfolioPage = () => {
       setHasUnsavedChanges(true);
       loadData(); // Refresh data
     } catch (error: any) {
+      console.error('Error saving project:', error);
       toast({ title: 'שגיאה', description: error?.message || 'שגיאה בשמירת הפרויקט', variant: 'destructive' });
     }
   };
