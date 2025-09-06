@@ -31,14 +31,6 @@ const CTASection = () => {
             התחל ליצור תמונות מושלמות עכשיו
           </motion.h2>
 
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={isIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-xl md:text-2xl text-white/90 mb-12 font-open-sans max-w-2xl mx-auto"
-          >
-            חסוך 80% וקבל תוצאות תוך ימים - צור קשר היום!
-          </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -51,7 +43,7 @@ const CTASection = () => {
               size="lg"
               className="bg-secondary hover:bg-secondary/90 text-white px-12 py-6 text-xl font-assistant font-bold shadow-warm hover:scale-105 transition-all duration-300"
             >
-              <a href="/portfolio">צפה בדוגמאות</a>
+              <a href="/portfolio">תיק עבודות</a>
             </Button>
           </motion.div>
 

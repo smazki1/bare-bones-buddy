@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -32,11 +32,22 @@ const PackageModal = ({ package: pkg, onClose }: PackageModalProps) => {
     window.open(url, '_blank');
   };
 
-  const exampleImages = [
-    '/lovable-uploads/c6d2bf37-2600-4108-a298-f663fc32ad15.png',
-    '/lovable-uploads/c6d2bf37-2600-4108-a298-f663fc32ad15.png',
-    '/lovable-uploads/c6d2bf37-2600-4108-a298-f663fc32ad15.png'
-  ];
+  // Pull first 3 pinned portfolio projects for examples
+  const [exampleImages, setExampleImages] = useState<string[]>([]);
+  useEffect(() => {
+    import('@/data/portfolioStore').then(({ portfolioStore }) => {
+      portfolioStore.getProjects().then(projects => {
+        const pinned = projects.filter(p => p.pinned);
+        const top3 = pinned.slice(0, 3);
+        const imgs: string[] = [];
+        top3.forEach(p => {
+          if (p.imageAfter) imgs.push(p.imageAfter);
+          else if (p.imageBefore) imgs.push(p.imageBefore);
+        });
+        setExampleImages(imgs);
+      }).catch(() => setExampleImages([]));
+    }).catch(() => setExampleImages([]));
+  }, []);
 
   return (
     <AnimatePresence>
@@ -78,7 +89,12 @@ const PackageModal = ({ package: pkg, onClose }: PackageModalProps) => {
                     {pkg.price}
                   </div>
                   <p className="text-lg text-primary-foreground/90 leading-relaxed">
-                    {pkg.subtitle}
+                    {pkg.subtitle.split('\n').map((line, idx, arr) => (
+                      <span key={idx}>
+                        {line}
+                        {idx < arr.length - 1 && <><br /></>}
+                      </span>
+                    ))}
                   </p>
                 </div>
               </div>
@@ -107,48 +123,68 @@ const PackageModal = ({ package: pkg, onClose }: PackageModalProps) => {
                 </div>
 
                 {/* Example Results */}
-                <div>
-                  <h3 className="text-xl font-bold text-foreground mb-6">דוגמאות תוצאות:</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {exampleImages.map((image, index) => (
-                      <motion.div
-                        key={index}
-                        className="aspect-square rounded-xl overflow-hidden bg-card border border-border/50"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.2 + index * 0.1 }}
-                      >
-                        <img
-                          src={image}
-                          alt={`דוגמה ${index + 1} לחבילת ${pkg.name}`}
-                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                        />
-                      </motion.div>
-                    ))}
+                {exampleImages.length > 0 && (
+                  <div>
+                    <h3 className="text-xl font-bold text-foreground mb-6">דוגמאות לתוצאות:</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {exampleImages.map((image, index) => (
+                        <motion.div
+                          key={index}
+                          className="aspect-square rounded-xl overflow-hidden bg-card border border-border/50"
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.2 + index * 0.1 }}
+                        >
+                          <img
+                            src={image}
+                            alt={`דוגמה ${index + 1} לחבילת ${pkg.name}`}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          />
+                        </motion.div>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* CTA */}
                 <motion.div
-                  className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl p-6 text-center"
+                  className="relative p-[2px] rounded-2xl bg-gradient-to-r from-secondary/60 via-primary to-secondary/60"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 }}
+                  whileHover={{ scale: 1.01 }}
                 >
-                  <h3 className="text-xl font-bold text-foreground mb-4">
-                    מוכנים להתחיל?
-                  </h3>
-                  <p className="text-muted-foreground mb-6">
-                    צרו איתנו קשר עכשיו ונתחיל לעבוד על הפרויקט שלכם
-                  </p>
-                  <Button
-                    size="lg"
-                    onClick={handleWhatsApp}
-                    className="bg-green-600 hover:bg-green-700 text-white gap-2 px-8"
-                  >
-                    <MessageCircle className="w-5 h-5" />
-                    בואו נדבר
-                  </Button>
+                  <div className="rounded-2xl bg-background/80 backdrop-blur-md border border-border/50 p-6 md:p-8 text-center">
+                    <motion.h3 
+                      className="text-2xl font-bold text-foreground mb-3"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6 }}
+                    >
+                      מוכנים להתחיל?
+                    </motion.h3>
+                    <motion.p 
+                      className="text-muted-foreground mb-6 text-lg"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.7 }}
+                    >
+                      צרו איתנו קשר עכשיו ונתחיל לעבוד על הפרויקט שלכם
+                    </motion.p>
+
+                    
+
+                    <div className="flex items-center justify-center">
+                      <Button
+                        size="lg"
+                        onClick={handleWhatsApp}
+                        className="bg-green-600 hover:bg-green-700 text-white gap-2 px-8 shadow-elegant hover:shadow-warm"
+                      >
+                        <MessageCircle className="w-5 h-5" />
+                        בואו נדבר
+                      </Button>
+                    </div>
+                  </div>
                 </motion.div>
               </div>
             </div>

@@ -109,10 +109,10 @@ const SectorsSection = () => {
             <Button 
               asChild
               size="lg"
-              className="bg-secondary hover:bg-secondary/90 text-white font-assistant font-semibold px-8 py-4 rounded-xl transition-all duration-300 hover:scale-105 shadow-elegant hover:shadow-warm"
+              className="bg-secondary hover:bg-secondary/90 text-white font-assistant font-semibold px-8 py-4 rounded-xl transition-all duration-300 hover:scale-105 shadow-elegant hover:shadow-warm w-full"
             >
               <Link to="/contact#top">
-                צור קשר ונמצא פתרון!
+                ספרו לנו על העסק שלכם
               </Link>
             </Button>
           </div>

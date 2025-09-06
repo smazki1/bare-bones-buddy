@@ -57,7 +57,7 @@ const TestimonialsSection = () => {
             הלקוחות שלנו
           </h2>
           <p className="text-xl text-muted-foreground font-open-sans max-w-2xl mx-auto">
-            עסקים שהבינו שתמונות טובות = יותר לקוחות
+            עסקים שהבינו את העתיד = חוסכים אלפי שקלים
           </p>
         </motion.div>
 
@@ -119,16 +119,6 @@ const TestimonialsSection = () => {
           ))}
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
-          className="text-center mt-16"
-        >
-          <p className="text-muted-foreground font-open-sans mb-4">
-            רוצה להצטרף לרשימת הלקוחות המרוצים שלנו?
-          </p>
-        </motion.div>
       </div>
     </section>
   );

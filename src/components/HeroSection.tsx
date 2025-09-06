@@ -106,7 +106,7 @@ const HeroSection = () => {
           >
             <Button 
               size="lg" 
-              className="bg-secondary hover:bg-secondary/90 text-white px-8 py-6 text-lg font-assistant font-semibold shadow-warm transition-all duration-300 hover:scale-105"
+              className="bg-secondary hover:bg-secondary/90 text-white px-10 py-7 text-xl font-assistant font-bold shadow-warm transition-all duration-300 hover:scale-105"
               onClick={() => navigate('/services')}
             >
               התחילו עכשיו
@@ -114,10 +114,10 @@ const HeroSection = () => {
             <Button 
               variant="outline" 
               size="lg"
-              className="bg-white/95 text-primary hover:bg-white px-8 py-6 text-lg font-assistant border-0 shadow-lg transition-all duration-300 hover:scale-105"
+              className="bg-white/95 text-primary hover:bg-white px-10 py-7 text-xl font-assistant font-bold border-0 shadow-lg transition-all duration-300 hover:scale-105"
               onClick={() => navigate('/portfolio')}
             >
-              ראה דוגמאות
+              דוגמאות
             </Button>
           </motion.div>
         </div>

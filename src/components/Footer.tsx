@@ -3,7 +3,7 @@ import { MessageCircle, Phone, Mail, MapPin } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="bg-foreground text-white py-16">
+    <footer className="bg-foreground text-white py-16" dir="rtl">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
@@ -20,7 +20,7 @@ const Footer = () => {
               מנות מושלמות. תמונות מושלמות.
               יוצרים תמונות AI מקצועיות למסעדות בישראל.
             </p>
-            <div className="flex gap-4">
+            <div className="flex gap-4 flex-row-reverse">
               <a 
                 href="https://wa.me/+972527772807"
                 className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center hover:scale-110 transition-transform duration-300"
@@ -100,7 +100,7 @@ const Footer = () => {
               צור קשר
             </h4>
             <div className="space-y-4">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-row-reverse">
                 <Phone className="w-5 h-5 text-secondary flex-shrink-0" />
                 <a 
                   href="tel:+972527772807"
@@ -109,7 +109,7 @@ const Footer = () => {
                   052-777-2807
                 </a>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-row-reverse">
                 <Mail className="w-5 h-5 text-secondary flex-shrink-0" />
                 <a 
                   href="mailto:info@food-vision.co.il"
@@ -118,7 +118,7 @@ const Footer = () => {
                   info@food-vision.co.il
                 </a>
               </div>
-              <div className="flex items-start gap-3">
+              <div className="flex items-start gap-3 flex-row-reverse">
                 <MapPin className="w-5 h-5 text-secondary flex-shrink-0 mt-0.5" />
                 <span className="text-white/80 font-open-sans">
                   ישראל<br />
@@ -138,7 +138,7 @@ const Footer = () => {
           className="border-t border-white/20 mt-12 pt-8 text-center"
         >
           <p className="text-white/60 font-open-sans">
-            © 2024 Food Vision. כל הזכויות שמורות.
+            © 2025 Food Vision. כל הזכויות שמורות.
           </p>
           <p className="text-white/70 font-open-sans mt-2">
             נבנה באהבה על ידי{' '}

@@ -142,13 +142,13 @@ const PackageCard = ({ package: pkg, onClick }: PackageCardProps) => {
                       <Clock className="w-4 h-4 text-white/90" />
                       <span className="text-white/90 text-sm font-open-sans">זמן אספקה</span>
                     </div>
-                    <span className="text-white font-assistant font-bold text-sm">48-72 שעות</span>
+                    <span className="text-white font-assistant font-bold text-sm">תוך 72 שעות</span>
                   </div>
                 </div>
 
                 {/* Features List */}
                 <div className="space-y-3">
-                  {pkg.features.slice(0, 4).map((feature, index) => (
+                  {pkg.features.slice(0, 5).map((feature, index) => (
                     <div
                       key={index}
                       className="flex items-start gap-3 text-white/95"
