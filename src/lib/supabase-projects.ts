@@ -64,22 +64,8 @@ export const callPortfolioAdmin = async (action: string, payload: any): Promise<
       throw new Error('Access denied. Admin privileges required.');
     }
 
-    // Get admin token from localStorage/sessionStorage (support legacy keys too)
-    const adminToken =
-      localStorage.getItem('admin_token') ||
-      sessionStorage.getItem('admin_token') ||
-      localStorage.getItem('aiMaster:adminToken') ||
-      sessionStorage.getItem('aiMaster:adminToken');
-    
-    if (!adminToken) {
-      throw new Error('Admin token not found. Please set ADMIN_TOKEN in the admin settings.');
-    }
-
     const response = await supabase.functions.invoke('portfolio-admin', {
-      body: { action, payload },
-      headers: {
-        'x-admin-token': adminToken
-      }
+      body: { action, payload }
     });
 
     if (response.error) {

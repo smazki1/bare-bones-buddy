@@ -10,8 +10,9 @@ const corsHeaders = {
 // Initialize Supabase client
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const adminToken = Deno.env.get('ADMIN_TOKEN')!;
+const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 
+// Service-role client for DB writes
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 serve(async (req) => {
@@ -21,15 +22,36 @@ serve(async (req) => {
   }
 
   try {
-    // Verify admin token
-    const token = req.headers.get('x-admin-token');
-    if (!token || token !== adminToken) {
-      console.log('Unauthorized: Invalid or missing admin token');
+    // Verify authenticated admin using JWT + RPC
+    const authHeader = req.headers.get('authorization') || '';
+
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: { user }, error: userErr } = await supabaseAuth.auth.getUser();
+    if (userErr || !user) {
+      console.log('Unauthorized: Missing/invalid JWT');
       return new Response(
         JSON.stringify({ ok: false, error: 'Unauthorized' }),
-        { 
-          status: 401, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    const { data: adminRow, error: adminErr } = await supabaseAuth
+      .rpc('get_admin_user', { user_id_param: user.id })
+      .maybeSingle();
+
+    if (adminErr || !adminRow) {
+      console.log('Forbidden: User is not an admin');
+      return new Response(
+        JSON.stringify({ ok: false, error: 'Forbidden' }),
+        {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
