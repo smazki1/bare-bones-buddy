@@ -81,12 +81,20 @@ const StepOne: React.FC = () => {
 
         {/* 2-col layout: Mobile order = card first, images second */}
         <div className="grid grid-cols-1 md:grid-cols-2 md:gap-16 lg:gap-24 items-center">
-          {/* Images (LEFT on desktop, SECOND on mobile) */}
-          {/* Increased min-height to accommodate the vertical stack */}
-          <div className="order-2 md:order-1 flex items-center justify-center py-10 md:py-0 min-h-[480px] md:min-h-[500px]">
-            <div className="relative w-full h-full max-w-xs md:max-w-sm mx-auto">
+          {/* Images (LEFT on desktop, SECOND on mobile) - 2x2 GRID LAYOUT */}
+          <div className="order-2 md:order-1 flex items-center justify-center py-10 md:py-0">
+            <div className="grid grid-cols-2 gap-4 md:gap-5">
               {images.map((img, i) => (
-                <StackedCard key={i} idx={i} label={img.label} url={img.url} />
+                <motion.div
+                  key={i}
+                  className="w-36 h-52 md:w-40 md:h-56 rounded-lg overflow-hidden shadow-2xl border-4 p-2 pb-6"
+                  style={{ backgroundColor: COLORS.card, borderColor: COLORS.card }}
+                  initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 100, damping: 20, delay: i * 0.15 } }}
+                  whileHover={{ scale: 1.05, zIndex: 10, y: -5, boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2), 0 10px 10px -5px rgba(0,0,0,0.1)' }}
+                >
+                  <img src={img.url} alt={img.label} className="w-full h-full object-cover rounded-sm" />
+                </motion.div>
               ))}
             </div>
           </div>
