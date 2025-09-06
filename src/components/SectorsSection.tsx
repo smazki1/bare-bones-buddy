@@ -104,7 +104,7 @@ const SectorsSection = () => {
         >
           <div className="bg-background/80 backdrop-blur-sm rounded-2xl p-8 border border-border/50 max-w-md mx-auto">
             <p className="text-muted-foreground font-open-sans mb-6 text-lg" dir="rtl">
-              לא מוצא את הקטגוריה שלך?
+              מחפשים שירות מותאם אישית?
             </p>
             <Button 
               asChild

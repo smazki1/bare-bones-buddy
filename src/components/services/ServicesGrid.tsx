@@ -26,7 +26,7 @@ const services = [
     suitableFor: 'כל סוגי העסקים שרוצים לראות איך זה עובד',
     deliveryTime: '3–5 ימי עסקים',
     price: '₪499',
-    popular: false,
+    popular: true,
     buttonText: 'התחל בלי סיכון - זיכוי מלא!'
   },
   {
@@ -43,13 +43,13 @@ const services = [
   {
     icon: Flame,
     title: 'חבילת נוכחות דיגיטלית מלאה',
-    description: 'הכי פופולרי – המותג שלכם בכל מקום',
+    description: 'המותג שלכם בכל מקום',
     includes: '150 תמונות מקצועיות, עד 30 מנות/מוצרים שונים, 5 סרטונים, גדלים מותאמים לכל הפלטפורמות',
     suitableFor: 'מסעדות ועסקים שרוצים נוכחות דיגיטלית חזקה',
     deliveryTime: '7–10 ימי עסקים',
     price: '₪1,689',
     originalPrice: '₪1,190 לאחר זיכוי',
-    popular: true
+    popular: false
   },
   {
     icon: Crown,
@@ -239,30 +239,6 @@ const ServicesGrid = () => {
           ))}
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
-          className="text-center mt-16"
-        >
-          <div className="inline-flex items-center gap-4">
-            <Button 
-              asChild
-              size="lg"
-              className="bg-secondary hover:bg-secondary/90 text-white font-assistant text-lg px-8 py-6"
-            >
-              <Link to="/contact">קבל הצעת מחיר מותאמת אישית</Link>
-            </Button>
-            <Button 
-              asChild
-              variant="outline"
-              size="lg"
-              className="bg-white text-primary hover:bg-white/90 font-assistant text-lg px-8 py-6 border border-primary/20"
-            >
-              <Link to="/faq">איך זה עובד</Link>
-            </Button>
-          </div>
-        </motion.div>
       </div>
     </section>
   );

@@ -57,7 +57,7 @@ const TestimonialsSection = () => {
             הלקוחות שלנו
           </h2>
           <p className="text-xl text-muted-foreground font-open-sans max-w-2xl mx-auto">
-            עסקים שהבינו את העתיד = חוסכים אלפי שקלים
+            עסקים שהבינו את העתיד = כבר חוסכים אלפי שקלים בכל חודש
           </p>
         </motion.div>
 

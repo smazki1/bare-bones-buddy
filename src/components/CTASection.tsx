@@ -36,14 +36,29 @@ const CTASection = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={isIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="flex flex-col sm:flex-row gap-6 justify-center items-center"
+            className="flex flex-col gap-6 justify-center items-center"
           >
             <Button
               asChild
               size="lg"
               className="bg-secondary hover:bg-secondary/90 text-white px-12 py-6 text-xl font-assistant font-bold shadow-warm hover:scale-105 transition-all duration-300"
             >
-              <a href="/portfolio">תיק עבודות</a>
+              <a 
+                href="https://wa.me/972527772807?text=שלום, אני מעוניין/ת לקבל הצעת מחיר מותאמת אישית לשירותי התמונות לעסק שלי"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                קבל הצעת מחיר מותאמת אישית
+              </a>
+            </Button>
+            
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="border-2 border-white/80 text-white bg-white/10 backdrop-blur-sm hover:bg-white hover:text-primary px-8 py-4 text-lg font-assistant font-semibold shadow-lg"
+            >
+              <a href="/faq">איך זה עובד</a>
             </Button>
           </motion.div>
 

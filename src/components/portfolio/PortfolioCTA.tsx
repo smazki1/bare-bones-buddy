@@ -30,6 +30,7 @@ const PortfolioCTA = () => {
             whileInView={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
             viewport={{ once: true }}
+            className="flex flex-col gap-4 items-center"
           >
             <Button
               size="lg"
@@ -37,8 +38,19 @@ const PortfolioCTA = () => {
               asChild
             >
               <a href="/contact">
-                בואו ניצור קסם למסעדה שלכם
+                בואו ניצור קסם למסעדה / עסק שלכם
                 <ArrowLeft className="mr-2 h-5 w-5" />
+              </a>
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="lg"
+              className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-assistant font-semibold px-6 py-3 text-lg transition-all duration-300"
+              asChild
+            >
+              <a href="/faq">
+                איך זה עובד
               </a>
             </Button>
           </motion.div>

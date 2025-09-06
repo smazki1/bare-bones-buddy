@@ -184,20 +184,28 @@ const Portfolio = () => {
                     ראיתם את הטוב ביותר שלנו
                   </h3>
                   <p className="text-xl text-muted-foreground font-open-sans mb-8 max-w-2xl mx-auto">
-                    מוכנים ליצור ויזואלים מרהיבים למסעדה שלכם? בואו נדבר!
+                    מוכנים ליצור ויזואלים מרהיבים למסעדה / עסק שלכם? בואו נדבר!
                   </p>
                   
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                  <div className="flex flex-col gap-4 justify-center items-center">
                     <motion.a
                       href="/contact"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-assistant font-semibold px-8 py-4 text-lg rounded-xl shadow-warm hover:shadow-elegant transition-all duration-300 inline-flex items-center gap-2"
                     >
-                      בואו ניצור קסם למסעדה שלכם
+                      בואו ניצור קסם למסעדה / עסק שלכם
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                       </svg>
+                    </motion.a>
+                    
+                    <motion.a
+                      href="/faq"
+                      whileHover={{ scale: 1.02 }}
+                      className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-assistant font-semibold px-6 py-3 text-lg rounded-xl transition-all duration-300 inline-flex items-center gap-2"
+                    >
+                      איך זה עובד
                     </motion.a>
                     
                     <motion.a

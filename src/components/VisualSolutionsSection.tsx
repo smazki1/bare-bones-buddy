@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { VisualSolutionsConfig, VisualSolutionCard } from '@/types/visualSolutions';
 import { visualSolutionsStore } from '@/data/visualSolutionsStore';
@@ -14,6 +14,7 @@ interface VisualSolutionCardProps {
 const VisualSolutionCardComponent = ({ solution, index, isIntersecting }: VisualSolutionCardProps) => {
   const [cardRef, setCardRef] = useState<HTMLDivElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!cardRef) return;
@@ -32,10 +33,8 @@ const VisualSolutionCardComponent = ({ solution, index, isIntersecting }: Visual
   }, [cardRef]);
 
   const handleClick = () => {
-    if (solution.href) {
-      // Navigation will be handled by Link component
-      return;
-    }
+    // Navigate to services page
+    navigate('/services');
   };
 
   const CardContent = () => (
@@ -81,16 +80,6 @@ const VisualSolutionCardComponent = ({ solution, index, isIntersecting }: Visual
       </div>
     </motion.div>
   );
-
-  if (solution.href) {
-    return (
-      <div ref={setCardRef}>
-        <Link to={solution.href}>
-          <CardContent />
-        </Link>
-      </div>
-    );
-  }
 
   return (
     <div ref={setCardRef}>
