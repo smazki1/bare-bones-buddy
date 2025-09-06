@@ -34,6 +34,7 @@ const AdminVisualSolutionsEditor = ({
   
   const [previewMode, setPreviewMode] = useState<'image' | 'video'>('image');
   const [dragActive, setDragActive] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
@@ -78,7 +79,7 @@ const AdminVisualSolutionsEditor = ({
     onClose();
   };
 
-  const handleDrop = (e: React.DragEvent, type: 'image' | 'video') => {
+  const handleDrop = async (e: React.DragEvent, type: 'image' | 'video') => {
     e.preventDefault();
     setDragActive(false);
     
@@ -86,31 +87,69 @@ const AdminVisualSolutionsEditor = ({
     if (files.length === 0) return;
     
     const file = files[0];
-    if (type === 'image') {
-      if (!isValidImageFile(file)) return;
-      convertFileToDataUrl(file).then((dataUrl) => {
+    setIsUploading(true);
+    
+    try {
+      if (type === 'image') {
+        if (!isValidImageFile(file)) {
+          console.log('Invalid image file dropped');
+          return;
+        }
+        const dataUrl = await convertFileToDataUrl(file);
         setFormData(prev => ({ ...prev, imageSrc: dataUrl }));
-      });
-    } else {
-      if (!isValidVideoFile(file)) return;
-      convertFileToDataUrl(file).then((dataUrl) => {
+        console.log('Image replaced via drag & drop');
+      } else {
+        if (!isValidVideoFile(file)) {
+          console.log('Invalid video file dropped');
+          return;
+        }
+        const dataUrl = await convertFileToDataUrl(file);
         setFormData(prev => ({ ...prev, videoSrc: dataUrl }));
-      });
+        console.log('Video replaced via drag & drop');
+      }
+    } catch (error) {
+      console.error('Error processing dropped file:', error);
+    } finally {
+      setIsUploading(false);
     }
   };
 
   const handleImageFileSelect = async (file: File | null) => {
     if (!file) return;
-    if (!isValidImageFile(file)) return;
-    const dataUrl = await convertFileToDataUrl(file);
-    setFormData(prev => ({ ...prev, imageSrc: dataUrl }));
+    if (!isValidImageFile(file)) {
+      console.log('Invalid image file selected');
+      return;
+    }
+    
+    setIsUploading(true);
+    try {
+      const dataUrl = await convertFileToDataUrl(file);
+      setFormData(prev => ({ ...prev, imageSrc: dataUrl }));
+      console.log('Image updated successfully');
+    } catch (error) {
+      console.error('Error uploading image:', error);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleVideoFileSelect = async (file: File | null) => {
     if (!file) return;
-    if (!isValidVideoFile(file)) return;
-    const dataUrl = await convertFileToDataUrl(file);
-    setFormData(prev => ({ ...prev, videoSrc: dataUrl }));
+    if (!isValidVideoFile(file)) {
+      console.log('Invalid video file selected');
+      return;
+    }
+    
+    setIsUploading(true);
+    try {
+      const dataUrl = await convertFileToDataUrl(file);
+      setFormData(prev => ({ ...prev, videoSrc: dataUrl }));
+      console.log('Video updated successfully');
+    } catch (error) {
+      console.error('Error uploading video:', error);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -201,13 +240,20 @@ const AdminVisualSolutionsEditor = ({
                 <div
                   className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
                     dragActive ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-primary/50'
-                  }`}
+                  } ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
                   onDrop={(e) => handleDrop(e, 'image')}
                   onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
                   onDragLeave={() => setDragActive(false)}
-                  onClick={() => imageInputRef.current?.click()}
+                  onClick={() => !isUploading && imageInputRef.current?.click()}
                 >
-                  {formData.imageSrc ? (
+                  {isUploading ? (
+                    <div className="space-y-2">
+                      <div className="w-8 h-8 mx-auto border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                      <p className="font-open-sans text-sm text-gray-600">
+                        מעלה תמונה...
+                      </p>
+                    </div>
+                  ) : formData.imageSrc ? (
                     <div className="space-y-2">
                       <img
                         src={formData.imageSrc}
@@ -218,11 +264,14 @@ const AdminVisualSolutionsEditor = ({
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => setFormData(prev => ({ ...prev, imageSrc: '' }))}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setFormData(prev => ({ ...prev, imageSrc: '' }));
+                        }}
                         className="font-assistant"
                       >
                         <X className="w-4 h-4 ml-1" />
-                        הסר תמונה
+                        החלף תמונה
                       </Button>
                     </div>
                   ) : (
@@ -256,13 +305,20 @@ const AdminVisualSolutionsEditor = ({
                 <div
                   className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
                     dragActive ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-primary/50'
-                  }`}
+                  } ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
                   onDrop={(e) => handleDrop(e, 'video')}
                   onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
                   onDragLeave={() => setDragActive(false)}
-                  onClick={() => videoInputRef.current?.click()}
+                  onClick={() => !isUploading && videoInputRef.current?.click()}
                 >
-                  {formData.videoSrc ? (
+                  {isUploading ? (
+                    <div className="space-y-2">
+                      <div className="w-8 h-8 mx-auto border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                      <p className="font-open-sans text-sm text-gray-600">
+                        מעלה וידאו...
+                      </p>
+                    </div>
+                  ) : formData.videoSrc ? (
                     <div className="space-y-2">
                       <video
                         src={formData.videoSrc}
@@ -273,11 +329,14 @@ const AdminVisualSolutionsEditor = ({
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => setFormData(prev => ({ ...prev, videoSrc: '' }))}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setFormData(prev => ({ ...prev, videoSrc: '' }));
+                        }}
                         className="font-assistant"
                       >
                         <X className="w-4 h-4 ml-1" />
-                        הסר וידאו
+                        החלף וידאו
                       </Button>
                     </div>
                   ) : (
@@ -310,10 +369,10 @@ const AdminVisualSolutionsEditor = ({
           <div className="flex gap-3 pt-4">
             <Button
               type="submit"
-              disabled={!formData.title || !formData.imageSrc}
+              disabled={!formData.title || !formData.imageSrc || isUploading}
               className="font-assistant"
             >
-              {editingCard ? 'עדכן' : 'הוסף'} פתרון ויזואלי
+              {isUploading ? 'מעלה...' : editingCard ? 'עדכן' : 'הוסף'} פתרון ויזואלי
             </Button>
             <Button
               type="button"
