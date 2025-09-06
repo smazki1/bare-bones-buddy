@@ -37,19 +37,34 @@ const COLORS = {
   card: "#ffffff",
 };
 
-// --- Visual card for the "fan" layout ---
-const FanCard: React.FC<{ idx: number; total: number; label: string; url?: string }> = ({ idx, total, label, url }) => {
-  const angle = (idx - (total - 1) / 2) * 12; // restore wider spread so rear images are visible
+// --- New visual card for the "stacked" layout ---
+type StackedCardProps = { idx: number; label: string; url?: string };
+const StackedCard: React.FC<StackedCardProps> = ({ idx, label, url }) => {
+  const positions: { rotate: number; x: number; y: number }[] = [
+    { rotate: -6, x: -50, y: 20 },
+    { rotate: 4, x: 50, y: -30 },
+    { rotate: 8, x: -30, y: 50 },
+    { rotate: -3, x: 60, y: 60 },
+  ];
+  const { rotate, x, y } = positions[idx % positions.length];
   const src = url || DEMO_IMG;
+
   return (
     <motion.div
-      className="absolute left-1/2 -translate-x-1/2 bottom-2 md:bottom-6 w-32 h-48 md:w-40 md:h-56 rounded-lg overflow-hidden shadow-2xl border-4"
-      style={{ originX: "50%", originY: "150%", backgroundColor: COLORS.card, borderColor: COLORS.card }}
-      initial={{ scale: 0.5, opacity: 0, rotate: angle, y: 20 }}
-      animate={{ scale: 1, opacity: 1, rotate: angle, y: 0, transition: { type: "spring", stiffness: 160, damping: 20, delay: idx * 0.08 } }}
-      whileHover={{ y: -10, scale: 1.05, transition: { type: "spring", stiffness: 300, damping: 16 } }}
+      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-48 md:w-40 md:h-56 rounded-lg overflow-hidden shadow-2xl border-4"
+      style={{ backgroundColor: COLORS.card, borderColor: COLORS.card }}
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{
+        scale: 1,
+        opacity: 1,
+        rotate,
+        x,
+        y,
+        transition: { type: "spring", stiffness: 120, damping: 20, delay: idx * 0.1 },
+      }}
+      whileHover={{ y: y - 10, scale: 1.1, rotate: 0, zIndex: 10, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)", transition: { type: "spring", stiffness: 200, damping: 15 } }}
     >
-      <img src={src} alt={label} className="w-full h-full object-cover" draggable={false} style={{ imageRendering: 'auto' }} />
+      <img src={src} alt={label} className="w-full h-full object-cover" />
       <div className="absolute top-1 right-1 text-white text-[10px] px-1.5 py-0.5 rounded" style={{ backgroundColor: COLORS.secondary }}>
         {label}
       </div>
@@ -77,10 +92,10 @@ const StepOne: React.FC = () => {
         {/* 2-col layout: Mobile order = card first, images second */}
         <div className="grid grid-cols-1 md:grid-cols-2 md:gap-16 lg:gap-24 items-start">
           {/* Images (LEFT on desktop, SECOND on mobile) */}
-          <div className="order-2 md:order-1 flex items-center justify-center py-10 md:py-0">
-            <div className="relative w-[85vw] max-w-[360px] h-[280px] md:w-[640px] md:h-[420px] mx-auto">
+          <div className="order-2 md:order-1 flex items-center justify-center py-10 md:py-0 min-h-[420px] md:min-h-[500px]">
+            <div className="relative w-full h-full max-w-lg mx-auto">
               {images.map((img, i) => (
-                <FanCard key={i} idx={i} total={images.length} label={img.label} url={img.url} />
+                <StackedCard key={i} idx={i} label={img.label} url={img.url} />
               ))}
             </div>
           </div>
