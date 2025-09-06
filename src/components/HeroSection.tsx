@@ -115,9 +115,9 @@ const HeroSection = () => {
               variant="outline" 
               size="lg"
               className="bg-white/95 text-primary hover:bg-white px-10 py-7 text-xl font-assistant font-bold border-0 shadow-lg transition-all duration-300 hover:scale-105"
-              onClick={() => navigate('/portfolio')}
+              onClick={() => navigate('/faq#top')}
             >
-              דוגמאות
+              איך זה עובד
             </Button>
           </motion.div>
         </div>

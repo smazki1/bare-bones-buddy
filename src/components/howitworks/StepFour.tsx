@@ -76,9 +76,9 @@ const StepFour: React.FC = () => {
   return (
     <section style={{ backgroundColor: COLORS.background }} className="py-16 md:py-24 font-sans" dir="rtl">
       <div className="container mx-auto px-4">
-        {/* 2-col layout: Mobile order = card first, image second */}
+        {/* 2-col layout: RTL — images on the left (desktop), card on the right */}
         <div className="grid grid-cols-1 md:grid-cols-2 md:gap-16 lg:gap-24 items-center">
-          {/* Image Side (LEFT on desktop, SECOND on mobile) */}
+          {/* Images LEFT on desktop, second on mobile */}
           <div className="order-2 md:order-1 flex items-center justify-center py-10 md:py-0 min-h-[360px] md:min-h-[420px]">
             <div className="grid grid-cols-2 gap-4">
               <SingleCard url={DEMO_FINAL_IMG} label="סגנון 1" animationDelay={0} />
@@ -88,7 +88,7 @@ const StepFour: React.FC = () => {
             </div>
           </div>
 
-          {/* Info Card (RIGHT on desktop, FIRST on mobile) */}
+          {/* Info Card RIGHT on desktop, first on mobile */}
           <div className="order-1 md:order-2">
             <div
               className="p-6 md:p-8 rounded-2xl"
@@ -114,7 +114,7 @@ const StepFour: React.FC = () => {
                   href="#packages"
                   className="inline-block bg-secondary hover:bg-secondary/90 text-white px-8 py-3 rounded-xl font-assistant font-bold text-base md:text-lg transition-all duration-200 hover:scale-105 shadow-warm"
                 >
-                  חבילות ושירותים
+                  החבילות שלנו
                 </a>
               </div>
             </div>
