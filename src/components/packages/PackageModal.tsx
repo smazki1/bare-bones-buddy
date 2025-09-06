@@ -34,22 +34,40 @@ const PackageModal = ({ package: pkg, onClose }: PackageModalProps) => {
 
   // Pull first 3 pinned portfolio projects for examples
   const [exampleImages, setExampleImages] = useState<string[]>([]);
+  const [pinnedProjects, setPinnedProjects] = useState<any[]>([]);
+  
   useEffect(() => {
     let removeListener: (() => void) | null = null;
 
-    const refreshImages = () => {
-      import('@/data/portfolioStore').then(({ portfolioStore }) => {
-        portfolioStore.getProjects().then(projects => {
-          const pinned = projects.filter(p => p.pinned);
-          const top3 = pinned.slice(0, 3);
-          const imgs: string[] = [];
-          top3.forEach(p => {
-            if (p.imageAfter) imgs.push(p.imageAfter);
-            else if (p.imageBefore) imgs.push(p.imageBefore);
-          });
-          setExampleImages(imgs);
-        }).catch(() => setExampleImages([]));
-      }).catch(() => setExampleImages([]));
+    const refreshImages = async () => {
+      try {
+        const { portfolioStore } = await import('@/data/portfolioStore');
+        const projects = await portfolioStore.getProjects();
+        console.log('All projects:', projects.length);
+        
+        const pinned = projects.filter(p => p.pinned);
+        console.log('Pinned projects:', pinned.length, pinned);
+        
+        const top3 = pinned.slice(0, 3);
+        setPinnedProjects(top3);
+        console.log('Top 3 pinned:', top3);
+        
+        const imgs: string[] = [];
+        top3.forEach(p => {
+          if (p.imageAfter) {
+            imgs.push(p.imageAfter);
+          } else if (p.imageBefore) {
+            imgs.push(p.imageBefore);
+          }
+        });
+        
+        console.log('Example images:', imgs);
+        setExampleImages(imgs);
+      } catch (error) {
+        console.error('Error loading pinned projects:', error);
+        setExampleImages([]);
+        setPinnedProjects([]);
+      }
     };
 
     // Initial fetch
@@ -57,7 +75,10 @@ const PackageModal = ({ package: pkg, onClose }: PackageModalProps) => {
 
     // Subscribe to portfolio updates for live sync
     import('@/data/portfolioStore').then(({ PORTFOLIO_UPDATE_EVENT }) => {
-      const handler = () => refreshImages();
+      const handler = () => {
+        console.log('Portfolio updated, refreshing images...');
+        refreshImages();
+      };
       window.addEventListener(PORTFOLIO_UPDATE_EVENT, handler as EventListener);
       removeListener = () => window.removeEventListener(PORTFOLIO_UPDATE_EVENT, handler as EventListener);
     }).catch(() => {});
@@ -148,7 +169,7 @@ const PackageModal = ({ package: pkg, onClose }: PackageModalProps) => {
                       {exampleImages.map((image, index) => (
                         <motion.div
                           key={index}
-                          className="aspect-square rounded-xl overflow-hidden bg-card border border-border/50"
+                          className="aspect-[4/3] rounded-xl overflow-hidden bg-card border border-border/50 shadow-md"
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{ delay: 0.2 + index * 0.1 }}
@@ -157,10 +178,26 @@ const PackageModal = ({ package: pkg, onClose }: PackageModalProps) => {
                             src={image}
                             alt={`דוגמה ${index + 1} לחבילת ${pkg.name}`}
                             className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                            loading="lazy"
+                            onError={(e) => {
+                              console.error('Failed to load image:', image);
+                              e.currentTarget.style.display = 'none';
+                            }}
                           />
                         </motion.div>
                       ))}
                     </div>
+                    <p className="text-sm text-muted-foreground mt-2 text-center">
+                      {pinnedProjects.length} דוגמאות מתוך תיק העבודות שלנו
+                    </p>
+                  </div>
+                )}
+
+                {/* Debug info (remove in production) */}
+                {process.env.NODE_ENV === 'development' && (
+                  <div className="bg-gray-100 p-4 rounded-lg text-sm">
+                    <p>Debug: {pinnedProjects.length} pinned projects found</p>
+                    <p>Debug: {exampleImages.length} example images loaded</p>
                   </div>
                 )}
 
