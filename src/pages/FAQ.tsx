@@ -5,6 +5,7 @@ import Footer from '@/components/Footer';
 import StepOne from '@/components/howitworks/StepOne';
 import StepTwo from '@/components/howitworks/StepTwo';
 import StepThree from '@/components/howitworks/StepThree';
+import StepFour from '@/components/howitworks/StepFour';
 import {
   Accordion,
   AccordionContent,
@@ -142,6 +143,9 @@ const FAQ = () => {
 
         {/* How It Works - Step 3 */}
         <StepThree />
+
+        {/* How It Works - Step 4 */}
+        <StepFour />
 
         {/* Why FoodVision Section */}
         <section ref={whyRef} className="py-20 bg-gradient-subtle">
