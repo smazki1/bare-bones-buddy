@@ -147,6 +147,8 @@ const FAQ = () => {
         {/* How It Works - Step 4 */}
         <StepFour />
 
+        {/* CTA moved into StepFour */}
+
         {/* Why FoodVision Section */}
         <section ref={whyRef} className="py-20 bg-gradient-subtle">
           <div className="container mx-auto px-4">
@@ -154,15 +156,8 @@ const FAQ = () => {
               initial={{ opacity: 0, y: 50 }}
               animate={whyIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
               transition={{ duration: 0.8 }}
-              className="text-center mb-16"
-            >
-              <h2 className="text-4xl md:text-5xl font-assistant font-bold text-primary mb-4">
-                למה FoodVision?
-              </h2>
-              <p className="text-xl text-muted-foreground font-open-sans max-w-2xl mx-auto">
-                מותאם מושלם לעולם המשלוחים והשיווק הדיגיטלי
-              </p>
-            </motion.div>
+              className="mb-8"
+            />
 
             <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {whyFoodVisionPoints.map((item, index) => (

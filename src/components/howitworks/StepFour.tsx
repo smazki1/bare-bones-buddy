@@ -109,6 +109,14 @@ const StepFour: React.FC = () => {
                 בתוך ימים ספורים, אתם מקבלים ספריית תמונות ברמה של מגזין. תמונות מרהיבות שמוכנות להזניק
                 לכם את המכירות בכל פלטפורמה.
               </p>
+              <div className="text-center mt-6">
+                <a
+                  href="#packages"
+                  className="inline-block bg-secondary hover:bg-secondary/90 text-white px-8 py-3 rounded-xl font-assistant font-bold text-base md:text-lg transition-all duration-200 hover:scale-105 shadow-warm"
+                >
+                  חבילות ושירותים
+                </a>
+              </div>
             </div>
           </div>
         </div>
