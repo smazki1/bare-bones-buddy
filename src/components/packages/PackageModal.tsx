@@ -35,18 +35,36 @@ const PackageModal = ({ package: pkg, onClose }: PackageModalProps) => {
   // Pull first 3 pinned portfolio projects for examples
   const [exampleImages, setExampleImages] = useState<string[]>([]);
   useEffect(() => {
-    import('@/data/portfolioStore').then(({ portfolioStore }) => {
-      portfolioStore.getProjects().then(projects => {
-        const pinned = projects.filter(p => p.pinned);
-        const top3 = pinned.slice(0, 3);
-        const imgs: string[] = [];
-        top3.forEach(p => {
-          if (p.imageAfter) imgs.push(p.imageAfter);
-          else if (p.imageBefore) imgs.push(p.imageBefore);
-        });
-        setExampleImages(imgs);
+    let removeListener: (() => void) | null = null;
+
+    const refreshImages = () => {
+      import('@/data/portfolioStore').then(({ portfolioStore }) => {
+        portfolioStore.getProjects().then(projects => {
+          const pinned = projects.filter(p => p.pinned);
+          const top3 = pinned.slice(0, 3);
+          const imgs: string[] = [];
+          top3.forEach(p => {
+            if (p.imageAfter) imgs.push(p.imageAfter);
+            else if (p.imageBefore) imgs.push(p.imageBefore);
+          });
+          setExampleImages(imgs);
+        }).catch(() => setExampleImages([]));
       }).catch(() => setExampleImages([]));
-    }).catch(() => setExampleImages([]));
+    };
+
+    // Initial fetch
+    refreshImages();
+
+    // Subscribe to portfolio updates for live sync
+    import('@/data/portfolioStore').then(({ PORTFOLIO_UPDATE_EVENT }) => {
+      const handler = () => refreshImages();
+      window.addEventListener(PORTFOLIO_UPDATE_EVENT, handler as EventListener);
+      removeListener = () => window.removeEventListener(PORTFOLIO_UPDATE_EVENT, handler as EventListener);
+    }).catch(() => {});
+
+    return () => {
+      if (removeListener) removeListener();
+    };
   }, []);
 
   return (
