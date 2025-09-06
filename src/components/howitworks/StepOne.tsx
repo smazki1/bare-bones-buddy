@@ -47,6 +47,8 @@ const StackedCard: React.FC<StackedCardProps> = ({ idx, label, url }) => {
     { rotate: -3, x: 60, y: 60 },
   ];
   const { rotate, x, y } = positions[idx % positions.length];
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const posScale = isMobile ? 0.7 : 1; // keep images within the stage on mobile
   const src = url || DEMO_IMG;
 
   return (
@@ -58,16 +60,13 @@ const StackedCard: React.FC<StackedCardProps> = ({ idx, label, url }) => {
         scale: 1,
         opacity: 1,
         rotate,
-        x,
-        y,
+        x: x * posScale,
+        y: y * posScale,
         transition: { type: "spring", stiffness: 120, damping: 20, delay: idx * 0.1 },
       }}
-      whileHover={{ y: y - 10, scale: 1.1, rotate: 0, zIndex: 10, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)", transition: { type: "spring", stiffness: 200, damping: 15 } }}
+      whileHover={{ y: y * posScale - 10, scale: 1.08, rotate: 0, zIndex: 10, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)", transition: { type: "spring", stiffness: 200, damping: 15 } }}
     >
-      <img src={src} alt={label} className="w-full h-full object-cover" />
-      <div className="absolute top-1 right-1 text-white text-[10px] px-1.5 py-0.5 rounded" style={{ backgroundColor: COLORS.secondary }}>
-        {label}
-      </div>
+      <img src={src} alt={label} className="w-full h-full object-contain bg-white" draggable={false} style={{ imageRendering: 'auto' }} />
     </motion.div>
   );
 };
