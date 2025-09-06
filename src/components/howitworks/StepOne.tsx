@@ -59,10 +59,10 @@ const FanCard: React.FC<{ idx: number; total: number; label: string; url?: strin
 
 const StepOne: React.FC = () => {
   const images = [
-    { label: "טלפון #1", url: DEMO_IMG },
-    { label: "תוצאה #1", url: DEMO_IMG },
-    { label: "תוצאה #2", url: DEMO_IMG },
-    { label: "תוצאה #3", url: DEMO_IMG },
+    { label: "טלפון #1", url: normalizeGithubRaw("https://github.com/smazki1/images-stocks-/blob/c954d8e20f1323083129aef2032f662899812414/PHOTO-2025-05-22-22-13-52.jpg") },
+    { label: "תוצאה #1", url: normalizeGithubRaw("https://github.com/smazki1/images-stocks-/blob/c954d8e20f1323083129aef2032f662899812414/PHOTO-2025-05-22-22-13-51.jpg") },
+    { label: "תוצאה #2", url: normalizeGithubRaw("https://github.com/smazki1/images-stocks-/blob/c954d8e20f1323083129aef2032f662899812414/PHOTO-2025-05-22-22-13-51%202.jpg") },
+    { label: "תוצאה #3", url: normalizeGithubRaw("https://github.com/smazki1/images-stocks-/blob/c954d8e20f1323083129aef2032f662899812414/PHOTO-2025-05-22-22-13-50.jpg") },
   ];
 
   return (
