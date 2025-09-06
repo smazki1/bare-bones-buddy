@@ -41,10 +41,10 @@ const COLORS = {
 type StackedCardProps = { idx: number; label: string; url?: string };
 const StackedCard: React.FC<StackedCardProps> = ({ idx, label, url }) => {
   const positions: { rotate: number; x: number; y: number }[] = [
-    { rotate: -6, x: -50, y: 20 },
-    { rotate: 4, x: 50, y: -30 },
-    { rotate: 8, x: -30, y: 50 },
-    { rotate: -3, x: 60, y: 60 },
+    { rotate: -8, x: -25, y: 10 },
+    { rotate: 5, x: 30, y: -25 },
+    { rotate: 10, x: -20, y: 30 },
+    { rotate: -4, x: 35, y: 40 },
   ];
   const { rotate, x, y } = positions[idx % positions.length];
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
