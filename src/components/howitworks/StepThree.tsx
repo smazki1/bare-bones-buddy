@@ -36,16 +36,6 @@ const StepThree: React.FC = () => {
   return (
     <section style={{ backgroundColor: COLORS.background }} className="py-16 md:py-24 font-sans" dir="rtl">
       <div className="container mx-auto px-4">
-        {/* Header (optional, for standalone preview consistency) */}
-        <div className="text-center mb-10 md:mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-3" style={{ color: COLORS.primary }}>
-            מצילום בטלפון לסטודיו מקצועי
-          </h2>
-          <p className="text-lg md:text-xl max-w-2xl mx-auto" style={{ color: COLORS.text, opacity: 0.8 }}>
-            התהליך השקוף שלנו שחוסך לכם זמן, כסף ועצבים
-          </p>
-        </div>
-
         {/* 2-col layout: Mobile order = card first, icon second */}
         <div className="grid grid-cols-1 md:grid-cols-2 md:gap-16 lg:gap-24 items-start">
           {/* Icon (LEFT on desktop, SECOND on mobile) */}
