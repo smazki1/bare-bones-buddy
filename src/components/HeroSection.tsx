@@ -90,12 +90,12 @@ const HeroSection = () => {
           </motion.h1>
 
           <motion.p
-            className="text-lg md:text-xl lg:text-2xl text-white/95 mb-8 font-open-sans max-w-4xl mx-auto leading-relaxed drop-shadow-lg"
+            className="text-xl md:text-2xl lg:text-3xl text-white mb-8 font-open-sans font-semibold max-w-4xl mx-auto leading-relaxed drop-shadow-2xl text-shadow-lg border-2 border-white/20 bg-black/40 backdrop-blur-sm rounded-lg p-6"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.4 }}
           >
-            מה שלקח <strong>שבועות</strong> עם צלם — אצלנו מוכן <strong>תוך ימים</strong>, וב־<strong>90% פחות כסף</strong>
+            מה שלקח <strong className="text-secondary text-2xl md:text-3xl lg:text-4xl">שבועות</strong> עם צלם — אצלנו מוכן <strong className="text-secondary text-2xl md:text-3xl lg:text-4xl">תוך ימים</strong>, וב־<strong className="text-secondary text-2xl md:text-3xl lg:text-4xl">90% פחות כסף</strong>
           </motion.p>
 
           <motion.div
