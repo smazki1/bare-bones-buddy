@@ -182,6 +182,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      link_admin_user: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
