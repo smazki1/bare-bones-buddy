@@ -99,21 +99,13 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
 
   const handleAddCategory = () => {
     if (!newCategoryLabel.trim()) {
-      toast({
-        title: 'שגיאה',
-        description: 'יש להזין שם קטגוריה',
-        variant: 'destructive'
-      });
+      // לא מציגים טוסט כדי לא להפריע לזרימה
       return;
     }
 
     const marketsConfig = marketsStore.safeGetConfigOrDefaults();
     const newId = marketsStore.generateId(newCategoryLabel);
-    const newSlug = newCategoryLabel
-      .toLowerCase()
-      .replace(/[\s\u05D0-\u05EA]+/g, '-')
-      .replace(/[^\w-]/g, '')
-      .replace(/^-+|-+$/g, '');
+    const newSlug = newId; // שמירה על עקביות ותמיכה בעברית
 
     const newTag = {
       id: newId,
@@ -133,13 +125,8 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
     setNewCategoryLabel('');
     setShowAddCategory(false);
     
-    // Auto-select the new category
+    // בחירה אוטומטית בקטגוריה החדשה
     handleTagChange(newSlug);
-    
-    toast({
-      title: 'הצלחה',
-      description: 'קטגוריה חדשה נוספה בהצלחה',
-    });
   };
 
   // Sync form data when opening editor or when switching cards

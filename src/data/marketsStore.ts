@@ -75,11 +75,19 @@ class MarketsStore {
   }
 
   generateId(label: string): string {
-    const baseId = label
-      .toLowerCase()
-      .replace(/[\s\u05D0-\u05EA]+/g, '-')
-      .replace(/[^\w-]/g, '')
-      .replace(/^-+|-+$/g, '');
+    const normalized = (label || '').toString().trim().toLowerCase();
+
+    // 1) replace whitespace with single dash
+    let baseId = normalized.replace(/\s+/g, '-');
+
+    // 2) keep latin, digits, dash/underscore, and HEBREW letters (\u0590-\u05FF)
+    baseId = baseId.replace(/[^a-z0-9_\-\u0590-\u05FF]+/gi, '');
+
+    // 3) collapse multiple dashes and trim
+    baseId = baseId.replace(/-+/g, '-').replace(/^-+|-+$/g, '');
+
+    // 4) fallback if empty (e.g., only emojis)
+    if (!baseId) baseId = `cat-${Date.now()}`;
 
     const config = this.getConfig();
     if (!config) return baseId;
