@@ -31,6 +31,17 @@ class MarketsStore {
       };
 
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(processedConfig));
+      
+      // Dispatch update events
+      try {
+        window.dispatchEvent(new CustomEvent('markets:updated'));
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: this.STORAGE_KEY,
+          newValue: JSON.stringify(processedConfig)
+        }));
+      } catch (error) {
+        console.warn('Failed to dispatch markets update events:', error);
+      }
     } catch (error) {
       console.error('Failed to save markets config:', error);
     }

@@ -62,6 +62,27 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
   // Load available tags from markets store
   useEffect(() => {
     loadAvailableTags();
+
+    // Listen for markets updates
+    const handleMarketsUpdate = () => {
+      loadAvailableTags();
+    };
+
+    // Listen for storage changes (cross-tab updates)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'food-vision-markets-config') {
+        loadAvailableTags();
+      }
+    };
+
+    // Listen for custom events (same-tab updates)
+    window.addEventListener('markets:updated', handleMarketsUpdate);
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('markets:updated', handleMarketsUpdate);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const loadAvailableTags = () => {
