@@ -47,7 +47,7 @@ const AdminSolutions = () => {
     setHasUnsavedChanges(true);
   };
 
-  const handleSaveConfig = () => {
+  const handleSaveConfig = async () => {
     const ok = solutionsStore.saveConfig(config);
     if (!ok) {
       toast({
@@ -55,12 +55,17 @@ const AdminSolutions = () => {
         description: 'אין אפשרות לשמור ל-localStorage. ייתכן שנפח האחסון מלא או נחסם.',
         variant: 'destructive'
       });
+      // continue to cloud save even if local failed
+    }
+    const cloudOk = await solutionsStore.saveToSupabase(config);
+    if (!cloudOk) {
+      toast({ title: 'שמירה לענן נכשלה', description: 'בדוק חיבור/הרשאות Supabase', variant: 'destructive' });
       return;
     }
     setHasUnsavedChanges(false);
     toast({
       title: 'נשמר בהצלחה',
-      description: 'התצורה נשמרה במערכת',
+      description: 'נשמר ל‑Supabase (ול‑localStorage אם אפשר)',
     });
   };
 

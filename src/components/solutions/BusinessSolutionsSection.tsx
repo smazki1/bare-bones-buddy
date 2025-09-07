@@ -95,7 +95,15 @@ const BusinessSolutionsSection = () => {
       setConfig(newConfig);
     };
 
-    updateConfig();
+    // Load from Supabase first (if available), else fallback
+    (async () => {
+      const cloud = await solutionsStore.fetchFromSupabase();
+      if (cloud) {
+        setConfig(cloud);
+      } else {
+        updateConfig();
+      }
+    })();
 
     const handleSaveFailed = () => {
       console.warn('BusinessSolutions: save_failed event received');

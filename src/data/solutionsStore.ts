@@ -1,6 +1,8 @@
 import { SolutionsConfig, SolutionCard, DEFAULT_SOLUTIONS_CONFIG } from '@/types/solutions';
+import { supabase } from '@/integrations/supabase/client';
 
 const STORAGE_KEY = 'aiMaster:solutions';
+const SUPABASE_KEY = 'solutions_v1';
 
 class SolutionsStore {
   private isSSR(): boolean {
@@ -83,6 +85,65 @@ class SolutionsStore {
     } catch (error) {
       console.error('Failed to save solutions config:', error);
       try { window.dispatchEvent(new Event('solutions:save_failed')); } catch {}
+      return false;
+    }
+  }
+
+  // -------- Supabase integration (non-breaking, optional) --------
+  private isSupabaseReady(): boolean {
+    return typeof supabase !== 'undefined' && supabase !== null;
+  }
+
+  private normalize(config: SolutionsConfig): SolutionsConfig {
+    const fixedItems = this.ensureUniqueIds(this.fixOrder(config.items));
+    return { ...config, items: fixedItems };
+  }
+
+  async fetchFromSupabase(): Promise<SolutionsConfig | null> {
+    if (!this.isSupabaseReady()) return null;
+    try {
+      const { data, error } = await (supabase as any)
+        .from('site_configs')
+        .select('content, updated_at')
+        .eq('key', SUPABASE_KEY)
+        .maybeSingle();
+      if (error) {
+        console.warn('Supabase solutions fetch error:', error.message);
+        return null;
+      }
+      if (!data?.content) return null;
+      const cfg = data.content as SolutionsConfig;
+      if (!this.validateConfig(cfg)) return null;
+      const normalized = this.normalize(cfg);
+      // Sync to local for faster next loads
+      try { this.saveConfig({ ...normalized, updatedAt: new Date().toISOString() }); } catch {}
+      return normalized;
+    } catch (e) {
+      console.warn('Supabase solutions fetch exception:', e);
+      return null;
+    }
+  }
+
+  async saveToSupabase(config: SolutionsConfig): Promise<boolean> {
+    if (!this.isSupabaseReady()) return false;
+    try {
+      const normalized = this.normalize(config);
+      const payload = {
+        key: SUPABASE_KEY,
+        content: normalized,
+        updated_at: new Date().toISOString()
+      };
+      const { error } = await (supabase as any)
+        .from('site_configs')
+        .upsert(payload, { onConflict: 'key' });
+      if (error) {
+        console.error('Supabase solutions save error:', error.message);
+        return false;
+      }
+      try { window.dispatchEvent(new Event('solutions:updated')); } catch {}
+      return true;
+    } catch (e) {
+      console.error('Supabase solutions save exception:', e);
       return false;
     }
   }
