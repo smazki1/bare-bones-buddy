@@ -220,27 +220,27 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" dir="rtl">
-        <DialogHeader>
-          <DialogTitle className="text-right font-assistant">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-background border-border" dir="rtl">
+        <DialogHeader className="bg-background">
+          <DialogTitle className="text-right font-assistant text-foreground">
             {card ? 'עריכת כרטיס' : 'כרטיס חדש'}
           </DialogTitle>
-          <DialogDescription className="text-right font-open-sans">
+          <DialogDescription className="text-right font-open-sans text-muted-foreground">
             הגדרת פרטי הכרטיס, מדיה וקישורים
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 bg-background">
           {/* Form */}
           <div className="space-y-6">
             {/* Basic Info */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg font-assistant text-right">פרטים בסיסיים</CardTitle>
+            <Card className="bg-card border-border">
+              <CardHeader className="bg-card">
+                <CardTitle className="text-lg font-assistant text-right text-card-foreground">פרטים בסיסיים</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 bg-card">
                 <div className="space-y-2">
-                  <Label htmlFor="title" className="text-right text-sm font-medium">
+                  <Label htmlFor="title" className="text-right text-sm font-medium text-card-foreground">
                     כותרת <span className="text-destructive">*</span>
                   </Label>
                   <Input
@@ -248,13 +248,13 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
                     value={formData.title}
                     onChange={(e) => handleInputChange('title', e.target.value)}
                     placeholder="מסעדות ובתי קפה"
-                    className="text-right"
+                    className="text-right bg-background border-input text-foreground placeholder:text-muted-foreground"
                     dir="rtl"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="image" className="text-right text-sm font-medium">
+                  <Label htmlFor="image" className="text-right text-sm font-medium text-card-foreground">
                     תמונה <span className="text-destructive">*</span>
                   </Label>
                   <div className="flex gap-2">
@@ -292,7 +292,7 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
                     value={formData.imageSrc || ''}
                     onChange={(e) => handleInputChange('imageSrc', e.target.value)}
                     placeholder="או הדבק URL לתמונה"
-                    className="text-right text-xs"
+                    className="text-right text-xs bg-background border-input text-foreground placeholder:text-muted-foreground"
                   />
                 </div>
 
@@ -301,14 +301,14 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
                     checked={isClickable}
                     onCheckedChange={handleClickableToggle}
                   />
-                  <Label className="text-right text-sm font-medium">
+                  <Label className="text-right text-sm font-medium text-card-foreground">
                     הפוך את הכרטיס ללחיץ
                   </Label>
                 </div>
 
                 {isClickable && (
                   <div className="space-y-2">
-                    <Label className="text-right text-sm font-medium">
+                    <Label className="text-right text-sm font-medium text-card-foreground">
                       בחר קטגוריה
                     </Label>
                     <Select value={formData.tagSlug || ''} onValueChange={handleTagChange}>
@@ -334,7 +334,7 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
                     checked={formData.enabled}
                     onCheckedChange={(checked) => handleInputChange('enabled', checked)}
                   />
-                  <Label className="text-right text-sm font-medium">
+                  <Label className="text-right text-sm font-medium text-card-foreground">
                     מופעל
                   </Label>
                 </div>
@@ -343,25 +343,25 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
 
             {/* Advanced Settings */}
             <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
-              <Card>
+              <Card className="bg-card border-border">
                 <CollapsibleTrigger asChild>
-                  <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                  <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors bg-card">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        {isAdvancedOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                        <CardTitle className="text-lg font-assistant text-right">הגדרות מתקדמות</CardTitle>
+                        {isAdvancedOpen ? <ChevronDown className="h-4 w-4 text-card-foreground" /> : <ChevronRight className="h-4 w-4 text-card-foreground" />}
+                        <CardTitle className="text-lg font-assistant text-right text-card-foreground">הגדרות מתקדמות</CardTitle>
                       </div>
                     </div>
-                    <CardDescription className="text-right font-open-sans">
+                    <CardDescription className="text-right font-open-sans text-muted-foreground">
                       וידאו וקישור מותאם אישית (אופציונלי)
                     </CardDescription>
                   </CardHeader>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-4 bg-card">
                     {/* Video */}
                     <div className="space-y-2">
-                      <Label className="text-right text-sm font-medium">וידאו (אופציונלי)</Label>
+                      <Label className="text-right text-sm font-medium text-card-foreground">וידאו (אופציונלי)</Label>
                       <div className="flex gap-2">
                         <Button
                           type="button"
@@ -397,13 +397,13 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
                         value={formData.videoSrc || ''}
                         onChange={(e) => handleInputChange('videoSrc', e.target.value)}
                         placeholder="או הדבק URL לוידאו"
-                        className="text-right text-xs"
+                        className="text-right text-xs bg-background border-input text-foreground placeholder:text-muted-foreground"
                       />
                     </div>
 
                     {/* Custom Link */}
                     <div className="space-y-2">
-                      <Label htmlFor="customHref" className="text-right text-sm font-medium">
+                      <Label htmlFor="customHref" className="text-right text-sm font-medium text-card-foreground">
                         קישור מותאם אישית
                       </Label>
                       <Input
@@ -418,7 +418,7 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
                           }
                         }}
                         placeholder="/contact או /portfolio"
-                        className="text-right"
+                        className="text-right bg-background border-input text-foreground placeholder:text-muted-foreground"
                       />
                       <p className="text-xs text-muted-foreground text-right">
                         עוקף את הקישור האוטומטי לתיק העבודות. השאר ריק לשימוש בקטגוריה שנבחרה למעלה
@@ -432,12 +432,12 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
 
           {/* Preview */}
           <div className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg font-assistant text-right">תצוגה מקדימה</CardTitle>
+            <Card className="bg-card border-border">
+              <CardHeader className="bg-card">
+                <CardTitle className="text-lg font-assistant text-right text-card-foreground">תצוגה מקדימה</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="relative aspect-[16/11] rounded-2xl overflow-hidden shadow-lg bg-gray-100">
+              <CardContent className="bg-card">
+                <div className="relative aspect-[16/11] rounded-2xl overflow-hidden shadow-lg bg-muted">
                   {/* Background Media */}
                   {formData.videoSrc ? (
                     <video
@@ -457,8 +457,8 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
                       className="absolute inset-0 w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
-                      <p className="text-gray-500 font-open-sans">אין מדיה</p>
+                    <div className="absolute inset-0 flex items-center justify-center bg-muted">
+                      <p className="text-muted-foreground font-open-sans">אין מדיה</p>
                     </div>
                   )}
                   

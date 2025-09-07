@@ -71,31 +71,31 @@ const SortableMarketItem = ({
         
         <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
-            <Label htmlFor={`label-${market.id}`} className="text-sm">תווית</Label>
+            <Label htmlFor={`label-${market.id}`} className="text-sm text-foreground">תווית</Label>
             <Input
               id={`label-${market.id}`}
               value={market.label}
               onChange={(e) => onUpdate(market.id, { label: e.target.value })}
               placeholder="מנות מסעדות"
-              className="text-right"
+              className="text-right bg-background border-input text-foreground placeholder:text-muted-foreground"
               dir="rtl"
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor={`slug-${market.id}`} className="text-sm">Slug</Label>
+            <Label htmlFor={`slug-${market.id}`} className="text-sm text-foreground">Slug</Label>
             <Input
               id={`slug-${market.id}`}
               value={market.slug}
               onChange={(e) => onUpdate(market.id, { slug: e.target.value })}
               placeholder="restaurants"
-              className="text-left"
+              className="text-left bg-background border-input text-foreground placeholder:text-muted-foreground"
               dir="ltr"
             />
           </div>
           
           <div className="space-y-2">
-            <Label className="text-sm">מצב</Label>
+            <Label className="text-sm text-foreground">מצב</Label>
             <div className="flex items-center gap-2">
               <Switch
                 checked={market.enabled}
@@ -246,22 +246,22 @@ const AdminMarketsEditor = () => {
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="sectionTitle">כותרת הסקשן</Label>
+              <Label htmlFor="sectionTitle" className="text-foreground">כותרת הסקשן</Label>
               <Input
                 id="sectionTitle"
                 value={config.sectionTitle}
                 onChange={(e) => handleConfigUpdate({ sectionTitle: e.target.value })}
-                className="text-right"
+                className="text-right bg-background border-input text-foreground placeholder:text-muted-foreground"
                 dir="rtl"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="sectionSubtitle">תת-כותרת</Label>
+              <Label htmlFor="sectionSubtitle" className="text-foreground">תת-כותרת</Label>
               <Textarea
                 id="sectionSubtitle"
                 value={config.sectionSubtitle}
                 onChange={(e) => handleConfigUpdate({ sectionSubtitle: e.target.value })}
-                className="text-right min-h-[60px]"
+                className="text-right min-h-[60px] bg-background border-input text-foreground placeholder:text-muted-foreground"
                 dir="rtl"
               />
             </div>

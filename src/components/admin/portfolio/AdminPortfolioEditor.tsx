@@ -169,7 +169,7 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject }: Admin
 
     return (
       <div className="space-y-2">
-        <Label className="text-sm font-assistant font-medium">
+        <Label className="text-sm font-assistant font-medium text-foreground">
           {label} {required && <span className="text-destructive">*</span>}
         </Label>
         
@@ -244,9 +244,9 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject }: Admin
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-assistant">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-background border-border" dir="rtl">
+        <DialogHeader className="bg-background">
+          <DialogTitle className="text-xl font-assistant text-foreground">
             {editingProject ? 'עריכת פרויקט' : 'פרויקט חדש'}
           </DialogTitle>
           <DialogDescription className="font-open-sans text-muted-foreground">
@@ -257,12 +257,12 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject }: Admin
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="space-y-6"
+          className="space-y-6 bg-background"
         >
           {/* Basic Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="businessName" className="text-sm font-assistant font-medium">
+              <Label htmlFor="businessName" className="text-sm font-assistant font-medium text-foreground">
                 שם המנה/המוצר <span className="text-destructive">*</span>
               </Label>
               <Input
@@ -270,13 +270,13 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject }: Admin
                 value={formData.businessName}
                 onChange={(e) => setFormData(prev => ({ ...prev, businessName: e.target.value }))}
                 placeholder="למשל: המבורגר הבית / לחם מחמצת שומשום"
-                className="text-right"
+                className="text-right bg-background border-input text-foreground placeholder:text-muted-foreground"
                 dir="rtl"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="businessType" className="text-sm font-assistant font-medium">
+              <Label htmlFor="businessType" className="text-sm font-assistant font-medium text-foreground">
                 סוג העסק
               </Label>
               <Input
@@ -284,7 +284,7 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject }: Admin
                 value={formData.businessType}
                 onChange={(e) => setFormData(prev => ({ ...prev, businessType: e.target.value }))}
                 placeholder="למשל: מסעדה"
-                className="text-right"
+                className="text-right bg-background border-input text-foreground placeholder:text-muted-foreground"
                 dir="rtl"
               />
             </div>
@@ -293,7 +293,7 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject }: Admin
           {/* Service & Category */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label className="text-sm font-assistant font-medium">סוג שירות</Label>
+              <Label className="text-sm font-assistant font-medium text-foreground">סוג שירות</Label>
               <Select
                 value={formData.serviceType}
                 onValueChange={(value: 'תמונות' | 'סרטונים') => 
@@ -311,7 +311,7 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject }: Admin
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-assistant font-medium">קטגוריה</Label>
+              <Label className="text-sm font-assistant font-medium text-foreground">קטגוריה</Label>
               <Select
                 value={formData.category}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
@@ -330,7 +330,7 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject }: Admin
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-assistant font-medium">גודל כרטיס</Label>
+              <Label className="text-sm font-assistant font-medium text-foreground">גודל כרטיס</Label>
               <Select
                 value={formData.size}
                 onValueChange={(value: ProjectSize) => setFormData(prev => ({ ...prev, size: value }))}
@@ -356,7 +356,7 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject }: Admin
           {/* Preview */}
           {(previewImages.after || previewImages.before) && (
             <div className="space-y-2">
-              <Label className="text-sm font-assistant font-medium">תצוגה מקדימה</Label>
+              <Label className="text-sm font-assistant font-medium text-foreground">תצוגה מקדימה</Label>
               <div className="flex gap-4 p-4 bg-muted/30 rounded-lg">
                 {previewImages.after && (
                   <div className="flex-1">

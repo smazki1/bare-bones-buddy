@@ -232,9 +232,9 @@ const AdminSettings = () => {
         <CardTitle className="text-sm font-assistant">הגדרות ניהול (דפדפן זה)</CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
-        <input className="w-full border px-2 py-1 text-sm" placeholder="SUPABASE_URL" value={url} onChange={e => setUrl(e.target.value)} />
-        <input className="w-full border px-2 py-1 text-sm" placeholder="SUPABASE_ANON_KEY" value={key} onChange={e => setKey(e.target.value)} />
-        <input className="w-full border px-2 py-1 text-sm" placeholder="ADMIN_TOKEN" value={token} onChange={e => setToken(e.target.value)} />
+        <input className="w-full border border-input bg-background text-foreground placeholder:text-muted-foreground px-2 py-1 text-sm" placeholder="SUPABASE_URL" value={url} onChange={e => setUrl(e.target.value)} />
+        <input className="w-full border border-input bg-background text-foreground placeholder:text-muted-foreground px-2 py-1 text-sm" placeholder="SUPABASE_ANON_KEY" value={key} onChange={e => setKey(e.target.value)} />
+        <input className="w-full border border-input bg-background text-foreground placeholder:text-muted-foreground px-2 py-1 text-sm" placeholder="ADMIN_TOKEN" value={token} onChange={e => setToken(e.target.value)} />
         <Button size="sm" onClick={save} className="font-assistant text-xs">שמור</Button>
       </CardContent>
     </Card>

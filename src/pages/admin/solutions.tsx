@@ -274,8 +274,8 @@ const AdminSolutions = () => {
         </div>
 
         {hasUnsavedChanges && (
-          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-sm text-yellow-700 font-open-sans text-right">
+          <div className="mb-6 p-4 bg-accent/20 border border-accent rounded-lg">
+            <p className="text-sm text-accent-foreground font-open-sans text-right">
               יש שינויים שלא נשמרו. לא לשכוח ללחוץ "שמירה"!
             </p>
           </div>
@@ -294,32 +294,32 @@ const AdminSolutions = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="sectionTitle" className="text-right text-sm font-medium">
+                  <Label htmlFor="sectionTitle" className="text-right text-sm font-medium text-foreground">
                     כותרת הסקשן
                   </Label>
                   <Input
                     id="sectionTitle"
                     value={config.sectionTitle}
                     onChange={(e) => handleSectionChange('sectionTitle', e.target.value)}
-                    className="text-right"
+                    className="text-right bg-background border-input text-foreground placeholder:text-muted-foreground"
                     dir="rtl"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="sectionSubtitle" className="text-right text-sm font-medium">
+                  <Label htmlFor="sectionSubtitle" className="text-right text-sm font-medium text-foreground">
                     תת-כותרת
                   </Label>
                   <Input
                     id="sectionSubtitle"
                     value={config.sectionSubtitle}
                     onChange={(e) => handleSectionChange('sectionSubtitle', e.target.value)}
-                    className="text-right"
+                    className="text-right bg-background border-input text-foreground placeholder:text-muted-foreground"
                     dir="rtl"
                   />
                 </div>
 
                 {/* Preview */}
-                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                <div className="mt-6 p-4 bg-muted/30 rounded-lg">
                   <h3 className="text-sm font-medium text-muted-foreground mb-3 text-right">
                     תצוגה מקדימה:
                   </h3>
