@@ -148,19 +148,26 @@ class PortfolioStore {
           .single();
 
         if (error) {
-          console.error('Direct insert failed:', error);
+          console.error('Direct insert failed:', error.message, error.details);
           console.warn('Attempting Edge Function fallback...');
-          const res = await callPortfolioAdmin('add', insertPayload);
-          if (res?.id) {
-            project.id = res.id.toString();
-            project.createdAt = res.created_at;
-            return true;
+          try {
+            const res = await callPortfolioAdmin('add', insertPayload);
+            console.log('Edge function response:', res);
+            if (res?.id) {
+              project.id = res.id.toString();
+              project.createdAt = res.created_at;
+              return true;
+            }
+            console.error('Edge function result invalid:', res);
+            return false;
+          } catch (edgeError) {
+            console.error('Edge function failed:', edgeError);
+            return false;
           }
-          console.error('Edge function also failed:', res);
-          return false;
         }
 
         // Success
+        console.log('Insert successful:', data);
         if (data?.id) project.id = data.id.toString();
         if (data?.created_at) project.createdAt = data.created_at;
         return true;
@@ -177,16 +184,23 @@ class PortfolioStore {
           .single();
 
         if (error) {
-          console.error('Direct update failed:', error);
+          console.error('Direct update failed:', error.message, error.details);
           console.warn('Attempting Edge Function fallback...');
-          const res = await callPortfolioAdmin('update', { id: Number(project.id), ...updatePayload });
-          if (res) {
-            return true;
+          try {
+            const res = await callPortfolioAdmin('update', { id: Number(project.id), ...updatePayload });
+            console.log('Edge function update response:', res);
+            if (res) {
+              return true;
+            }
+            console.error('Edge function update failed:', res);
+            return false;
+          } catch (edgeError) {
+            console.error('Edge function update failed:', edgeError);
+            return false;
           }
-          console.error('Edge function also failed:', res);
-          return false;
         }
 
+        console.log('Update successful:', data);
         return true;
       }
     } catch (error) {
@@ -320,6 +334,8 @@ class PortfolioStore {
       await this.loadConfig();
     }
     
+    console.log('Adding new project:', project);
+    
     // Build new project; ID and created_at will be assigned by DB
     const newProject: Project = {
       id: 'temp',
@@ -333,12 +349,15 @@ class PortfolioStore {
     this.dispatchUpdateEvent();
 
     try {
+      console.log('Saving to Supabase...');
       const success = await this.saveProjectToSupabase(newProject, 'add');
+      console.log('Save result:', success);
+      
       if (!success) {
         // Remove from UI if save failed
         this.config.items = this.config.items.filter(p => p.id !== 'temp');
         this.dispatchUpdateEvent();
-        throw new Error('Failed to save project. Check admin permissions or ADMIN_TOKEN.');
+        throw new Error('שגיאה בשמירת הפרויקט. בדוק הרשאות אדמין.');
       }
       // Show success message
       window.dispatchEvent(new CustomEvent('showToast', { 
@@ -347,12 +366,13 @@ class PortfolioStore {
       // Realtime will handle the final update with correct ID
       return newProject;
     } catch (error) {
+      console.error('Error in addProject:', error);
       // Remove from UI if save failed
       this.config.items = this.config.items.filter(p => p.id !== 'temp');
       this.dispatchUpdateEvent();
       // Show error message
       window.dispatchEvent(new CustomEvent('showToast', { 
-        detail: { type: 'error', message: 'שגיאה בשמירת הפרויקט' } 
+        detail: { type: 'error', message: error.message || 'שגיאה בשמירת הפרויקט' } 
       }));
       throw error;
     }
