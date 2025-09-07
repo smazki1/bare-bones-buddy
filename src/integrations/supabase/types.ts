@@ -283,6 +283,48 @@ export type Database = {
         }
         Relationships: []
       }
+      testimonials: {
+        Row: {
+          business_name: string
+          category: string
+          created_at: string | null
+          display_order: number
+          enabled: boolean
+          id: string
+          image_url: string
+          link_facebook: string | null
+          link_instagram: string | null
+          link_x: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          business_name: string
+          category: string
+          created_at?: string | null
+          display_order?: number
+          enabled?: boolean
+          id?: string
+          image_url: string
+          link_facebook?: string | null
+          link_instagram?: string | null
+          link_x?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          business_name?: string
+          category?: string
+          created_at?: string | null
+          display_order?: number
+          enabled?: boolean
+          id?: string
+          image_url?: string
+          link_facebook?: string | null
+          link_instagram?: string | null
+          link_x?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

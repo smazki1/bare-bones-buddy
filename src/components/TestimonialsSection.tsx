@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Instagram, Twitter, Facebook, ExternalLink } from 'lucide-react';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
@@ -5,43 +6,75 @@ import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 const TestimonialsSection = () => {
   const { ref, isIntersecting } = useIntersectionObserver({ threshold: 0.2 });
 
-  const testimonials = [
+  // Load from Supabase
+  const [items, setItems] = useState<Array<{
+    id: string;
+    business_name: string;
+    category: string;
+    image_url: string;
+    link_instagram?: string | null;
+    link_facebook?: string | null;
+    link_x?: string | null;
+  }>>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const { supabase } = await import('@/integrations/supabase/client');
+        const { data } = await supabase
+          .from('testimonials')
+          .select('*')
+          .eq('enabled', true)
+          .order('display_order', { ascending: true })
+          .order('created_at', { ascending: false });
+        if (mounted) {
+          setItems((data || []) as any);
+        }
+      } catch {}
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+  const testimonials = items.length > 0 ? items.map((t) => ({
+    id: t.id,
+    businessName: t.business_name,
+    image: t.image_url,
+    socialLinks: [
+      ...(t.link_instagram ? [{ icon: Instagram, url: t.link_instagram, label: 'Instagram' as const }] : []),
+      ...(t.link_x ? [{ icon: Twitter, url: t.link_x, label: 'Twitter' as const }] : []),
+      ...(t.link_facebook ? [{ icon: Facebook, url: t.link_facebook, label: 'Facebook' as const }] : []),
+    ],
+    category: t.category,
+  })) : [
     {
-      id: 1,
+      id: '1',
       businessName: 'טעמים לאירועים',
-      image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      socialLinks: [
-        { icon: Instagram, url: 'https://instagram.com/tamim-events', label: 'Instagram' }
-      ],
-      category: 'ספקי מזון'
+      image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?auto=format&fit=crop&w=800&q=80',
+      socialLinks: [ { icon: Instagram, url: 'https://instagram.com/tamim-events', label: 'Instagram' as const } ],
+      category: 'ספקי מזון',
     },
     {
-      id: 2,
+      id: '2',
       businessName: 'דג הזהב',
-      image: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      socialLinks: [
-        { icon: Twitter, url: 'https://twitter.com/golden-fish', label: 'Twitter' }
-      ],
-      category: 'מסעדות'
+      image: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=800&q=80',
+      socialLinks: [ { icon: Twitter, url: 'https://twitter.com/golden-fish', label: 'Twitter' as const } ],
+      category: 'מסעדות',
     },
     {
-      id: 3,
+      id: '3',
       businessName: 'בורגר פלאש',
-      image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      socialLinks: [
-        { icon: Instagram, url: 'https://instagram.com/burger-flash', label: 'Instagram' }
-      ],
-      category: 'אוכל מהיר'
+      image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=800&q=80',
+      socialLinks: [ { icon: Instagram, url: 'https://instagram.com/burger-flash', label: 'Instagram' as const } ],
+      category: 'אוכל מהיר',
     },
     {
-      id: 4,
+      id: '4',
       businessName: 'חלות של שבת',
-      image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      socialLinks: [
-        { icon: Facebook, url: 'https://facebook.com/challot-shabbat', label: 'Facebook' }
-      ],
-      category: 'מאפיות'
-    }
+      image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80',
+      socialLinks: [ { icon: Facebook, url: 'https://facebook.com/challot-shabbat', label: 'Facebook' as const } ],
+      category: 'מאפיות',
+    },
   ];
 
   return (
