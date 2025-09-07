@@ -124,27 +124,22 @@ const AdminPortfolioPage = () => {
     try {
       console.log('Saving project:', projectData);
       
-      if ('id' in projectData) {
+      if ('id' in projectData && projectData.id) {
         console.log('Updating existing project:', projectData.id);
-        await portfolioStore.updateProject(projectData.id, {
-          businessName: projectData.businessName,
-          businessType: projectData.businessType,
-          serviceType: projectData.serviceType,
-          imageAfter: projectData.imageAfter,
-          imageBefore: projectData.imageBefore,
-          size: projectData.size,
-          category: projectData.category,
-          pinned: projectData.pinned,
-        });
+        // Pass the entire project data for update
+        const success = await portfolioStore.updateProject(projectData.id, projectData);
+        if (!success) {
+          throw new Error('שגיאה בעדכון הפרויקט');
+        }
       } else {
         console.log('Adding new project');
         await portfolioStore.addProject(projectData);
       }
-      toast({ title: 'הצלחה', description: 'הפרויקט נשמר' });
+      
       setIsEditorOpen(false);
       setEditingProject(null);
-      setHasUnsavedChanges(true);
-      loadData(); // Refresh data
+      setHasUnsavedChanges(false);
+      // No need to call loadData() as realtime updates will handle it
     } catch (error: any) {
       console.error('Error saving project:', error);
       toast({ title: 'שגיאה', description: error?.message || 'שגיאה בשמירת הפרויקט', variant: 'destructive' });

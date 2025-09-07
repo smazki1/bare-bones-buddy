@@ -161,18 +161,23 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject }: Admin
     if (!formData.businessName.trim() || !formData.imageAfter) {
       toast({
         title: "שגיאה",
-        description: "יש למלא שם עסק ותמונה אחרי לפחות",
+        description: "יש למלא שם המנה/המוצר ותמונה אחרי לפחות",
         variant: "destructive"
       });
       return;
     }
 
+    // Ensure tags array is properly set
+    const finalFormData = {
+      ...formData,
+      tags: formData.tags && formData.tags.length > 0 ? formData.tags : [formData.category]
+    };
+
     const projectToSave = editingProject 
-      ? { ...editingProject, ...formData }
-      : formData;
+      ? { ...editingProject, ...finalFormData }
+      : finalFormData;
 
     onSave(projectToSave);
-    onClose();
   };
 
   const ImageUploadArea = ({ 

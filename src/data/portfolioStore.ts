@@ -134,9 +134,12 @@ class PortfolioStore {
           image_after: project.imageAfter,
           image_before: project.imageBefore || null,
           size: project.size,
-          category: project.category,
+          category: project.tags?.[0] || project.category,
+          tags: project.tags || [project.category],
           pinned: project.pinned || false,
         };
+
+        console.log('Insert payload:', insertPayload);
 
         const { data, error } = await (supabase as any)
           .from('projects')
@@ -148,11 +151,12 @@ class PortfolioStore {
           console.error('Direct insert failed:', error);
           console.warn('Attempting Edge Function fallback...');
           const res = await callPortfolioAdmin('add', insertPayload);
-          if (res?.id) {
-            project.id = res.id.toString();
-            project.createdAt = res.created_at;
+          if (res?.ok && res?.data?.id) {
+            project.id = res.data.id.toString();
+            project.createdAt = res.data.created_at;
             return true;
           }
+          console.error('Edge function also failed:', res);
           return false;
         }
 
@@ -163,6 +167,8 @@ class PortfolioStore {
       } else {
         // Update path – never touch identity or created_at
         const updatePayload = convertToSupabaseUpdate(project);
+        console.log('Update payload:', updatePayload);
+        
         const { data, error } = await (supabase as any)
           .from('projects')
           .update(updatePayload)
@@ -174,7 +180,11 @@ class PortfolioStore {
           console.error('Direct update failed:', error);
           console.warn('Attempting Edge Function fallback...');
           const res = await callPortfolioAdmin('update', { id: Number(project.id), ...updatePayload });
-          return !!res;
+          if (res?.ok) {
+            return true;
+          }
+          console.error('Edge function also failed:', res);
+          return false;
         }
 
         return true;
@@ -354,7 +364,10 @@ class PortfolioStore {
     }
     
     const index = this.config.items.findIndex(p => p.id == id);
-    if (index === -1) return false;
+    if (index === -1) {
+      console.error('Project not found for update:', id);
+      return false;
+    }
 
     const originalProject = { ...this.config.items[index] };
     const updatedProject = { 
@@ -373,14 +386,27 @@ class PortfolioStore {
         // Revert optimistic update if save failed
         this.config.items[index] = originalProject;
         this.dispatchUpdateEvent();
+        // Show error message
+        window.dispatchEvent(new CustomEvent('showToast', { 
+          detail: { type: 'error', message: 'שגיאה בעדכון הפרויקט' } 
+        }));
         return false;
       }
+      // Show success message
+      window.dispatchEvent(new CustomEvent('showToast', { 
+        detail: { type: 'success', message: 'הפרויקט עודכן בהצלחה!' } 
+      }));
       // Realtime will handle the final sync
       return true;
     } catch (error) {
+      console.error('Error updating project:', error);
       // Revert optimistic update if save failed
       this.config.items[index] = originalProject;
       this.dispatchUpdateEvent();
+      // Show error message
+      window.dispatchEvent(new CustomEvent('showToast', { 
+        detail: { type: 'error', message: 'שגיאה בעדכון הפרויקט' } 
+      }));
       return false;
     }
   }
