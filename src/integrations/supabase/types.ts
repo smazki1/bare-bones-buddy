@@ -62,6 +62,98 @@ export type Database = {
         }
         Relationships: []
       }
+      client_images: {
+        Row: {
+          category: string
+          client_id: string
+          created_at: string | null
+          dish_name: string
+          id: string
+          image_after: string
+          image_before: string | null
+          service_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string
+          client_id: string
+          created_at?: string | null
+          dish_name: string
+          id?: string
+          image_after: string
+          image_before?: string | null
+          service_type?: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          client_id?: string
+          created_at?: string | null
+          dish_name?: string
+          id?: string
+          image_after?: string
+          image_before?: string | null
+          service_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_images_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          business_name: string
+          business_type: string
+          contact_person: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          monthly_savings: number | null
+          notes: string | null
+          package_type: string
+          phone: string | null
+          signup_date: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          business_name: string
+          business_type: string
+          contact_person?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          monthly_savings?: number | null
+          notes?: string | null
+          package_type?: string
+          phone?: string | null
+          signup_date?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          business_name?: string
+          business_type?: string
+          contact_person?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          monthly_savings?: number | null
+          notes?: string | null
+          package_type?: string
+          phone?: string | null
+          signup_date?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       dishes: {
         Row: {
           after_url: string | null
