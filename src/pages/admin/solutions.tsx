@@ -24,10 +24,35 @@ const AdminSolutions = () => {
 
   useEffect(() => {
     if (user && isAdmin) {
-      const storedConfig = solutionsStore.getConfig();
-      if (storedConfig) {
-        setConfig(storedConfig);
-      }
+      // Cloud-first load to mirror homepage and ensure parity
+      let didSetFromCloud = false;
+      (async () => {
+        try {
+          const cloud = await solutionsStore.fetchFromSupabase();
+          if (cloud) {
+            setConfig(cloud);
+            didSetFromCloud = true;
+          }
+        } catch {}
+        if (!didSetFromCloud) {
+          const stored = solutionsStore.getConfig();
+          setConfig(stored || solutionsStore.safeGetConfigOrDefaults());
+        }
+      })();
+
+      // Keep in sync with same-tab/local updates
+      const handleLocalUpdate = () => setConfig(solutionsStore.safeGetConfigOrDefaults());
+      const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === 'aiMaster:solutions') {
+          setConfig(solutionsStore.safeGetConfigOrDefaults());
+        }
+      };
+      window.addEventListener('solutions:updated', handleLocalUpdate as EventListener);
+      window.addEventListener('storage', handleStorageChange);
+      return () => {
+        window.removeEventListener('solutions:updated', handleLocalUpdate as EventListener);
+        window.removeEventListener('storage', handleStorageChange);
+      };
     }
   }, [user, isAdmin]);
 
