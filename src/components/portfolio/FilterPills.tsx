@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { categoryFilters } from '@/data/portfolioMock';
+import { getAvailableTags } from '@/utils/tagUtils';
+import { useState, useEffect } from 'react';
 
 interface FilterPillsProps {
   activeFilter: string;
@@ -8,6 +9,18 @@ interface FilterPillsProps {
 }
 
 const FilterPills = ({ activeFilter, onFilterChange }: FilterPillsProps) => {
+  const [availableTags, setAvailableTags] = useState(() => getAvailableTags());
+
+  // Listen for solutions updates to refresh available tags
+  useEffect(() => {
+    const handleSolutionsUpdate = () => {
+      setAvailableTags(getAvailableTags());
+    };
+
+    window.addEventListener('solutions:updated', handleSolutionsUpdate);
+    return () => window.removeEventListener('solutions:updated', handleSolutionsUpdate);
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -17,7 +30,7 @@ const FilterPills = ({ activeFilter, onFilterChange }: FilterPillsProps) => {
     >
       <div className="container mx-auto px-4">
         <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory md:justify-center">
-          {categoryFilters.map((filter, index) => (
+          {availableTags.map((filter, index) => (
             <motion.div
               key={filter.slug}
               initial={{ opacity: 0, scale: 0.9 }}
