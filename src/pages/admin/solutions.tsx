@@ -34,14 +34,29 @@ const AdminSolutions = () => {
   const handleSectionChange = (field: 'sectionTitle' | 'sectionSubtitle', value: string) => {
     setConfig(prev => {
       const next = { ...prev, [field]: value };
-      solutionsStore.saveConfig(next);
+      const ok = solutionsStore.saveConfig(next);
+      if (!ok) {
+        toast({
+          title: 'שמירה נכשלה',
+          description: 'נכשלה שמירה ל-localStorage (נפח/הרשאות). נשמור רק לזיכרון עד לרענון.',
+          variant: 'destructive'
+        });
+      }
       return next;
     });
     setHasUnsavedChanges(true);
   };
 
   const handleSaveConfig = () => {
-    solutionsStore.saveConfig(config);
+    const ok = solutionsStore.saveConfig(config);
+    if (!ok) {
+      toast({
+        title: 'שמירה נכשלה',
+        description: 'אין אפשרות לשמור ל-localStorage. ייתכן שנפח האחסון מלא או נחסם.',
+        variant: 'destructive'
+      });
+      return;
+    }
     setHasUnsavedChanges(false);
     toast({
       title: 'נשמר בהצלחה',
@@ -88,7 +103,10 @@ const AdminSolutions = () => {
           order: index,
         })),
       };
-      solutionsStore.saveConfig(next);
+      const ok = solutionsStore.saveConfig(next);
+      if (!ok) {
+        toast({ title: 'שמירה נכשלה', description: 'בעיה בשמירת התצורה', variant: 'destructive' });
+      }
       return next;
     });
     setHasUnsavedChanges(true);
@@ -102,7 +120,10 @@ const AdminSolutions = () => {
           item.id === id ? { ...item, enabled } : item
         ),
       };
-      solutionsStore.saveConfig(next);
+      const ok = solutionsStore.saveConfig(next);
+      if (!ok) {
+        toast({ title: 'שמירה נכשלה', description: 'בעיה בשמירת התצורה', variant: 'destructive' });
+      }
       return next;
     });
     setHasUnsavedChanges(true);
@@ -111,7 +132,10 @@ const AdminSolutions = () => {
   const handleReorderCards = (reorderedItems: SolutionCard[]) => {
     setConfig(prev => {
       const next = { ...prev, items: reorderedItems };
-      solutionsStore.saveConfig(next);
+      const ok = solutionsStore.saveConfig(next);
+      if (!ok) {
+        toast({ title: 'שמירה נכשלה', description: 'בעיה בשמירת התצורה', variant: 'destructive' });
+      }
       return next;
     });
     setHasUnsavedChanges(true);

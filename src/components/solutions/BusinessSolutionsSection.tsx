@@ -97,6 +97,10 @@ const BusinessSolutionsSection = () => {
 
     updateConfig();
 
+    const handleSaveFailed = () => {
+      console.warn('BusinessSolutions: save_failed event received');
+    };
+
     // Cross-tab updates
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'aiMaster:solutions') updateConfig();
@@ -106,10 +110,12 @@ const BusinessSolutionsSection = () => {
     // Same-tab updates from admin actions
     const handleLocalUpdate = () => updateConfig();
     window.addEventListener('solutions:updated', handleLocalUpdate as EventListener);
+    window.addEventListener('solutions:save_failed', handleSaveFailed as EventListener);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('solutions:updated', handleLocalUpdate as EventListener);
+      window.removeEventListener('solutions:save_failed', handleSaveFailed as EventListener);
     };
   }, []);
 

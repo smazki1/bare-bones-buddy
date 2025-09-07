@@ -59,24 +59,31 @@ class SolutionsStore {
     }
   }
 
-  saveConfig(config: SolutionsConfig): void {
-    if (this.isSSR()) return;
-    
+  saveConfig(config: SolutionsConfig): boolean {
+    if (this.isSSR()) return false;
+
     const fixedItems = this.ensureUniqueIds(this.fixOrder(config.items));
     const configToSave = {
       ...config,
       items: fixedItems,
       updatedAt: new Date().toISOString()
     };
-    
+
+    // Pre-flight size guard: localStorage is typically ~5MB. Keep some headroom.
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(configToSave));
-      // Notify same-tab listeners that solutions config changed
-      try {
-        window.dispatchEvent(new Event('solutions:updated'));
-      } catch {}
+      const json = JSON.stringify(configToSave);
+      if (json.length > 4_500_000) {
+        console.error('Solutions config too large for localStorage. Size (bytes):', json.length);
+        try { window.dispatchEvent(new Event('solutions:save_failed')); } catch {}
+        return false;
+      }
+      localStorage.setItem(STORAGE_KEY, json);
+      try { window.dispatchEvent(new Event('solutions:updated')); } catch {}
+      return true;
     } catch (error) {
       console.error('Failed to save solutions config:', error);
+      try { window.dispatchEvent(new Event('solutions:save_failed')); } catch {}
+      return false;
     }
   }
 
