@@ -63,6 +63,19 @@ const AdminPortfolioList = ({ projects, onEdit, onDelete, onDuplicate }: AdminPo
     });
   };
 
+  const setItemPosition = (id: number, newIndex: number) => {
+    setLocalOrder(prev => {
+      if (newIndex < 0 || newIndex >= prev.length) return prev;
+      const currentIndex = prev.indexOf(id);
+      if (currentIndex === -1 || currentIndex === newIndex) return prev;
+      
+      const next = [...prev];
+      next.splice(currentIndex, 1);
+      next.splice(newIndex, 0, id);
+      return next;
+    });
+  };
+
   const saveOrder = () => {
     if (!visibleCategory || !sortMode || localOrder.length === 0) return;
     portfolioStore.setManualOrderForCategory(visibleCategory, localOrder);
@@ -126,9 +139,20 @@ const AdminPortfolioList = ({ projects, onEdit, onDelete, onDuplicate }: AdminPo
                 <Badge variant="secondary" className="text-[10px] mt-1">Pinned</Badge>
               )}
               {sortMode && visibleCategory && (
-                <div className="flex gap-1 mt-1">
-                  <Button variant="outline" size="sm" className="h-7 px-2 text-xs" onClick={() => moveItem(Number(project.id), 'up')}>↑</Button>
-                  <Button variant="outline" size="sm" className="h-7 px-2 text-xs" onClick={() => moveItem(Number(project.id), 'down')}>↓</Button>
+                <div className="flex flex-col gap-1 mt-1">
+                  <Input
+                    type="number"
+                    min="1"
+                    max={filteredProjects.length}
+                    value={localOrder.indexOf(Number(project.id)) + 1}
+                    onChange={(e) => setItemPosition(Number(project.id), parseInt(e.target.value) - 1)}
+                    className="h-7 w-12 text-xs text-center"
+                    title="מיקום"
+                  />
+                  <div className="flex gap-1">
+                    <Button variant="outline" size="sm" className="h-6 w-6 p-0 text-xs" onClick={() => moveItem(Number(project.id), 'up')}>↑</Button>
+                    <Button variant="outline" size="sm" className="h-6 w-6 p-0 text-xs" onClick={() => moveItem(Number(project.id), 'down')}>↓</Button>
+                  </div>
                 </div>
               )}
             </div>
