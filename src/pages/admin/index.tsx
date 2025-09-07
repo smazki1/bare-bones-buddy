@@ -80,6 +80,13 @@ const AdminLogin = ({ onSignIn }: { onSignIn: (email: string, password: string) 
 const AdminDashboard = ({ onLogout, userEmail }: { onLogout: () => void; userEmail?: string }) => {
   const adminSections = [
     {
+      title: 'ניהול לקוחות',
+      description: 'ניהול לקוחות, התמונות שלהם וחיסכון חודשי',
+      icon: Users,
+      href: '/admin/clients',
+      color: 'text-indigo-600'
+    },
+    {
       title: 'ניהול פתרונות עסקיים',
       description: 'עריכת התוכן, התמונות והקישורים של הסקשן',
       icon: Image,
