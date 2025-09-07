@@ -23,7 +23,7 @@ export const DEFAULT_SOLUTIONS_CONFIG: SolutionsConfig = {
     {
       id: 'restaurants',
       title: 'מסעדות ובתי קפה',
-      videoSrc: 'https://videos.pexels.com/video-files/3196330/3196330-uhd_2560_1440_25fps.mp4',
+      imageSrc: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
       tagSlug: 'restaurants',
       href: '/portfolio?tag=restaurants',
       enabled: true,
