@@ -8,7 +8,8 @@ export type Project = {
   imageAfter: string;
   imageBefore?: string;
   size: ProjectSize;
-  category: string;
+  category: string; // Keep for backward compatibility
+  tags?: string[]; // New multiple tags support
   pinned?: boolean;
   createdAt?: string;
 };

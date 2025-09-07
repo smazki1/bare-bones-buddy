@@ -143,6 +143,7 @@ export type Database = {
           pinned: boolean
           service_type: string
           size: string
+          tags: string[] | null
         }
         Insert: {
           business_name: string
@@ -155,6 +156,7 @@ export type Database = {
           pinned?: boolean
           service_type: string
           size: string
+          tags?: string[] | null
         }
         Update: {
           business_name?: string
@@ -167,6 +169,25 @@ export type Database = {
           pinned?: boolean
           service_type?: string
           size?: string
+          tags?: string[] | null
+        }
+        Relationships: []
+      }
+      site_configs: {
+        Row: {
+          content: Json
+          key: string
+          updated_at: string
+        }
+        Insert: {
+          content: Json
+          key: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          key?: string
+          updated_at?: string
         }
         Relationships: []
       }

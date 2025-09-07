@@ -22,6 +22,7 @@ const convertFromSupabase = (dbProject: any): Project => ({
   imageBefore: dbProject.image_before,
   size: dbProject.size,
   category: dbProject.category,
+  tags: dbProject.tags || [dbProject.category], // Use tags or fallback to category
   pinned: dbProject.pinned || false,
   createdAt: dbProject.created_at
 });
@@ -34,7 +35,8 @@ const convertToSupabaseUpdate = (project: Project) => ({
   image_after: project.imageAfter,
   image_before: project.imageBefore || null,
   size: project.size,
-  category: project.category,
+  category: project.tags?.[0] || project.category, // Use first tag as category for compatibility
+  tags: project.tags || [project.category],
   pinned: project.pinned || false,
 });
 
@@ -47,7 +49,8 @@ const convertToSupabaseInsert = (project: Project) => ({
   image_after: project.imageAfter,
   image_before: project.imageBefore,
   size: project.size,
-  category: project.category,
+  category: project.tags?.[0] || project.category, // Use first tag as category for compatibility
+  tags: project.tags || [project.category],
   pinned: project.pinned || false,
   created_at: project.createdAt
 });
@@ -406,7 +409,10 @@ class PortfolioStore {
     if (category === 'all') {
       return projects;
     }
-    const filtered = projects.filter(p => p.category === category);
+    // Filter projects that have the category in their tags or as their primary category
+    const filtered = projects.filter(p => 
+      p.tags?.includes(category) || p.category === category
+    );
     return filtered.sort((a, b) => this.sortProjects(a, b, category));
   }
 

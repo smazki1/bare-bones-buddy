@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Upload, X, Image, Eye, Loader2 } from 'lucide-react';
+import { Upload, X, Image, Eye, Loader2, Plus } from 'lucide-react';
 import { Project, ProjectSize } from '@/data/portfolioMock';
 import { categoryFilters } from '@/data/portfolioMock';
 import { convertFileToDataUrl, isValidImageFile } from '@/utils/fileUtils';
@@ -29,7 +29,8 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject }: Admin
     imageAfter: '',
     imageBefore: '',
     size: 'medium',
-    category: 'restaurants'
+    category: 'restaurants',
+    tags: []
   });
   const [isUploading, setIsUploading] = useState(false);
   const [previewImages, setPreviewImages] = useState<{
@@ -51,7 +52,8 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject }: Admin
         imageAfter: editingProject.imageAfter,
         imageBefore: editingProject.imageBefore || '',
         size: editingProject.size,
-        category: editingProject.category
+        category: editingProject.category,
+        tags: editingProject.tags || [editingProject.category]
       });
       setPreviewImages({
         after: editingProject.imageAfter,
@@ -65,7 +67,8 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject }: Admin
         imageAfter: '',
         imageBefore: '',
         size: 'medium',
-        category: 'restaurants'
+        category: 'restaurants',
+        tags: []
       });
       setPreviewImages({});
     }
@@ -135,6 +138,23 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject }: Admin
       ...prev,
       [type]: undefined
     }));
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      tags: prev.tags?.filter(tag => tag !== tagToRemove) || []
+    }));
+  };
+
+  const addTag = (newTag: string) => {
+    if (newTag && !formData.tags?.includes(newTag)) {
+      setFormData(prev => ({
+        ...prev,
+        tags: [...(prev.tags || []), newTag],
+        category: newTag // Keep category as primary tag for compatibility
+      }));
+    }
   };
 
   const handleSave = () => {
@@ -290,8 +310,8 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject }: Admin
             </div>
           </div>
 
-          {/* Service & Category */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Service & Tags */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-sm font-assistant font-medium text-foreground">סוג שירות</Label>
               <Select
@@ -306,25 +326,6 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject }: Admin
                 <SelectContent>
                   <SelectItem value="תמונות">תמונות</SelectItem>
                   <SelectItem value="סרטונים">סרטונים</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm font-assistant font-medium text-foreground">קטגוריה</Label>
-              <Select
-                value={formData.category}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
-              >
-                <SelectTrigger className="text-right" dir="rtl">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {categoryFilters.filter(cat => cat.slug !== 'all').map((category) => (
-                    <SelectItem key={category.slug} value={category.slug}>
-                      {category.label}
-                    </SelectItem>
-                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -345,6 +346,49 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject }: Admin
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          {/* Tags Selection */}
+          <div className="space-y-4">
+            <Label className="text-sm font-assistant font-medium text-foreground">תגיות (ניתן לבחור מספר תגיות)</Label>
+            
+            {/* Selected Tags */}
+            {formData.tags && formData.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {formData.tags.map((tag) => {
+                  const tagLabel = categoryFilters.find(cat => cat.slug === tag)?.label || tag;
+                  return (
+                    <Badge key={tag} variant="secondary" className="gap-2">
+                      {tagLabel}
+                      <X 
+                        className="w-3 h-3 cursor-pointer hover:text-destructive" 
+                        onClick={() => removeTag(tag)}
+                      />
+                    </Badge>
+                  );
+                })}
+              </div>
+            )}
+            
+            {/* Add New Tag */}
+            <Select onValueChange={addTag} value="">
+              <SelectTrigger className="text-right" dir="rtl">
+                <SelectValue placeholder="הוסף תגית..." />
+              </SelectTrigger>
+              <SelectContent>
+                {categoryFilters.filter(cat => 
+                  cat.slug !== 'all' && 
+                  !formData.tags?.includes(cat.slug)
+                ).map((category) => (
+                  <SelectItem key={category.slug} value={category.slug}>
+                    <div className="flex items-center gap-2">
+                      <Plus className="w-4 h-4" />
+                      {category.label}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Images */}
