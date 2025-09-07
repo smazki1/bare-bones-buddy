@@ -120,7 +120,7 @@ const AdminPortfolioPage = () => {
     }
   };
 
-  const handleSaveProject = async (projectData: Omit<Project, 'id'> | Project) => {
+  const persistProject = async (projectData: Omit<Project, 'id'> | Project) => {
     try {
       console.log('Saving project:', projectData);
       
@@ -143,6 +143,30 @@ const AdminPortfolioPage = () => {
     } catch (error: any) {
       console.error('Error saving project:', error);
       toast({ title: 'שגיאה', description: error?.message || 'שגיאה בשמירת הפרויקט', variant: 'destructive' });
+    }
+  };
+
+  // Autosave handler (no modal close, no toasts unless error)
+  const handleAutoSave = async (projectData: Omit<Project, 'id'> | Project) => {
+    try {
+      if ('id' in projectData) {
+        await portfolioStore.updateProject(projectData.id, {
+          businessName: projectData.businessName,
+          businessType: projectData.businessType,
+          serviceType: projectData.serviceType,
+          imageAfter: projectData.imageAfter,
+          imageBefore: projectData.imageBefore,
+          size: projectData.size,
+          category: projectData.category,
+          pinned: projectData.pinned,
+        });
+      } else {
+        await portfolioStore.addProject(projectData);
+      }
+      setHasUnsavedChanges(true);
+    } catch (error) {
+      // Silent failure; editor still shows
+      console.warn('Autosave failed:', error);
     }
   };
 
@@ -461,7 +485,8 @@ const AdminPortfolioPage = () => {
             setIsEditorOpen(false);
             setEditingProject(null);
           }}
-          onSave={handleSaveProject}
+          onSave={persistProject}
+          onAutoSave={handleAutoSave}
           editingProject={editingProject}
         />
       </div>

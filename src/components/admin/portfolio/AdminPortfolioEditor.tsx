@@ -18,9 +18,10 @@ interface AdminPortfolioEditorProps {
   onClose: () => void;
   onSave: (project: Omit<Project, 'id'> | Project) => void;
   editingProject?: Project | null;
+  onAutoSave?: (project: Omit<Project, 'id'> | Project) => void;
 }
 
-const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject }: AdminPortfolioEditorProps) => {
+const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject, onAutoSave }: AdminPortfolioEditorProps) => {
   const { toast } = useToast();
   const [formData, setFormData] = useState<Omit<Project, 'id'>>({
     businessName: '',
@@ -37,6 +38,7 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject }: Admin
     after?: string;
     before?: string;
   }>({});
+  const [autoSaveTimer, setAutoSaveTimer] = useState<number | null>(null);
 
   const afterInputRef = useRef<HTMLInputElement>(null);
   const beforeInputRef = useRef<HTMLInputElement>(null);
@@ -73,6 +75,28 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject }: Admin
       setPreviewImages({});
     }
   }, [isOpen, editingProject]);
+
+  // Debounced autosave when editing existing projects or when new project is valid (has name + after image)
+  useEffect(() => {
+    if (!isOpen || !onAutoSave) return;
+
+    const isValid = formData.businessName.trim().length > 0 && !!formData.imageAfter;
+    const payload = editingProject ? { ...editingProject, ...formData } : formData;
+
+    // Only autosave when editing an existing project, or when new form is valid
+    if (editingProject || isValid) {
+      if (autoSaveTimer) window.clearTimeout(autoSaveTimer);
+      const t = window.setTimeout(() => {
+        try { onAutoSave(payload); } catch {}
+      }, 800);
+      setAutoSaveTimer(t);
+    }
+
+    return () => {
+      if (autoSaveTimer) window.clearTimeout(autoSaveTimer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData, isOpen, editingProject]);
 
   const handleImageUpload = async (file: File, type: 'after' | 'before') => {
     if (!isValidImageFile(file)) {
