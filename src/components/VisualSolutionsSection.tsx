@@ -101,7 +101,18 @@ const VisualSolutionsSection = () => {
       setConfig(newConfig);
     };
 
-    loadConfig();
+    // Cloud-first load with fallback
+    let didSetFromCloud = false;
+    (async () => {
+      try {
+        const cloud = await visualSolutionsStore.fetchFromSupabase();
+        if (cloud) {
+          setConfig(cloud);
+          didSetFromCloud = true;
+        }
+      } catch {}
+      if (!didSetFromCloud) loadConfig();
+    })();
 
     // Cross-tab updates
     const handleStorageChange = (e: StorageEvent) => {

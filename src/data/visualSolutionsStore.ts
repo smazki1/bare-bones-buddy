@@ -1,6 +1,8 @@
 import { VisualSolutionsConfig, VisualSolutionCard, DEFAULT_VISUAL_SOLUTIONS_CONFIG } from '@/types/visualSolutions';
+import { supabase } from '@/integrations/supabase/client';
 
 const STORAGE_KEY = 'aiMaster:visualSolutions';
+const SUPABASE_KEY = 'visual_solutions_v1';
 
 class VisualSolutionsStore {
   private isSSR(): boolean {
@@ -152,6 +154,64 @@ class VisualSolutionsStore {
     }
     
     return id;
+  }
+
+  // ---------- Supabase integration (optional but preferred) ----------
+  private isSupabaseReady(): boolean {
+    return typeof supabase !== 'undefined' && supabase !== null;
+  }
+
+  private normalize(config: VisualSolutionsConfig): VisualSolutionsConfig {
+    const fixedItems = this.ensureUniqueIds(this.fixOrder(config.items));
+    return { ...config, items: fixedItems };
+  }
+
+  async fetchFromSupabase(): Promise<VisualSolutionsConfig | null> {
+    if (!this.isSupabaseReady()) return null;
+    try {
+      const { data, error } = await (supabase as any)
+        .from('site_configs')
+        .select('content, updated_at')
+        .eq('key', SUPABASE_KEY)
+        .maybeSingle();
+      if (error) {
+        console.warn('Supabase visual solutions fetch error:', error.message);
+        return null;
+      }
+      if (!data?.content) return null;
+      const cfg = data.content as VisualSolutionsConfig;
+      if (!this.validateConfig(cfg)) return null;
+      const normalized = this.normalize(cfg);
+      try { this.saveConfig({ ...normalized, updatedAt: new Date().toISOString() } as any); } catch {}
+      return normalized;
+    } catch (e) {
+      console.warn('Supabase visual solutions fetch exception:', e);
+      return null;
+    }
+  }
+
+  async saveToSupabase(config: VisualSolutionsConfig): Promise<boolean> {
+    if (!this.isSupabaseReady()) return false;
+    try {
+      const normalized = this.normalize(config);
+      const payload = {
+        key: SUPABASE_KEY,
+        content: normalized,
+        updated_at: new Date().toISOString()
+      };
+      const { error } = await (supabase as any)
+        .from('site_configs')
+        .upsert(payload, { onConflict: 'key' });
+      if (error) {
+        console.error('Supabase visual solutions save error:', error.message);
+        return false;
+      }
+      try { window.dispatchEvent(new Event('visualSolutions:updated')); } catch {}
+      return true;
+    } catch (e) {
+      console.error('Supabase visual solutions save exception:', e);
+      return false;
+    }
   }
 }
 

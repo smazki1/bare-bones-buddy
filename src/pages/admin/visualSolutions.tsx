@@ -40,8 +40,9 @@ const AdminVisualSolutions = () => {
     setHasUnsavedChanges(true);
   };
 
-  const handleSaveConfig = () => {
+  const handleSaveConfig = async () => {
     visualSolutionsStore.saveConfig(config);
+    await visualSolutionsStore.saveToSupabase(config);
     setHasUnsavedChanges(false);
     toast({
       title: "נשמר בהצלחה",
