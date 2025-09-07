@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { X, Upload, Play, Pause, ExternalLink, ChevronDown, ChevronRight } from 'lucide-react';
+import { X, Upload, Play, Pause, ExternalLink, ChevronDown, ChevronRight, Plus } from 'lucide-react';
 import { convertFileToDataUrl, isValidImageFile, isValidVideoFile } from '@/utils/fileUtils';
 import { useToast } from '@/hooks/use-toast';
 import { marketsStore } from '@/data/marketsStore';
@@ -53,12 +53,18 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
   const [isClickable, setIsClickable] = useState(false);
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const [availableTags, setAvailableTags] = useState<Array<{id: string, label: string, slug: string}>>([]);
+  const [showAddCategory, setShowAddCategory] = useState(false);
+  const [newCategoryLabel, setNewCategoryLabel] = useState('');
   const videoRef = useRef<HTMLVideoElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
   // Load available tags from markets store
   useEffect(() => {
+    loadAvailableTags();
+  }, []);
+
+  const loadAvailableTags = () => {
     const marketsConfig = marketsStore.safeGetConfigOrDefaults();
     const enabledTags = marketsConfig.items
       .filter(item => item.enabled)
@@ -68,7 +74,52 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
         slug: item.slug
       }));
     setAvailableTags(enabledTags);
-  }, []);
+  };
+
+  const handleAddCategory = () => {
+    if (!newCategoryLabel.trim()) {
+      toast({
+        title: 'שגיאה',
+        description: 'יש להזין שם קטגוריה',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const marketsConfig = marketsStore.safeGetConfigOrDefaults();
+    const newId = marketsStore.generateId(newCategoryLabel);
+    const newSlug = newCategoryLabel
+      .toLowerCase()
+      .replace(/[\s\u05D0-\u05EA]+/g, '-')
+      .replace(/[^\w-]/g, '')
+      .replace(/^-+|-+$/g, '');
+
+    const newTag = {
+      id: newId,
+      label: newCategoryLabel.trim(),
+      slug: newSlug,
+      enabled: true,
+      order: marketsConfig.items.length
+    };
+
+    const updatedConfig = {
+      ...marketsConfig,
+      items: [...marketsConfig.items, newTag]
+    };
+
+    marketsStore.saveConfig(updatedConfig);
+    loadAvailableTags();
+    setNewCategoryLabel('');
+    setShowAddCategory(false);
+    
+    // Auto-select the new category
+    handleTagChange(newSlug);
+    
+    toast({
+      title: 'הצלחה',
+      description: 'קטגוריה חדשה נוספה בהצלחה',
+    });
+  };
 
   // Sync form data when opening editor or when switching cards
   useEffect(() => {
@@ -308,16 +359,59 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
 
                 {isClickable && (
                   <div className="space-y-2">
-                    <Label className="text-right text-sm font-medium text-card-foreground">
-                      בחר קטגוריה
-                    </Label>
+                    <div className="flex items-center justify-between">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowAddCategory(!showAddCategory)}
+                        className="flex items-center gap-2"
+                      >
+                        <Plus className="h-4 w-4" />
+                        הוסף קטגוריה
+                      </Button>
+                      <Label className="text-right text-sm font-medium text-card-foreground">
+                        בחר קטגוריה
+                      </Label>
+                    </div>
+                    
+                    {showAddCategory && (
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={handleAddCategory}
+                          disabled={!newCategoryLabel.trim()}
+                        >
+                          הוסף
+                        </Button>
+                        <Input
+                          value={newCategoryLabel}
+                          onChange={(e) => setNewCategoryLabel(e.target.value)}
+                          placeholder="שם קטגוריה חדשה"
+                          className="flex-1 text-right bg-background border-input text-foreground placeholder:text-muted-foreground"
+                          dir="rtl"
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleAddCategory();
+                            }
+                          }}
+                        />
+                      </div>
+                    )}
+                    
                     <Select value={formData.tagSlug || ''} onValueChange={handleTagChange}>
-                      <SelectTrigger className="text-right" dir="rtl">
+                      <SelectTrigger className="text-right bg-background border-input text-foreground" dir="rtl">
                         <SelectValue placeholder="בחר קטגוריה לתיק העבודות" />
                       </SelectTrigger>
-                      <SelectContent dir="rtl">
+                      <SelectContent dir="rtl" className="bg-background border-border shadow-md">
                         {availableTags.map((tag) => (
-                          <SelectItem key={tag.id} value={tag.slug}>
+                          <SelectItem 
+                            key={tag.id} 
+                            value={tag.slug}
+                            className="text-foreground hover:bg-muted focus:bg-muted cursor-pointer"
+                          >
                             {tag.label}
                           </SelectItem>
                         ))}
