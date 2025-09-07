@@ -200,51 +200,57 @@ const AdminVisualSolutionsEditor = ({
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6 bg-background">
+        <form onSubmit={handleSubmit} className="space-y-6 bg-background p-1">
           {/* Basic Information */}
           <div className="space-y-4">
             <div>
-              <Label htmlFor="title" className="font-assistant text-foreground font-medium">כותרת *</Label>
+              <Label htmlFor="title" className="font-assistant text-foreground font-medium text-sm mb-1.5 block">
+                כותרת *
+              </Label>
               <Input
                 id="title"
                 value={formData.title || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                 placeholder="לדוגמה: תמונות תפריט"
                 required
-                className="font-open-sans bg-background border-input text-foreground placeholder:text-muted-foreground"
+                className="font-open-sans bg-background border-input text-foreground placeholder:text-muted-foreground h-10"
               />
             </div>
 
             <div>
-              <Label htmlFor="href" className="font-assistant text-foreground font-medium">קישור (אופציונלי)</Label>
+              <Label htmlFor="href" className="font-assistant text-foreground font-medium text-sm mb-1.5 block">
+                קישור (אופציונלי)
+              </Label>
               <Input
                 id="href"
                 value={formData.href || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, href: e.target.value }))}
                 placeholder="/services"
-                className="font-open-sans bg-background border-input text-foreground placeholder:text-muted-foreground"
+                className="font-open-sans bg-background border-input text-foreground placeholder:text-muted-foreground h-10"
               />
             </div>
 
             <div>
-              <Label htmlFor="tagSlug" className="font-assistant text-foreground font-medium">תג סינון (אופציונלי)</Label>
+              <Label htmlFor="tagSlug" className="font-assistant text-foreground font-medium text-sm mb-1.5 block">
+                תג סינון (אופציונלי)
+              </Label>
               <Input
                 id="tagSlug"
                 value={formData.tagSlug || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, tagSlug: e.target.value }))}
                 placeholder="menu-photos"
-                className="font-open-sans bg-background border-input text-foreground placeholder:text-muted-foreground"
+                className="font-open-sans bg-background border-input text-foreground placeholder:text-muted-foreground h-10"
               />
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-border">
               <Switch
                 id="enabled"
                 checked={formData.enabled ?? true}
                 onCheckedChange={(checked) => setFormData(prev => ({ ...prev, enabled: checked }))}
               />
-              <Label htmlFor="enabled" className="font-assistant text-foreground font-medium">
-                {formData.enabled ? <Eye className="w-4 h-4 inline ml-1" /> : <EyeOff className="w-4 h-4 inline ml-1" />}
+              <Label htmlFor="enabled" className="font-assistant text-foreground font-medium flex items-center gap-1.5">
+                {formData.enabled ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                 {formData.enabled ? 'פעיל' : 'לא פעיל'}
               </Label>
             </div>
@@ -277,9 +283,9 @@ const AdminVisualSolutionsEditor = ({
               <div>
                 <Label className="font-assistant text-foreground font-medium">תמונה ראשית *</Label>
                 <div
-                  className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors bg-background ${
-                    dragActive ? 'border-primary bg-primary/5' : 'border-muted-foreground hover:border-primary/50'
-                  } ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
+                  className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-all duration-200 bg-background min-h-[120px] flex flex-col items-center justify-center ${
+                    dragActive ? 'border-primary bg-primary/5 scale-[1.02]' : 'border-border hover:border-primary/50 hover:bg-muted/30'
+                  } ${isUploading ? 'opacity-60 pointer-events-none' : ''}`}
                   onDrop={(e) => handleDrop(e, 'image')}
                   onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
                   onDragLeave={() => setDragActive(false)}
@@ -288,29 +294,28 @@ const AdminVisualSolutionsEditor = ({
                     if (!isUploading) {
                       console.log('Opening file picker');
                       if (imageInputRef.current) {
-                        // Allow selecting the same file again by resetting the value
                         imageInputRef.current.value = '';
                         imageInputRef.current.click();
                       }
-                    } else {
-                      console.log('Upload in progress, click ignored');
                     }
                   }}
                 >
                   {isUploading ? (
-                    <div className="space-y-2">
-                      <div className="w-8 h-8 mx-auto border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                      <p className="font-open-sans text-sm text-muted-foreground">
+                    <div className="space-y-3">
+                      <div className="w-10 h-10 mx-auto border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                      <p className="font-open-sans text-sm text-muted-foreground font-medium">
                         מעלה תמונה...
                       </p>
                     </div>
                   ) : formData.imageSrc ? (
-                    <div className="space-y-2">
-                      <img
-                        src={formData.imageSrc}
-                        alt="Preview"
-                        className="max-w-full h-32 object-cover mx-auto rounded"
-                      />
+                    <div className="space-y-3 w-full">
+                      <div className="relative max-w-full">
+                        <img
+                          src={formData.imageSrc}
+                          alt="תצוגה מקדימה"
+                          className="max-w-full h-32 object-cover mx-auto rounded-lg border border-border shadow-sm"
+                        />
+                      </div>
                       <Button
                         type="button"
                         variant="outline"
@@ -319,18 +324,23 @@ const AdminVisualSolutionsEditor = ({
                           e.stopPropagation();
                           setFormData(prev => ({ ...prev, imageSrc: '' }));
                         }}
-                        className="font-assistant"
+                        className="font-assistant bg-background hover:bg-destructive hover:text-destructive-foreground border-border"
                       >
                         <X className="w-4 h-4 ml-1" />
                         החלף תמונה
                       </Button>
                     </div>
                   ) : (
-                    <div className="space-y-2">
-                      <Upload className="w-8 h-8 mx-auto text-muted-foreground" />
-                      <p className="font-open-sans text-sm text-muted-foreground">
-                        גרור תמונה לכאן או הדבק URL
-                      </p>
+                    <div className="space-y-3">
+                      <Upload className="w-10 h-10 mx-auto text-muted-foreground" />
+                      <div className="space-y-1">
+                        <p className="font-assistant text-sm font-medium text-foreground">
+                          לחץ להעלאת תמונה
+                        </p>
+                        <p className="font-open-sans text-xs text-muted-foreground">
+                          או גרור תמונה לכאן • JPG, PNG, WebP עד 5MB
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -342,16 +352,20 @@ const AdminVisualSolutionsEditor = ({
                   onChange={(e) => {
                     console.log('Input onChange triggered', e.target.files?.[0]?.name);
                     handleImageFileSelect(e.target.files?.[0] || null);
-                    // Reset to allow selecting the same file again
                     e.currentTarget.value = '';
                   }}
                 />
-                <Input
-                  value={formData.imageSrc || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, imageSrc: e.target.value }))}
-                  placeholder="או הדבק URL של תמונה כאן"
-                  className="mt-2 font-open-sans bg-background border-input text-foreground placeholder:text-muted-foreground"
-                />
+                <div className="mt-3">
+                  <Label className="font-assistant text-sm text-muted-foreground mb-1 block">
+                    או הדבק קישור לתמונה:
+                  </Label>
+                  <Input
+                    value={formData.imageSrc || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, imageSrc: e.target.value }))}
+                    placeholder="https://example.com/image.jpg"
+                    className="font-open-sans bg-background border-input text-foreground placeholder:text-muted-foreground"
+                  />
+                </div>
               </div>
             )}
 
@@ -359,34 +373,35 @@ const AdminVisualSolutionsEditor = ({
               <div>
                 <Label className="font-assistant text-foreground font-medium">וידאו (אופציונלי)</Label>
                 <div
-                  className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors bg-background ${
-                    dragActive ? 'border-primary bg-primary/5' : 'border-muted-foreground hover:border-primary/50'
-                  } ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
+                  className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-all duration-200 bg-background min-h-[120px] flex flex-col items-center justify-center ${
+                    dragActive ? 'border-primary bg-primary/5 scale-[1.02]' : 'border-border hover:border-primary/50 hover:bg-muted/30'
+                  } ${isUploading ? 'opacity-60 pointer-events-none' : ''}`}
                   onDrop={(e) => handleDrop(e, 'video')}
                   onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
                   onDragLeave={() => setDragActive(false)}
                   onClick={() => {
                     if (!isUploading && videoInputRef.current) {
-                      // Allow selecting the same file again by resetting the value
                       videoInputRef.current.value = '';
                       videoInputRef.current.click();
                     }
                   }}
                 >
                   {isUploading ? (
-                    <div className="space-y-2">
-                      <div className="w-8 h-8 mx-auto border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                      <p className="font-open-sans text-sm text-muted-foreground">
+                    <div className="space-y-3">
+                      <div className="w-10 h-10 mx-auto border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                      <p className="font-open-sans text-sm text-muted-foreground font-medium">
                         מעלה וידאו...
                       </p>
                     </div>
                   ) : formData.videoSrc ? (
-                    <div className="space-y-2">
-                      <video
-                        src={formData.videoSrc}
-                        className="max-w-full h-32 object-cover mx-auto rounded"
-                        controls
-                      />
+                    <div className="space-y-3 w-full">
+                      <div className="relative max-w-full">
+                        <video
+                          src={formData.videoSrc}
+                          className="max-w-full h-32 object-cover mx-auto rounded-lg border border-border shadow-sm"
+                          controls
+                        />
+                      </div>
                       <Button
                         type="button"
                         variant="outline"
@@ -395,18 +410,23 @@ const AdminVisualSolutionsEditor = ({
                           e.stopPropagation();
                           setFormData(prev => ({ ...prev, videoSrc: '' }));
                         }}
-                        className="font-assistant"
+                        className="font-assistant bg-background hover:bg-destructive hover:text-destructive-foreground border-border"
                       >
                         <X className="w-4 h-4 ml-1" />
                         החלף וידאו
                       </Button>
                     </div>
                   ) : (
-                    <div className="space-y-2">
-                      <Upload className="w-8 h-8 mx-auto text-muted-foreground" />
-                      <p className="font-open-sans text-sm text-muted-foreground">
-                        גרור וידאו לכאן או הדבק URL
-                      </p>
+                    <div className="space-y-3">
+                      <Upload className="w-10 h-10 mx-auto text-muted-foreground" />
+                      <div className="space-y-1">
+                        <p className="font-assistant text-sm font-medium text-foreground">
+                          לחץ להעלאת וידאו
+                        </p>
+                        <p className="font-open-sans text-xs text-muted-foreground">
+                          או גרור וידאו לכאן • MP4, WebM עד 10MB
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -418,34 +438,48 @@ const AdminVisualSolutionsEditor = ({
                   onChange={(e) => {
                     console.log('Video input onChange triggered', e.target.files?.[0]?.name);
                     handleVideoFileSelect(e.target.files?.[0] || null);
-                    // Reset to allow selecting the same file again
                     e.currentTarget.value = '';
                   }}
                 />
-                <Input
-                  value={formData.videoSrc || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, videoSrc: e.target.value }))}
-                  placeholder="או הדבק URL של וידאו כאן"
-                  className="mt-2 font-open-sans bg-background border-input text-foreground placeholder:text-muted-foreground"
-                />
+                <div className="mt-3">
+                  <Label className="font-assistant text-sm text-muted-foreground mb-1 block">
+                    או הדבק קישור לוידאו:
+                  </Label>
+                  <Input
+                    value={formData.videoSrc || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, videoSrc: e.target.value }))}
+                    placeholder="https://example.com/video.mp4"
+                    className="font-open-sans bg-background border-input text-foreground placeholder:text-muted-foreground"
+                  />
+                </div>
               </div>
             )}
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-6 border-t border-border">
             <Button
               type="submit"
-              disabled={!formData.title || !formData.imageSrc || isUploading}
-              className="font-assistant"
+              disabled={!formData.title?.trim() || !formData.imageSrc?.trim() || isUploading}
+              className="font-assistant flex-1 h-11"
             >
-              {isUploading ? 'מעלה...' : editingCard ? 'עדכן' : 'הוסף'} פתרון ויזואלי
+              {isUploading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin ml-2" />
+                  מעלה...
+                </>
+              ) : (
+                <>
+                  {editingCard ? 'עדכן' : 'הוסף'} פתרון ויזואלי
+                </>
+              )}
             </Button>
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
-              className="font-assistant"
+              disabled={isUploading}
+              className="font-assistant h-11 px-6"
             >
               ביטול
             </Button>
