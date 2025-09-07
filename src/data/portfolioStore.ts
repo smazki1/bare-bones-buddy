@@ -59,6 +59,7 @@ class PortfolioStore {
   private config: PortfolioConfig = { items: [], initialized: false };
   private isLoaded = false;
   private realtimeChannel: any = null;
+  private isMutating = false;
 
   constructor() {
     this.loadConfig();
@@ -81,7 +82,7 @@ class PortfolioStore {
         console.error('Error loading projects from Supabase:', error);
         // Fallback to mock data if Supabase fails
         this.config = {
-          items: fullPortfolioData,
+          items: [],
           initialized: true,
           updatedAt: new Date().toISOString(),
           manualOrderByCategory: {}
@@ -96,8 +97,15 @@ class PortfolioStore {
             manualOrderByCategory: {}
           };
         } else {
+          // Deduplicate by id to avoid any accidental duplicates from race conditions
+          const map = new Map<string, any>();
+          for (const p of projects) {
+            const key = String(p.id);
+            if (!map.has(key)) map.set(key, p);
+          }
+          const deduped = Array.from(map.values());
           this.config = {
-            items: projects.map(convertFromSupabase),
+            items: deduped.map(convertFromSupabase),
             initialized: true,
             updatedAt: new Date().toISOString(),
             manualOrderByCategory: {}
@@ -109,9 +117,9 @@ class PortfolioStore {
       this.dispatchUpdateEvent();
     } catch (error) {
       console.error('Error loading portfolio config:', error);
-      // Fallback to mock data
+      // Fallback to empty list (never re-seed automatically)
       this.config = {
-        items: fullPortfolioData,
+        items: [],
         initialized: true,
         updatedAt: new Date().toISOString(),
         manualOrderByCategory: {}
@@ -211,16 +219,9 @@ class PortfolioStore {
 
   private async deleteProjectFromSupabase(id: string | number): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('projects')
-        .delete()
-        .eq('id', Number(id));
-      
-      if (!error) return true;
-
-      console.warn('Direct delete failed, attempting Edge Function fallback:', (error as any)?.message || error);
-      await callPortfolioAdmin('delete', { id: Number(id) });
-      return true;
+      // Use Edge Function directly to avoid RLS issues
+      const res = await callPortfolioAdmin('delete', { id: Number(id) });
+      return !!res || true;
     } catch (error) {
       console.error('Error deleting project from Supabase:', error);
       return false;
@@ -330,6 +331,11 @@ class PortfolioStore {
   }
 
   async addProject(project: Omit<Project, 'id'>): Promise<Project> {
+    if (this.isMutating) {
+      console.warn('Mutation in progress. Ignoring addProject call.');
+      return Promise.reject(new Error('פעולה בתהליך, נסה שוב.'));
+    }
+    this.isMutating = true;
     if (!this.isLoaded) {
       await this.loadConfig();
     }
@@ -344,9 +350,7 @@ class PortfolioStore {
       ...project,
     };
 
-    // Add to UI immediately for instant feedback (optimistic update)
-    this.config.items.unshift(newProject);
-    this.dispatchUpdateEvent();
+    // Do not optimistic insert to avoid duplicates with realtime
 
     try {
       console.log('Saving to Supabase...');
@@ -354,31 +358,27 @@ class PortfolioStore {
       console.log('Save result:', success);
       
       if (!success) {
-        // Remove from UI if save failed
-        this.config.items = this.config.items.filter(p => p.id !== 'temp');
-        this.dispatchUpdateEvent();
         throw new Error('שגיאה בשמירת הפרויקט. בדוק הרשאות אדמין.');
       }
-      // Show success message
-      window.dispatchEvent(new CustomEvent('showToast', { 
-        detail: { type: 'success', message: 'הפרויקט נשמר בהצלחה!' } 
-      }));
-      // Realtime will handle the final update with correct ID
+      // Force sync from DB to avoid any client-side drift
+      await this.reload();
       return newProject;
     } catch (error) {
       console.error('Error in addProject:', error);
-      // Remove from UI if save failed
-      this.config.items = this.config.items.filter(p => p.id !== 'temp');
-      this.dispatchUpdateEvent();
       // Show error message
-      window.dispatchEvent(new CustomEvent('showToast', { 
-        detail: { type: 'error', message: error.message || 'שגיאה בשמירת הפרויקט' } 
-      }));
+      window.dispatchEvent(new CustomEvent('showToast', { detail: { type: 'error', message: error.message || 'שגיאה בשמירת הפרויקט' } }));
       throw error;
+    } finally {
+      this.isMutating = false;
     }
   }
 
   async updateProject(id: string | number, updates: Partial<Project>): Promise<boolean> {
+    if (this.isMutating) {
+      console.warn('Mutation in progress. Ignoring updateProject call.');
+      return false;
+    }
+    this.isMutating = true;
     if (!this.isLoaded) {
       await this.loadConfig();
     }
@@ -416,7 +416,8 @@ class PortfolioStore {
       window.dispatchEvent(new CustomEvent('showToast', { 
         detail: { type: 'success', message: 'הפרויקט עודכן בהצלחה!' } 
       }));
-      // Realtime will handle the final sync
+      // Force sync from DB to ensure server truth wins
+      await this.reload();
       return true;
     } catch (error) {
       console.error('Error updating project:', error);
@@ -428,26 +429,27 @@ class PortfolioStore {
         detail: { type: 'error', message: 'שגיאה בעדכון הפרויקט' } 
       }));
       return false;
+    } finally {
+      this.isMutating = false;
     }
   }
 
   async deleteProject(id: string | number): Promise<boolean> {
+    if (this.isMutating) {
+      console.warn('Mutation in progress. Ignoring deleteProject call.');
+      return false;
+    }
+    this.isMutating = true;
     if (!this.isLoaded) {
       await this.loadConfig();
     }
     
     const success = await this.deleteProjectFromSupabase(id);
-    if (success) {
-      const initialLength = this.config.items.length;
-      this.config.items = this.config.items.filter(p => p.id != id);
-      
-      if (this.config.items.length < initialLength) {
-        this.dispatchUpdateEvent();
-        return true;
-      }
-    }
-    
-    return false;
+    if (!success) return false;
+    // Hard reload from DB to prevent ghost items
+    await this.reload();
+    this.isMutating = false;
+    return true;
   }
 
   async getProjectsByCategory(category: string): Promise<Project[]> {

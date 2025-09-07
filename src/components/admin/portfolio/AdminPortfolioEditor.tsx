@@ -76,21 +76,17 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject, onAutoS
     }
   }, [isOpen, editingProject]);
 
-  // Debounced autosave when editing existing projects or when new project is valid (has name + after image)
+  // Debounced autosave ONLY when editing existing projects
   useEffect(() => {
-    if (!isOpen || !onAutoSave) return;
+    if (!isOpen || !onAutoSave || !editingProject) return;
 
-    const isValid = formData.businessName.trim().length > 0 && !!formData.imageAfter;
-    const payload = editingProject ? { ...editingProject, ...formData } : formData;
+    const payload = { ...editingProject, ...formData };
 
-    // Only autosave when editing an existing project, or when new form is valid
-    if (editingProject || isValid) {
-      if (autoSaveTimer) window.clearTimeout(autoSaveTimer);
-      const t = window.setTimeout(() => {
-        try { onAutoSave(payload); } catch {}
-      }, 800);
-      setAutoSaveTimer(t);
-    }
+    if (autoSaveTimer) window.clearTimeout(autoSaveTimer);
+    const t = window.setTimeout(() => {
+      try { onAutoSave(payload); } catch {}
+    }, 800);
+    setAutoSaveTimer(t);
 
     return () => {
       if (autoSaveTimer) window.clearTimeout(autoSaveTimer);

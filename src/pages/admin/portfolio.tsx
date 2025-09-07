@@ -9,7 +9,7 @@ import { ArrowRight, Plus, Upload, Download, RotateCcw, Image, BarChart3 } from 
 import AdminPortfolioEditor from '@/components/admin/portfolio/AdminPortfolioEditor';
 import AdminPortfolioList from '@/components/admin/portfolio/AdminPortfolioList';
 import { portfolioStore, PORTFOLIO_UPDATE_EVENT } from '@/data/portfolioStore';
-import { Project, fullPortfolioData } from '@/data/portfolioMock';
+import { Project } from '@/data/portfolioMock';
 import { portfolioMockData } from '@/data/portfolioMock';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -33,36 +33,6 @@ const AdminPortfolioPage = () => {
       ]);
       setProjects(projectsData);
       setStats(statsData);
-
-      // If DB is empty, seed from existing mock data (admin only)
-      if (isAdmin && projectsData.length === 0 && fullPortfolioData?.length > 0) {
-        try {
-          const mapped = fullPortfolioData.map((p) => ({
-            id: Number(p.id),
-            business_name: p.businessName,
-            business_type: p.businessType,
-            service_type: p.serviceType,
-            image_after: p.imageAfter,
-            image_before: p.imageBefore || null,
-            size: p.size,
-            category: p.category,
-            pinned: p.pinned || false,
-            created_at: p.createdAt,
-          }));
-          await (supabase as any)
-            .from('projects')
-            .upsert(mapped, { onConflict: 'id' });
-          const refreshed = await portfolioStore.reload();
-          const [p2, s2] = await Promise.all([
-            portfolioStore.getProjects(),
-            portfolioStore.getStats(),
-          ]);
-          setProjects(p2);
-          setStats(s2);
-        } catch (seedErr) {
-          console.error('Error seeding projects to Supabase:', seedErr);
-        }
-      }
     } catch (error) {
       console.error('Error loading portfolio data:', error);
     }
@@ -160,8 +130,6 @@ const AdminPortfolioPage = () => {
           category: projectData.category,
           pinned: projectData.pinned,
         });
-      } else {
-        await portfolioStore.addProject(projectData);
       }
       setHasUnsavedChanges(true);
     } catch (error) {
