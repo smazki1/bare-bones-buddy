@@ -16,7 +16,8 @@ const services = [
     price: '₪99',
     originalPrice: 'במקום ₪299',
     popular: false,
-    buttonText: 'אני רוצה לקבל פרטים נוספים'
+    buttonText: 'אני רוצה לקבל פרטים נוספים',
+    hidden: true // מוסתר זמנית
   },
   {
     icon: Target,
@@ -131,7 +132,7 @@ const ServicesGrid = () => {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {services.map((service, index) => (
+          {services.filter(service => !service.hidden).map((service, index) => (
             <motion.div
               key={service.title}
               initial={{ opacity: 0, y: 50 }}
@@ -141,7 +142,7 @@ const ServicesGrid = () => {
               <Card className={`h-full hover:shadow-elegant transition-all duration-300 border-2 ${
                 service.popular 
                   ? 'border-secondary bg-gradient-to-br from-secondary/5 to-primary/5' 
-                  : (index === 0 || index === 1) 
+                  : (service.title === 'חבילת מבצע השקה') 
                     ? 'border-secondary/70 bg-gradient-to-br from-secondary/10 to-orange-50 shadow-lg hover:shadow-xl hover:scale-[1.02] ring-2 ring-secondary/20' 
                     : 'border-border'
               } relative overflow-hidden`}>
@@ -152,12 +153,12 @@ const ServicesGrid = () => {
                 )}
                 
                 {/* Special tag for launch promo */}
-                {index === 0 && (
+                {service.title === 'מבצע השקה' && (
                   <div className="absolute top-4 left-4 bg-gradient-to-r from-red-500 to-orange-500 text-white px-3 py-1 rounded-full text-sm font-assistant font-semibold animate-pulse">
                     🔥 מבצע השקה
                   </div>
                 )}
-                {index === 1 && (
+                {service.title === 'חבילת מבצע השקה' && (
                   <div className="absolute top-4 left-4 bg-gradient-to-r from-primary to-secondary text-white px-3 py-1 rounded-full text-sm font-assistant font-semibold animate-pulse">
                     🚀 מתחילים כאן
                   </div>
@@ -219,7 +220,7 @@ const ServicesGrid = () => {
                       className={`${
                         service.popular 
                           ? 'bg-secondary hover:bg-secondary/90' 
-                          : (index === 0 || index === 1)
+                          : (service.title === 'חבילת מבצע השקה')
                             ? 'bg-gradient-to-r from-secondary to-orange-500 hover:from-secondary/90 hover:to-orange-600 shadow-lg'
                             : 'bg-primary hover:bg-primary/90'
                       } text-white font-assistant`}
