@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { X, Upload, Play, Pause, ExternalLink, ChevronDown, ChevronRight, Plus } from 'lucide-react';
-import { convertFileToDataUrl, isValidImageFile, isValidVideoFile } from '@/utils/fileUtils';
+import { convertFileToDataUrl, isValidImageFile, isValidVideoFile, compressImageToDataUrl } from '@/utils/fileUtils';
 import { useToast } from '@/hooks/use-toast';
 import { marketsStore } from '@/data/marketsStore';
 
@@ -180,12 +180,20 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
     }
 
     try {
-      const dataUrl = await convertFileToDataUrl(file);
+      // דחיסה לפני שמירה כדי למנוע חריגת נפח ב-localStorage
+      const dataUrl = await compressImageToDataUrl(file, {
+        maxWidth: 1600,
+        maxHeight: 1200,
+        maxSizeKB: 200,
+        mimeType: 'image/webp',
+        initialQuality: 0.85,
+        minQuality: 0.6,
+      });
       handleInputChange('imageSrc', dataUrl);
     } catch (error) {
       toast({
         title: 'שגיאה',
-        description: 'שגיאה בהעלאת התמונה',
+        description: 'שגיאה בהעלאת/דחיסת התמונה',
         variant: 'destructive'
       });
     }
@@ -405,7 +413,7 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
                       <SelectTrigger className="text-right bg-background border-input text-foreground" dir="rtl">
                         <SelectValue placeholder="בחר קטגוריה לתיק העבודות" />
                       </SelectTrigger>
-                      <SelectContent dir="rtl" className="bg-background border-border shadow-md">
+                      <SelectContent dir="rtl" className="bg-background border-border shadow-md z-50">
                         {availableTags.map((tag) => (
                           <SelectItem 
                             key={tag.id} 
