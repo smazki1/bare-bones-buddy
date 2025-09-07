@@ -174,47 +174,50 @@ const AdminVisualSolutionsEditor = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
-        <DialogHeader>
-          <DialogTitle className="font-assistant text-xl">
+      <DialogContent 
+        className="max-w-2xl max-h-[90vh] overflow-y-auto bg-background border border-border shadow-lg z-50" 
+        dir="rtl"
+      >
+        <DialogHeader className="bg-background">
+          <DialogTitle className="font-assistant text-xl text-foreground">
             {editingCard ? 'עריכת פתרון ויזואלי' : 'הוספת פתרון ויזואלי חדש'}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 bg-background">
           {/* Basic Information */}
           <div className="space-y-4">
             <div>
-              <Label htmlFor="title" className="font-assistant">כותרת *</Label>
+              <Label htmlFor="title" className="font-assistant text-foreground font-medium">כותרת *</Label>
               <Input
                 id="title"
                 value={formData.title || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                 placeholder="לדוגמה: תמונות תפריט"
                 required
-                className="font-open-sans"
+                className="font-open-sans bg-background border-input text-foreground placeholder:text-muted-foreground"
               />
             </div>
 
             <div>
-              <Label htmlFor="href" className="font-assistant">קישור (אופציונלי)</Label>
+              <Label htmlFor="href" className="font-assistant text-foreground font-medium">קישור (אופציונלי)</Label>
               <Input
                 id="href"
                 value={formData.href || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, href: e.target.value }))}
                 placeholder="/services"
-                className="font-open-sans"
+                className="font-open-sans bg-background border-input text-foreground placeholder:text-muted-foreground"
               />
             </div>
 
             <div>
-              <Label htmlFor="tagSlug" className="font-assistant">תג סינון (אופציונלי)</Label>
+              <Label htmlFor="tagSlug" className="font-assistant text-foreground font-medium">תג סינון (אופציונלי)</Label>
               <Input
                 id="tagSlug"
                 value={formData.tagSlug || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, tagSlug: e.target.value }))}
                 placeholder="menu-photos"
-                className="font-open-sans"
+                className="font-open-sans bg-background border-input text-foreground placeholder:text-muted-foreground"
               />
             </div>
 
@@ -224,7 +227,7 @@ const AdminVisualSolutionsEditor = ({
                 checked={formData.enabled ?? true}
                 onCheckedChange={(checked) => setFormData(prev => ({ ...prev, enabled: checked }))}
               />
-              <Label htmlFor="enabled" className="font-assistant">
+              <Label htmlFor="enabled" className="font-assistant text-foreground font-medium">
                 {formData.enabled ? <Eye className="w-4 h-4 inline ml-1" /> : <EyeOff className="w-4 h-4 inline ml-1" />}
                 {formData.enabled ? 'פעיל' : 'לא פעיל'}
               </Label>
@@ -256,10 +259,10 @@ const AdminVisualSolutionsEditor = ({
 
             {previewMode === 'image' && (
               <div>
-                <Label className="font-assistant">תמונה ראשית *</Label>
+                <Label className="font-assistant text-foreground font-medium">תמונה ראשית *</Label>
                 <div
-                  className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
-                    dragActive ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-primary/50'
+                  className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors bg-background ${
+                    dragActive ? 'border-primary bg-primary/5' : 'border-muted-foreground hover:border-primary/50'
                   } ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
                   onDrop={(e) => handleDrop(e, 'image')}
                   onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
@@ -281,7 +284,7 @@ const AdminVisualSolutionsEditor = ({
                   {isUploading ? (
                     <div className="space-y-2">
                       <div className="w-8 h-8 mx-auto border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                      <p className="font-open-sans text-sm text-gray-600">
+                      <p className="font-open-sans text-sm text-muted-foreground">
                         מעלה תמונה...
                       </p>
                     </div>
@@ -308,8 +311,8 @@ const AdminVisualSolutionsEditor = ({
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <Upload className="w-8 h-8 mx-auto text-gray-400" />
-                      <p className="font-open-sans text-sm text-gray-600">
+                      <Upload className="w-8 h-8 mx-auto text-muted-foreground" />
+                      <p className="font-open-sans text-sm text-muted-foreground">
                         גרור תמונה לכאן או הדבק URL
                       </p>
                     </div>
@@ -331,17 +334,17 @@ const AdminVisualSolutionsEditor = ({
                   value={formData.imageSrc || ''}
                   onChange={(e) => setFormData(prev => ({ ...prev, imageSrc: e.target.value }))}
                   placeholder="או הדבק URL של תמונה כאן"
-                  className="mt-2 font-open-sans"
+                  className="mt-2 font-open-sans bg-background border-input text-foreground placeholder:text-muted-foreground"
                 />
               </div>
             )}
 
             {previewMode === 'video' && (
               <div>
-                <Label className="font-assistant">וידאו (אופציונלי)</Label>
+                <Label className="font-assistant text-foreground font-medium">וידאו (אופציונלי)</Label>
                 <div
-                  className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
-                    dragActive ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-primary/50'
+                  className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors bg-background ${
+                    dragActive ? 'border-primary bg-primary/5' : 'border-muted-foreground hover:border-primary/50'
                   } ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
                   onDrop={(e) => handleDrop(e, 'video')}
                   onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
@@ -357,7 +360,7 @@ const AdminVisualSolutionsEditor = ({
                   {isUploading ? (
                     <div className="space-y-2">
                       <div className="w-8 h-8 mx-auto border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                      <p className="font-open-sans text-sm text-gray-600">
+                      <p className="font-open-sans text-sm text-muted-foreground">
                         מעלה וידאו...
                       </p>
                     </div>
@@ -384,8 +387,8 @@ const AdminVisualSolutionsEditor = ({
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <Upload className="w-8 h-8 mx-auto text-gray-400" />
-                      <p className="font-open-sans text-sm text-gray-600">
+                      <Upload className="w-8 h-8 mx-auto text-muted-foreground" />
+                      <p className="font-open-sans text-sm text-muted-foreground">
                         גרור וידאו לכאן או הדבק URL
                       </p>
                     </div>
@@ -407,7 +410,7 @@ const AdminVisualSolutionsEditor = ({
                   value={formData.videoSrc || ''}
                   onChange={(e) => setFormData(prev => ({ ...prev, videoSrc: e.target.value }))}
                   placeholder="או הדבק URL של וידאו כאן"
-                  className="mt-2 font-open-sans"
+                  className="mt-2 font-open-sans bg-background border-input text-foreground placeholder:text-muted-foreground"
                 />
               </div>
             )}
