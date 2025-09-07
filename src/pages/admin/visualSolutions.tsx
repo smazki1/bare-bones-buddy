@@ -35,6 +35,7 @@ const AdminVisualSolutions = () => {
     setConfig(prev => {
       const next = { ...prev, [field]: value };
       visualSolutionsStore.saveConfig(next);
+      void visualSolutionsStore.saveToSupabase(next);
       return next;
     });
     setHasUnsavedChanges(true);
@@ -72,6 +73,7 @@ const AdminVisualSolutions = () => {
     setConfig(prev => {
       const next = { ...prev, items: newItems };
       visualSolutionsStore.saveConfig(next);
+      void visualSolutionsStore.saveToSupabase(next);
       return next;
     });
     setHasUnsavedChanges(true);
@@ -85,6 +87,7 @@ const AdminVisualSolutions = () => {
     setConfig(prev => {
       const next = { ...prev, items: newItems };
       visualSolutionsStore.saveConfig(next);
+      void visualSolutionsStore.saveToSupabase(next);
       return next;
     });
     setHasUnsavedChanges(true);
@@ -98,6 +101,7 @@ const AdminVisualSolutions = () => {
     setConfig(prev => {
       const next = { ...prev, items: newItems };
       visualSolutionsStore.saveConfig(next);
+      void visualSolutionsStore.saveToSupabase(next);
       return next;
     });
     setHasUnsavedChanges(true);
@@ -107,6 +111,7 @@ const AdminVisualSolutions = () => {
     setConfig(prev => {
       const next = { ...prev, items: newCards };
       visualSolutionsStore.saveConfig(next);
+      void visualSolutionsStore.saveToSupabase(next);
       return next;
     });
     setHasUnsavedChanges(true);
@@ -126,6 +131,7 @@ const AdminVisualSolutions = () => {
     setConfig(prev => {
       const next = { ...prev, items: newItems };
       visualSolutionsStore.saveConfig(next);
+      void visualSolutionsStore.saveToSupabase(next);
       return next;
     });
     setHasUnsavedChanges(true);
