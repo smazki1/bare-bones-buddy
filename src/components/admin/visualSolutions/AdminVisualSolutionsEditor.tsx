@@ -457,21 +457,21 @@ const AdminVisualSolutionsEditor = ({
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-6 border-t border-border">
+          <div className="flex gap-3 pt-6 border-t border-border bg-background sticky bottom-0 -mx-6 px-6 py-4">
             <Button
               type="submit"
               disabled={!formData.title?.trim() || !formData.imageSrc?.trim() || isUploading}
-              className="font-assistant flex-1 h-11"
+              className="font-assistant flex-1 h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isUploading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin ml-2" />
-                  מעלה...
-                </>
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  מעלה קובץ...
+                </div>
               ) : (
-                <>
-                  {editingCard ? 'עדכן' : 'הוסף'} פתרון ויזואלי
-                </>
+                <span className="flex items-center gap-2">
+                  {editingCard ? '💾 עדכן' : '➕ הוסף'} פתרון ויזואלי
+                </span>
               )}
             </Button>
             <Button
@@ -479,9 +479,9 @@ const AdminVisualSolutionsEditor = ({
               variant="outline"
               onClick={onClose}
               disabled={isUploading}
-              className="font-assistant h-11 px-6"
+              className="font-assistant h-12 px-8 border-2 hover:bg-muted disabled:opacity-50"
             >
-              ביטול
+              ❌ ביטול
             </Button>
           </div>
         </form>
