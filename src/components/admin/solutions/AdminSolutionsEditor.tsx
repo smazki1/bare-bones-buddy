@@ -67,7 +67,7 @@ const AdminSolutionsEditor: React.FC<AdminSolutionsEditorProps> = ({
   const loadAvailableTags = () => {
     const marketsConfig = marketsStore.safeGetConfigOrDefaults();
     const enabledTags = marketsConfig.items
-      .filter(item => item.enabled)
+      .filter(item => item.enabled && item.slug && item.slug.trim() !== '') // Filter out empty slugs
       .map(item => ({
         id: item.id,
         label: item.label,
