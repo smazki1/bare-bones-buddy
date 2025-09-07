@@ -135,11 +135,6 @@ const AdminVisualSolutions = () => {
       return next;
     });
     setHasUnsavedChanges(true);
-    
-    toast({
-      title: editingCard ? "עודכן בהצלחה" : "נוסף בהצלחה",
-      description: `הפתרון הויזואלי "${cardData.title}" ${editingCard ? 'עודכן' : 'נוסף'}`,
-    });
   };
 
   const handleExport = () => {

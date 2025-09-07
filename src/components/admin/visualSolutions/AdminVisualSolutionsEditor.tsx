@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
 import { VisualSolutionCard } from '@/types/visualSolutions';
 import { visualSolutionsStore } from '@/data/visualSolutionsStore';
 import { convertFileToDataUrl, isValidImageFile, isValidVideoFile } from '@/utils/fileUtils';
@@ -22,6 +23,7 @@ const AdminVisualSolutionsEditor = ({
   onSave, 
   editingCard 
 }: AdminVisualSolutionsEditorProps) => {
+  const { toast } = useToast();
   const [formData, setFormData] = useState<Partial<VisualSolutionCard>>({
     title: '',
     imageSrc: '',
@@ -60,17 +62,31 @@ const AdminVisualSolutionsEditor = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title || !formData.imageSrc) {
+    if (!formData.title?.trim()) {
+      toast({
+        variant: "destructive",
+        title: "שגיאה",
+        description: "יש למלא כותרת לפתרון הויזואלי",
+      });
+      return;
+    }
+
+    if (!formData.imageSrc?.trim()) {
+      toast({
+        variant: "destructive", 
+        title: "שגיאה",
+        description: "יש להעלות תמונה או להזין URL של תמונה",
+      });
       return;
     }
 
     const cardData: VisualSolutionCard = {
       id: editingCard?.id || visualSolutionsStore.generateId(formData.title),
-      title: formData.title,
-      imageSrc: formData.imageSrc,
-      videoSrc: formData.videoSrc || undefined,
-      href: formData.href || '/services',
-      tagSlug: formData.tagSlug || undefined,
+      title: formData.title.trim(),
+      imageSrc: formData.imageSrc.trim(),
+      videoSrc: formData.videoSrc?.trim() || undefined,
+      href: formData.href?.trim() || '/services',
+      tagSlug: formData.tagSlug?.trim() || undefined,
       enabled: formData.enabled ?? true,
       order: formData.order ?? 0,
     };
