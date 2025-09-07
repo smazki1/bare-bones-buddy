@@ -95,14 +95,17 @@ const BusinessSolutionsSection = () => {
       setConfig(newConfig);
     };
 
-    // Load from Supabase first (if available), else fallback
+    // Force a fresh fetch from Supabase on first mount, then fallback to local only if it fails
+    let didSetFromCloud = false;
     (async () => {
-      const cloud = await solutionsStore.fetchFromSupabase();
-      if (cloud) {
-        setConfig(cloud);
-      } else {
-        updateConfig();
-      }
+      try {
+        const cloud = await solutionsStore.fetchFromSupabase();
+        if (cloud) {
+          setConfig(cloud);
+          didSetFromCloud = true;
+        }
+      } catch {}
+      if (!didSetFromCloud) updateConfig();
     })();
 
     const handleSaveFailed = () => {
