@@ -117,8 +117,24 @@ const AdminPortfolioList = ({ projects, onEdit, onDelete, onDuplicate }: AdminPo
       exit={sortMode ? undefined : { opacity: 0, y: -20 }}
       transition={sortMode ? { duration: 0 } : { duration: 0.3 }}
     >
-      <Card className="group hover:shadow-md transition-shadow">
+      <Card className={`group hover:shadow-md transition-all ${
+        sortMode && visibleCategory 
+          ? 'cursor-grab active:cursor-grabbing border-2 border-dashed border-primary/30 hover:border-primary/60' 
+          : ''
+      }`}>
         <CardHeader className="pb-3">
+          {sortMode && visibleCategory && (
+            <div className="flex items-center justify-center w-full mb-2 text-muted-foreground">
+              <div className="flex gap-1">
+                <div className="w-1 h-1 bg-current rounded-full"></div>
+                <div className="w-1 h-1 bg-current rounded-full"></div>
+                <div className="w-1 h-1 bg-current rounded-full"></div>
+                <div className="w-1 h-1 bg-current rounded-full"></div>
+                <div className="w-1 h-1 bg-current rounded-full"></div>
+                <div className="w-1 h-1 bg-current rounded-full"></div>
+              </div>
+            </div>
+          )}
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
               <CardTitle className="text-lg font-assistant truncate">
@@ -365,7 +381,11 @@ const AdminPortfolioList = ({ projects, onEdit, onDelete, onDuplicate }: AdminPo
               onDragOver={handleDragOver}
               onDrop={() => handleDrop(index, displayedIds)}
               onDragEnd={handleDragEnd}
-              className={sortMode && visibleCategory ? 'cursor-move' : ''}
+              className={`${
+                sortMode && visibleCategory 
+                  ? 'cursor-grab hover:scale-105 transition-transform' 
+                  : ''
+              } ${dragIndex === index ? 'opacity-50 scale-95' : ''}`}
               aria-grabbed={sortMode && visibleCategory ? dragIndex === index : undefined}
             >
               <ProjectCard project={project} />
