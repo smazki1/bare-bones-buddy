@@ -1,4 +1,4 @@
-import { Project, categoryFilters, fullPortfolioData } from './portfolioMock';
+import { Project, categoryFilters } from './portfolioMock';
 import { supabase } from '@/integrations/supabase/client';
 import { callPortfolioAdmin } from '@/lib/supabase-projects';
 
@@ -221,7 +221,15 @@ class PortfolioStore {
     try {
       // Use Edge Function directly to avoid RLS issues
       const res = await callPortfolioAdmin('delete', { id: Number(id) });
-      return !!res || true;
+      // Success if function returns a boolean true or an object with indicative flags
+      if (res === true) return true;
+      if (res && typeof res === 'object') {
+        if ('id' in res || (res as any).deleted === true || (res as any).ok === true || (res as any).success === true) {
+          return true;
+        }
+      }
+      console.error('Edge function delete returned unexpected payload:', res);
+      return false;
     } catch (error) {
       console.error('Error deleting project from Supabase:', error);
       return false;
@@ -443,13 +451,15 @@ class PortfolioStore {
     if (!this.isLoaded) {
       await this.loadConfig();
     }
-    
-    const success = await this.deleteProjectFromSupabase(id);
-    if (!success) return false;
-    // Hard reload from DB to prevent ghost items
-    await this.reload();
-    this.isMutating = false;
-    return true;
+    try {
+      const success = await this.deleteProjectFromSupabase(id);
+      if (!success) return false;
+      // Hard reload from DB to prevent ghost items
+      await this.reload();
+      return true;
+    } finally {
+      this.isMutating = false;
+    }
   }
 
   async getProjectsByCategory(category: string): Promise<Project[]> {
