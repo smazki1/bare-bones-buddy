@@ -71,10 +71,29 @@ class VisualSolutionsStore {
     
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(configToSave));
-      // Notify same-tab listeners
-      try {
-        window.dispatchEvent(new Event('visualSolutions:updated'));
-      } catch {}
+      console.log('Visual solutions config saved:', configToSave);
+      
+      // Notify same-tab listeners with a small delay to ensure storage is written
+      setTimeout(() => {
+        try {
+          const updateEvent = new CustomEvent('visualSolutions:updated', { 
+            detail: configToSave 
+          });
+          window.dispatchEvent(updateEvent);
+          console.log('Visual solutions update event dispatched');
+          
+          // Also trigger storage event manually for same-tab updates
+          const storageEvent = new StorageEvent('storage', {
+            key: STORAGE_KEY,
+            newValue: JSON.stringify(configToSave),
+            storageArea: localStorage
+          });
+          window.dispatchEvent(storageEvent);
+          console.log('Storage event dispatched manually');
+        } catch (error) {
+          console.error('Failed to dispatch update event:', error);
+        }
+      }, 10);
     } catch (error) {
       console.error('Failed to save visual solutions config:', error);
     }

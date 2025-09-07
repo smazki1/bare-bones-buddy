@@ -97,6 +97,7 @@ const VisualSolutionsSection = () => {
   useEffect(() => {
     const loadConfig = () => {
       const newConfig = visualSolutionsStore.safeGetConfigOrDefaults();
+      console.log('Loading visual solutions config:', newConfig);
       setConfig(newConfig);
     };
 
@@ -104,12 +105,19 @@ const VisualSolutionsSection = () => {
 
     // Cross-tab updates
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'aiMaster:visualSolutions') loadConfig();
+      console.log('Storage change detected:', e.key);
+      if (e.key === 'aiMaster:visualSolutions') {
+        console.log('Visual solutions storage updated');
+        loadConfig();
+      }
     };
     window.addEventListener('storage', handleStorageChange);
 
     // Same-tab updates
-    const handleLocalUpdate = () => loadConfig();
+    const handleLocalUpdate = (e: CustomEvent) => {
+      console.log('Visual solutions update event received:', e.detail);
+      loadConfig();
+    };
     window.addEventListener('visualSolutions:updated', handleLocalUpdate as EventListener);
 
     return () => {
