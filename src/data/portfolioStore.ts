@@ -151,9 +151,9 @@ class PortfolioStore {
           console.error('Direct insert failed:', error);
           console.warn('Attempting Edge Function fallback...');
           const res = await callPortfolioAdmin('add', insertPayload);
-          if (res?.ok && res?.data?.id) {
-            project.id = res.data.id.toString();
-            project.createdAt = res.data.created_at;
+          if (res?.id) {
+            project.id = res.id.toString();
+            project.createdAt = res.created_at;
             return true;
           }
           console.error('Edge function also failed:', res);
@@ -180,7 +180,7 @@ class PortfolioStore {
           console.error('Direct update failed:', error);
           console.warn('Attempting Edge Function fallback...');
           const res = await callPortfolioAdmin('update', { id: Number(project.id), ...updatePayload });
-          if (res?.ok) {
+          if (res) {
             return true;
           }
           console.error('Edge function also failed:', res);
