@@ -13,6 +13,14 @@ export interface PortfolioConfig {
   manualOrderByCategory?: Record<string, number[]>;
 }
 
+// Normalize and validate project size
+const normalizeSize = (s: any): 'small' | 'medium' | 'large' => {
+  if (s === 'small' || s === 'medium' || s === 'large') return s;
+  const lower = typeof s === 'string' ? s.toLowerCase().trim() : '';
+  if (lower === 'small' || lower === 'medium' || lower === 'large') return lower as any;
+  return 'medium';
+};
+
 // Convert Supabase project to frontend format
 const convertFromSupabase = (dbProject: any): Project => {
   const tags = dbProject.tags || [dbProject.category];
@@ -25,7 +33,7 @@ const convertFromSupabase = (dbProject: any): Project => {
     serviceType: dbProject.service_type,
     imageAfter: dbProject.image_after,
     imageBefore: dbProject.image_before,
-    size: dbProject.size,
+    size: normalizeSize(dbProject.size),
     category: dbProject.category,
     tags: syncedTags,
     pinned: dbProject.pinned || false,
@@ -43,7 +51,7 @@ const convertToSupabaseUpdate = (project: Project) => {
     service_type: project.serviceType,
     image_after: project.imageAfter,
     image_before: project.imageBefore || null,
-    size: project.size,
+    size: normalizeSize(project.size),
     category: syncedTags[0] || project.category,
     tags: syncedTags,
     pinned: project.pinned || false,
@@ -61,7 +69,7 @@ const convertToSupabaseInsert = (project: Project) => {
     service_type: project.serviceType,
     image_after: project.imageAfter,
     image_before: project.imageBefore,
-    size: project.size,
+    size: normalizeSize(project.size),
     category: syncedTags[0] || project.category,
     tags: syncedTags,
     pinned: project.pinned || false,
@@ -155,17 +163,17 @@ class PortfolioStore {
 
       if (mode === 'add') {
         // Insert without overriding identity columns
-        const insertPayload = {
-          business_name: project.businessName,
-          business_type: project.businessType,
-          service_type: project.serviceType,
-          image_after: project.imageAfter,
-          image_before: project.imageBefore || null,
-          size: project.size,
-          category: project.tags?.[0] || project.category,
-          tags: project.tags || [project.category],
-          pinned: project.pinned || false,
-        };
+          const insertPayload = {
+            business_name: project.businessName,
+            business_type: project.businessType,
+            service_type: project.serviceType,
+            image_after: project.imageAfter,
+            image_before: project.imageBefore || null,
+            size: normalizeSize(project.size),
+            category: project.tags?.[0] || project.category,
+            tags: project.tags || [project.category],
+            pinned: project.pinned || false,
+          };
 
         console.log('Insert payload:', insertPayload);
 

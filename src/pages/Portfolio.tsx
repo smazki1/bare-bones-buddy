@@ -64,7 +64,10 @@ const Portfolio = () => {
     if (activeFilter === 'all') {
       return allProjects;
     }
-    return allProjects.filter(project => project.category === activeFilter);
+    // Support both legacy single category and new multi-tags
+    return allProjects.filter(project => 
+      project.category === activeFilter || project.tags?.includes(activeFilter)
+    );
   }, [activeFilter, allProjects]);
 
   // Check if there are more pages to load and haven't reached max display limit
