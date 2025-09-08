@@ -10,20 +10,16 @@ interface MasonryGridProps {
 }
 
 const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridProps) => {
-  console.log('🎨 MasonryGrid render:', { 
-    projectsLength: projects.length, 
-    isLoading, 
-    hasReachedMaxItems,
-    firstProject: projects[0]?.businessName
-  });
-
   const renderSkeletons = () => {
     return Array.from({ length: 6 }, (_, index) => (
       <div key={`skeleton-${index}`} className="break-inside-avoid mb-5">
-        <Skeleton className={`
-          w-full rounded-xl
+        <div className={`
+          w-full rounded-xl bg-gradient-to-br from-muted via-muted/80 to-muted animate-pulse
           ${index % 3 === 0 ? 'h-64' : index % 3 === 1 ? 'h-96' : 'h-80'}
-        `} />
+          flex items-center justify-center
+        `}>
+          <div className="w-6 h-6 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+        </div>
       </div>
     ));
   };
