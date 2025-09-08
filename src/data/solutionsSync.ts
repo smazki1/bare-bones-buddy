@@ -7,7 +7,8 @@ import { DEFAULT_SOLUTIONS_CONFIG } from '@/types/solutions';
  */
 export const forceSolutionsSync = () => {
   // Save the updated default config to trigger synchronization
-  const success = solutionsStore.saveConfig(DEFAULT_SOLUTIONS_CONFIG);
+  const maybe = solutionsStore.saveConfig(DEFAULT_SOLUTIONS_CONFIG as any);
+  const success = typeof maybe === 'boolean' ? maybe : true;
   
   if (success) {
     console.log('✅ Solutions synchronized with updated categories:', DEFAULT_SOLUTIONS_CONFIG.items.map(item => item.title));

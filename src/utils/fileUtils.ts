@@ -75,12 +75,14 @@ export const isValidVideoFile = (file: File): boolean => {
 };
 
 export const downloadBlob = (blob: Blob, filename: string): void => {
-  const url = URL.createObjectURL(blob);
+  const url = (URL as any).createObjectURL ? URL.createObjectURL(blob) : '';
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  if ((URL as any).revokeObjectURL) {
+    URL.revokeObjectURL(url);
+  }
 };

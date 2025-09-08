@@ -328,7 +328,8 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject, onAutoS
           ref={inputRef}
           type="file"
           accept="image/*"
-          className="hidden"
+          className="sr-only"
+          aria-label={`העלה תמונה "${type === 'after' ? 'אחרי' : 'לפני'}"`}
           onChange={(e) => handleFileSelect(e, type)}
         />
       </div>
@@ -362,7 +363,7 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject, onAutoS
                 id="businessName"
                 value={formData.businessName}
                 onChange={(e) => setFormData(prev => ({ ...prev, businessName: e.target.value }))}
-                placeholder="למשל: המבורגר הבית / לחם מחמצת שומשום"
+                placeholder="שם העסק"
                 className="text-right bg-background border-input text-foreground placeholder:text-muted-foreground"
                 dir="rtl"
               />
