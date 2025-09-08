@@ -17,7 +17,7 @@ const Index = () => {
       <VisualSolutionsSection />
       {/* PackagesSection hidden per request */}
       
-      <TestimonialsSection />
+      {/* TestimonialsSection hidden per request */}
       <SectorsSection />
       <CTASection />
       <Footer />
