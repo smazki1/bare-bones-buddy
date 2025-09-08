@@ -36,16 +36,7 @@ export async function fetchProjects(): Promise<DbProject[]> {
     .order('id', { ascending: false });
   if (error) throw error;
   const rows = data ?? [];
-  // Never show legacy/mock images (Unsplash or known seeds)
-  const isLegacyImage = (url?: string | null) => {
-    if (!url) return true;
-    try {
-      const h = new URL(url).hostname;
-      if (h.includes('images.unsplash.com') || h.includes('unsplash.com')) return true;
-    } catch {}
-    return false;
-  };
-  return rows.filter(r => !!r.image_after && !isLegacyImage(r.image_after));
+  return rows as DbProject[];
 }
 
 

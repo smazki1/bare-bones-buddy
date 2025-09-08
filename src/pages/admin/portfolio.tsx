@@ -41,7 +41,15 @@ const AdminPortfolioPage = () => {
   // Initialize data
   useEffect(() => {
     if (user && isAdmin) {
-      loadData();
+      (async () => {
+        // Ensure fresh data from Supabase before rendering
+        if ((portfolioStore as any).forceFresh) {
+          await (portfolioStore as any).forceFresh();
+        } else {
+          await portfolioStore.reload();
+        }
+        await loadData();
+      })();
     }
   }, [user, isAdmin]);
 
@@ -178,54 +186,42 @@ const AdminPortfolioPage = () => {
     }
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     try {
-      const config = portfolioStore.exportConfig();
-      const dataStr = JSON.stringify(config, null, 2);
-      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      // Export a fresh snapshot
+      if ((portfolioStore as any).forceFresh) {
+        await (portfolioStore as any).forceFresh();
+      }
+      const dataBlob = await portfolioStore.exportConfig();
       const url = URL.createObjectURL(dataBlob);
       const link = document.createElement('a');
       link.href = url;
       link.download = `portfolio-backup-${new Date().toISOString().split('T')[0]}.json`;
       link.click();
       URL.revokeObjectURL(url);
-      
-      toast({
-        title: "הצלחה",
-        description: "הגדרות הקטלוג יוצאו בהצלחה"
-      });
+      toast({ title: "הצלחה", description: "הגדרות הקטלוג יוצאו בהצלחה" });
     } catch (error) {
-      toast({
-        title: "שגיאה",
-        description: "שגיאה ביצוא ההגדרות",
-        variant: "destructive"
-      });
+      toast({ title: "שגיאה", description: "שגיאה ביצוא ההגדרות", variant: "destructive" });
     }
   };
 
-  const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const config = JSON.parse(e.target?.result as string);
-        portfolioStore.importConfig(config);
-        toast({
-          title: "הצלחה",
-          description: "הגדרות הקטלוג יובאו בהצלחה"
-        });
+    try {
+      const ok = await portfolioStore.importConfig(file);
+      if (ok) {
+        toast({ title: "הצלחה", description: "הגדרות הקטלוג יובאו בהצלחה" });
         setHasUnsavedChanges(true);
-      } catch (error) {
-        toast({
-          title: "שגיאה",
-          description: "קובץ לא תקין",
-          variant: "destructive"
-        });
+        await portfolioStore.reload();
+        await loadData();
+      } else {
+        toast({ title: "שגיאה", description: "קובץ לא תקין", variant: "destructive" });
       }
-    };
-    reader.readAsText(file);
+    } catch (error) {
+      toast({ title: "שגיאה", description: "קובץ לא תקין", variant: "destructive" });
+    }
   };
 
   const handleLoadMockData = () => {

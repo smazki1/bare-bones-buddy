@@ -182,7 +182,7 @@ class PortfolioStore {
   private async fetchFromSupabaseFresh(): Promise<void> {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
 
       const { data: projects, error } = await supabase
         .from('projects')
@@ -397,6 +397,11 @@ class PortfolioStore {
     // Force a fresh fetch from Supabase (avoid cached state)
     this.isLoaded = false;
     await this.loadConfig();
+  }
+
+  // Force immediate fresh fetch from Supabase, bypassing warm-start cache
+  async forceFresh(): Promise<void> {
+    await this.fetchFromSupabaseFresh();
   }
 
   async addProject(project: Omit<Project, 'id'>): Promise<Project> {
