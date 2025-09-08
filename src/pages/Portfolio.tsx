@@ -13,8 +13,8 @@ import { portfolioStore, PORTFOLIO_UPDATE_EVENT } from '@/data/portfolioStore';
 import { useIsMobile } from '@/hooks/use-mobile';
 // Remote fetch disabled: local-only portfolio
 
-const ITEMS_PER_PAGE = 12;
-const MAX_ITEMS_DISPLAY = 24;
+const ITEMS_PER_PAGE = 8;
+const MAX_ITEMS_DISPLAY = 16;
 
 const Portfolio = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -25,7 +25,7 @@ const Portfolio = () => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [allProjects, setAllProjects] = useState<Project[]>([]);
   const isMobile = useIsMobile();
-  const itemsPerPage = isMobile ? 6 : ITEMS_PER_PAGE;
+  const itemsPerPage = isMobile ? 4 : ITEMS_PER_PAGE;
 
   // Load projects from Supabase and local store with instant loading
   useEffect(() => {

@@ -14,9 +14,10 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
   const [showBefore, setShowBefore] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const { ref, isIntersecting } = useIntersectionObserver({ threshold: 0.1, rootMargin: '200px' });
+  const { ref, isIntersecting } = useIntersectionObserver({ threshold: 0.1, rootMargin: '50px' });
   const isMobile = useIsMobile();
-  const shouldLoadImage = isMobile || isIntersecting;
+  // Always load immediately for first 6 items, then use intersection observer
+  const shouldLoadImage = index < 6 || isMobile || isIntersecting;
 
   const getSizeClasses = (size: Project['size']) => {
     switch (size) {

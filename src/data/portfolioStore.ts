@@ -173,10 +173,10 @@ class PortfolioStore {
       // Skip loading from localStorage to avoid stale/placeholder data
       console.log('Skipping localStorage cache for portfolio to ensure fresh data');
       
-      // Then try to load from Supabase in background with shorter timeout
+      // Then try to load from Supabase in background with very short timeout
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
         
         const { data: projects, error } = await supabase
           .from('projects')
@@ -184,7 +184,8 @@ class PortfolioStore {
           .order('pinned', { ascending: false })
           .order('created_at', { ascending: false })
           .order('id', { ascending: false })
-          .limit(100); // Limit results for better performance
+          .limit(20) // Much smaller initial load
+          .abortSignal(controller.signal);
 
         clearTimeout(timeoutId);
 
