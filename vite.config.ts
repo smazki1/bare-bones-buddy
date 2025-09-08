@@ -12,8 +12,9 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   test: {
+    globals: true,
     environment: 'jsdom',
-    setupFiles: [],
+    setupFiles: ['./src/setupTests.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],
