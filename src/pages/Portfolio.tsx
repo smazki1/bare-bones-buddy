@@ -37,7 +37,7 @@ const Portfolio = () => {
         setIsInitialLoading(false);
       } catch (error) {
         console.error('Error loading projects:', error);
-        setAllProjects([]); // Set empty array on error
+        setAllProjects([]);
         setIsInitialLoading(false);
       }
     };

@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Project } from '@/data/portfolioMock';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { portfolioStore } from '@/data/portfolioStore';
 
 interface ProjectCardProps {
   project: Project;
@@ -15,31 +14,10 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
   const [showBefore, setShowBefore] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const { ref, isIntersecting } = useIntersectionObserver({ threshold: 0.1, rootMargin: '300px' });
+  const { ref, isIntersecting } = useIntersectionObserver({ threshold: 0.1, rootMargin: '100px' });
   const isMobile = useIsMobile();
-  // Always load immediately for first 6 items, then use intersection observer
-  const shouldLoadImage = index < 6 || isMobile || isIntersecting;
-
-  // On-demand image data (avoid fetching heavy base64 until needed)
-  const [afterSrc, setAfterSrc] = useState<string>(project.imageAfter || '');
-  const [beforeSrc, setBeforeSrc] = useState<string>(project.imageBefore || '');
-
-  useEffect(() => {
-    if (!shouldLoadImage) return;
-    if (afterSrc) return; // already have image
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await portfolioStore.fetchProjectImagesById(project.id);
-        if (cancelled) return;
-        if (res?.image_after) setAfterSrc(res.image_after);
-        if (res?.image_before) setBeforeSrc(res.image_before || '');
-      } catch (e) {
-        // swallow
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [shouldLoadImage, project.id, afterSrc]);
+  // Load immediately for mobile and first items, otherwise use intersection observer
+  const shouldLoadImage = isMobile || index < 8 || isIntersecting;
 
   const getSizeClasses = (size: Project['size']) => {
     switch (size) {
@@ -55,7 +33,7 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
   };
 
   const handleToggle = () => {
-    if (beforeSrc || project.imageBefore) {
+    if (project.imageBefore) {
       setShowBefore(!showBefore);
     }
   };
@@ -66,7 +44,6 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.3) }}
       className="break-inside-avoid mb-4 sm:mb-5 group cursor-pointer touch-manipulation"
-      style={{ contentVisibility: 'auto' }}
       onClick={handleToggle}
       aria-label={`פרויקט: ${project.businessName}`}
       role="button"
@@ -87,8 +64,8 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
         <div ref={ref} className="relative w-full h-full">
           {!imageError && shouldLoadImage && (
             <img
-              src={showBefore && (beforeSrc || project.imageBefore) ? (beforeSrc || project.imageBefore!) : (afterSrc || project.imageAfter)}
-              alt={`${project.businessName} - ${showBefore && (beforeSrc || project.imageBefore) ? 'לפני' : 'אחרי'}`}
+              src={showBefore && project.imageBefore ? project.imageBefore : project.imageAfter}
+              alt={`${project.businessName} - ${showBefore && project.imageBefore ? 'לפני' : 'אחרי'}`}
               className={`
                 w-full h-full object-cover transition-all duration-200
                 ${!imageLoaded ? 'opacity-0' : 'opacity-100'}
@@ -126,7 +103,7 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
           )}
 
           {/* Before/After badge */}
-          {(beforeSrc || project.imageBefore) && (
+          {project.imageBefore && (
             <Badge 
               variant="secondary" 
               className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-background/90 text-foreground border text-xs sm:text-sm"
