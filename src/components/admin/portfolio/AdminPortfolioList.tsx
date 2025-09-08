@@ -79,7 +79,7 @@ const AdminPortfolioList = ({ projects, onEdit, onDelete, onDuplicate }: AdminPo
 
   const saveOrder = () => {
     if (!visibleCategory || !sortMode || localOrder.length === 0) return;
-    portfolioStore.setManualOrderForCategory(visibleCategory, localOrder);
+    portfolioStore.setManualOrderForCategory(visibleCategory, localOrder.map(String));
   };
 
   // Drag & Drop handlers
@@ -222,12 +222,12 @@ const AdminPortfolioList = ({ projects, onEdit, onDelete, onDuplicate }: AdminPo
           {/* Actions */}
           <div className="flex items-center gap-2 pt-2 border-t">
             {!sortMode && (
-              <Button
-                variant={project.pinned ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => portfolioStore.togglePinned(project.id)}
-                className="text-xs font-assistant"
-              >
+            <Button
+              variant={project.pinned ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => portfolioStore.togglePinned(String(project.id))}
+              className="text-xs font-assistant"
+            >
                 <Pin className="w-3 h-3 mr-1" />
                 {project.pinned ? 'Unpin' : 'Pin'}
               </Button>

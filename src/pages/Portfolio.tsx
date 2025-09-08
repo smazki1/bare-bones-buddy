@@ -24,15 +24,22 @@ const Portfolio = () => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [allProjects, setAllProjects] = useState<Project[]>([]);
 
-  // Load projects from Supabase and local store
+  // Load projects from Supabase and local store with instant loading
   useEffect(() => {
     const loadProjects = async () => {
       try {
-        setIsInitialLoading(true);
+        // Check if we might have cached data for faster loading
+        const hasCache = localStorage.getItem('portfolioConfig_v2');
+        
+        if (!hasCache) {
+          setIsInitialLoading(true);
+        }
+        
         const storedProjects = await portfolioStore.getProjects();
         setAllProjects(storedProjects);
       } catch (error) {
         console.error('Error loading projects:', error);
+        setAllProjects([]); // Set empty array on error
       } finally {
         setIsInitialLoading(false);
       }

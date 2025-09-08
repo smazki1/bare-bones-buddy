@@ -10,7 +10,7 @@ export interface PortfolioConfig {
   items: Project[];
   updatedAt?: string;
   initialized?: boolean;
-  manualOrderByCategory?: Record<string, number[]>;
+  manualOrderByCategory?: Record<string, string[]>; // Changed to string[]
 }
 
 // Normalize and validate project size
@@ -58,67 +58,74 @@ const convertToSupabaseUpdate = (project: Project) => {
   };
 };
 
-// Convert frontend project to Supabase format for insert  
-const convertToSupabaseInsert = (project: Project) => {
-  const syncedTags = syncProjectTags(project.tags, project.category);
-  
-  return {
-    id: Number(project.id),
-    business_name: project.businessName,
-    business_type: project.businessType,
-    service_type: project.serviceType,
-    image_after: project.imageAfter,
-    image_before: project.imageBefore,
-    size: normalizeSize(project.size),
-    category: syncedTags[0] || project.category,
-    tags: syncedTags,
-    pinned: project.pinned || false,
-    created_at: project.createdAt
-  };
-};
-
 class PortfolioStore {
   private config: PortfolioConfig = { items: [], initialized: false };
   private isLoaded = false;
   private realtimeChannel: any = null;
   private isMutating = false;
+  private readonly STORAGE_KEY = 'portfolioConfig_v2';
 
   constructor() {
     this.loadConfig();
     this.setupRealtimeSubscription();
   }
 
+  private loadFromLocalStorage(): PortfolioConfig | null {
+    try {
+      if (typeof window === 'undefined') return null;
+      const stored = localStorage.getItem(this.STORAGE_KEY);
+      if (!stored) return null;
+      
+      const parsed = JSON.parse(stored);
+      // Validate the stored data
+      if (parsed && Array.isArray(parsed.items) && typeof parsed.initialized === 'boolean') {
+        return parsed;
+      }
+      return null;
+    } catch (error) {
+      console.warn('Error loading from localStorage:', error);
+      return null;
+    }
+  }
+
+  private saveToLocalStorage(config: PortfolioConfig): void {
+    try {
+      if (typeof window === 'undefined') return;
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(config));
+    } catch (error) {
+      console.warn('Error saving to localStorage:', error);
+    }
+  }
+
   private async loadConfig(): Promise<void> {
     try {
       if (this.isLoaded) return;
       
-      // Load projects from Supabase
-      const { data: projects, error } = await supabase
-        .from('projects')
-        .select('*')
-        .order('pinned', { ascending: false })
-        .order('created_at', { ascending: false })
-        .order('id', { ascending: false });
+      // Try to load from localStorage first for instant loading
+      const cachedData = this.loadFromLocalStorage();
+      if (cachedData && cachedData.items.length > 0) {
+        this.config = cachedData;
+        this.isLoaded = true;
+        this.dispatchUpdateEvent();
+        console.log('Portfolio loaded from cache:', cachedData.items.length, 'items');
+      }
+      
+      // Then try to load from Supabase in background with shorter timeout
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+        
+        const { data: projects, error } = await supabase
+          .from('projects')
+          .select('*')
+          .order('pinned', { ascending: false })
+          .order('created_at', { ascending: false })
+          .order('id', { ascending: false })
+          .limit(100); // Limit results for better performance
 
-      if (error) {
-        console.error('Error loading projects from Supabase:', error);
-        // Fallback to mock data if Supabase fails
-        this.config = {
-          items: [],
-          initialized: true,
-          updatedAt: new Date().toISOString(),
-          manualOrderByCategory: {}
-        };
-      } else {
-        // If DB empty, keep empty list (admin page will seed DB)
-        if (!projects || projects.length === 0) {
-          this.config = {
-            items: [],
-            initialized: true,
-            updatedAt: new Date().toISOString(),
-            manualOrderByCategory: {}
-          };
-        } else {
+        clearTimeout(timeoutId);
+
+        if (!error && projects && projects.length > 0) {
           // Deduplicate by id to avoid any accidental duplicates from race conditions
           const map = new Map<string, any>();
           for (const p of projects) {
@@ -128,6 +135,32 @@ class PortfolioStore {
           const deduped = Array.from(map.values());
           this.config = {
             items: deduped.map(convertFromSupabase),
+            initialized: true,
+            updatedAt: new Date().toISOString(),
+            manualOrderByCategory: {}
+          };
+          
+          // Save to localStorage for next time
+          this.saveToLocalStorage(this.config);
+          console.log('Portfolio loaded from Supabase:', this.config.items.length, 'items');
+        } else if (error) {
+          console.error('Error loading projects from Supabase:', error);
+          // If we have cached data, use it, otherwise create empty config
+          if (!this.config.initialized) {
+            this.config = {
+              items: [],
+              initialized: true,
+              updatedAt: new Date().toISOString(),
+              manualOrderByCategory: {}
+            };
+          }
+        }
+      } catch (fetchError) {
+        console.error('Supabase timeout or error:', fetchError);
+        // Use cached data if available
+        if (!this.config.initialized) {
+          this.config = {
+            items: [],
             initialized: true,
             updatedAt: new Date().toISOString(),
             manualOrderByCategory: {}
@@ -200,64 +233,60 @@ class PortfolioStore {
             console.error('Edge function failed:', edgeError);
             return false;
           }
+        } else {
+          // Success: Update project ID from DB
+          if (data?.id) {
+            project.id = data.id.toString();
+            project.createdAt = data.created_at;
+          }
+          console.log('Project added successfully:', project.id);
+          return true;
         }
-
-        // Success
-        console.log('Insert successful:', data);
-        if (data?.id) project.id = data.id.toString();
-        if (data?.created_at) project.createdAt = data.created_at;
-        return true;
       } else {
-        // Update path – never touch identity or created_at
+        // Update existing project
         const updatePayload = convertToSupabaseUpdate(project);
         console.log('Update payload:', updatePayload);
-        
-        const { data, error } = await (supabase as any)
+
+        const { error } = await (supabase as any)
           .from('projects')
           .update(updatePayload)
-          .eq('id', Number(project.id))
-          .select()
-          .single();
+          .eq('id', project.id);
 
         if (error) {
           console.error('Direct update failed:', error.message, error.details);
           console.warn('Attempting Edge Function fallback...');
           try {
-            const res = await callPortfolioAdmin('update', { id: Number(project.id), ...updatePayload });
-            console.log('Edge function update response:', res);
-            if (res) {
-              return true;
+            const res = await callPortfolioAdmin('update', { id: project.id, ...updatePayload });
+            if (!res || res.error) {
+              console.error('Edge function update failed:', res);
+              return false;
             }
-            console.error('Edge function update failed:', res);
-            return false;
+            console.log('Edge function update success:', res);
+            return true;
           } catch (edgeError) {
             console.error('Edge function update failed:', edgeError);
             return false;
           }
         }
-
-        console.log('Update successful:', data);
+        console.log('Project updated successfully:', project.id);
         return true;
       }
     } catch (error) {
       console.error('Error saving project to Supabase:', error);
+      // Show error message
+      window.dispatchEvent(new CustomEvent('showToast', { detail: { type: 'error', message: error.message || 'שגיאה בשמירת הפרויקט' } }));
       return false;
     }
   }
 
   private async deleteProjectFromSupabase(id: string | number): Promise<boolean> {
     try {
-      // Use Edge Function directly to avoid RLS issues
-      const res = await callPortfolioAdmin('delete', { id: Number(id) });
-      // Success if function returns a boolean true or an object with indicative flags
-      if (res === true) return true;
-      if (res && typeof res === 'object') {
-        if ('id' in res || (res as any).deleted === true || (res as any).ok === true || (res as any).success === true) {
-          return true;
-        }
+      const res = await callPortfolioAdmin('delete', { id: String(id) });
+      if (!res || res.deleted !== true) {
+        console.error('Edge function delete returned unexpected payload:', res);
+        return false;
       }
-      console.error('Edge function delete returned unexpected payload:', res);
-      return false;
+      return true;
     } catch (error) {
       console.error('Error deleting project from Supabase:', error);
       return false;
@@ -265,70 +294,51 @@ class PortfolioStore {
   }
 
   private setupRealtimeSubscription(): void {
-    // Setup Supabase realtime subscription for instant updates
-    this.realtimeChannel = supabase
-      .channel('portfolio-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'projects'
-        },
-        (payload) => {
-          console.log('Realtime update received:', payload.eventType);
-          this.handleRealtimeUpdate(payload);
-        }
-      )
-      .subscribe();
-  }
-
-  private async handleRealtimeUpdate(payload: any): Promise<void> {
-    const { eventType, new: newRecord, old: oldRecord } = payload;
+    if (typeof window === 'undefined') return;
     
     try {
-      switch (eventType) {
-        case 'INSERT':
-          if (newRecord) {
-            const newProject = convertFromSupabase(newRecord);
-            // Add to beginning of list if not already exists
-            const exists = this.config.items.some(p => p.id === newProject.id);
-            if (!exists) {
-              this.config.items.unshift(newProject);
-              this.dispatchUpdateEvent();
+      // Subscribe to real-time changes on projects table
+      this.realtimeChannel = supabase
+        .channel('portfolio-updates')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'projects'
+          },
+          async (payload) => {
+            console.log('Realtime update received:', payload);
+            try {
+              // Just reload the entire config when any change happens
+              this.isLoaded = false; // Force reload
+              await this.loadConfig();
+            } catch (error) {
+              console.error('Error handling realtime update:', error);
             }
           }
-          break;
-          
-        case 'UPDATE':
-          if (newRecord) {
-            const updatedProject = convertFromSupabase(newRecord);
-            const index = this.config.items.findIndex(p => p.id === updatedProject.id);
-            if (index !== -1) {
-              this.config.items[index] = updatedProject;
-              this.dispatchUpdateEvent();
-            }
-          }
-          break;
-          
-        case 'DELETE':
-          if (oldRecord) {
-            const deletedId = oldRecord.id.toString();
-            const initialLength = this.config.items.length;
-            this.config.items = this.config.items.filter(p => p.id !== deletedId);
-            if (this.config.items.length < initialLength) {
-              this.dispatchUpdateEvent();
-            }
-          }
-          break;
-      }
+        )
+        .subscribe();
+
+      console.log('Portfolio realtime subscription started');
     } catch (error) {
-      console.error('Error handling realtime update:', error);
+      console.error('Error setting up realtime subscription:', error);
     }
   }
 
-  private dispatchUpdateEvent(): void {
-    window.dispatchEvent(new CustomEvent(PORTFOLIO_UPDATE_EVENT));
+  dispatchUpdateEvent(): void {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent(PORTFOLIO_UPDATE_EVENT, { 
+        detail: { items: this.config.items, timestamp: Date.now() } 
+      }));
+    }
+  }
+
+  async getProjects(): Promise<Project[]> {
+    if (!this.isLoaded) {
+      await this.loadConfig();
+    }
+    return [...this.config.items];
   }
 
   async getConfig(): Promise<PortfolioConfig> {
@@ -338,65 +348,43 @@ class PortfolioStore {
     return { ...this.config };
   }
 
-  private sortProjects(a: Project, b: Project, category?: string): number {
-    const manual = this.config.manualOrderByCategory || {};
-    if (category && manual[category]) {
-      const order = manual[category];
-      const ia = order.indexOf(Number(a.id));
-      const ib = order.indexOf(Number(b.id));
-      const aIn = ia !== -1; const bIn = ib !== -1;
-      if (aIn && bIn) return ia - ib;
-      if (aIn) return -1;
-      if (bIn) return 1;
-    }
-
-    if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1;
-
-    const ta = a.createdAt ? Date.parse(a.createdAt) : 0;
-    const tb = b.createdAt ? Date.parse(b.createdAt) : 0;
-    if (tb !== ta) return tb - ta;
-
-    return Number(b.id) - Number(a.id);
-  }
-
-  async getProjects(): Promise<Project[]> {
-    if (!this.isLoaded) {
-      await this.loadConfig();
-    }
-    return [...this.config.items].sort((a, b) => this.sortProjects(a, b));
+  async reload(): Promise<void> {
+    this.isLoaded = false;
+    await this.loadConfig();
   }
 
   async addProject(project: Omit<Project, 'id'>): Promise<Project> {
     if (this.isMutating) {
       console.warn('Mutation in progress. Ignoring addProject call.');
-      return Promise.reject(new Error('פעולה בתהליך, נסה שוב.'));
+      throw new Error('מוטציה בתהליך, נסה שוב');
     }
     this.isMutating = true;
     if (!this.isLoaded) {
       await this.loadConfig();
     }
-    
-    console.log('Adding new project:', project);
-    
-    // Build new project; ID and created_at will be assigned by DB
-    const newProject: Project = {
-      id: 'temp',
-      createdAt: new Date().toISOString(),
-      pinned: false,
-      ...project,
-    };
-
-    // Do not optimistic insert to avoid duplicates with realtime
 
     try {
-      console.log('Saving to Supabase...');
+      const newProject: Project = {
+        ...project,
+        id: Date.now().toString(), // Temporary ID
+        createdAt: new Date().toISOString()
+      };
+
+      // Optimistic update - add to local config immediately
+      this.config.items.unshift(newProject);
+      this.saveToLocalStorage(this.config); // Cache immediately
+      this.dispatchUpdateEvent();
+
       const success = await this.saveProjectToSupabase(newProject, 'add');
-      console.log('Save result:', success);
-      
       if (!success) {
+        // Revert optimistic update if save failed
+        this.config.items = this.config.items.filter(p => p.id !== newProject.id);
+        this.saveToLocalStorage(this.config);
+        this.dispatchUpdateEvent();
         throw new Error('שגיאה בשמירת הפרויקט. בדוק הרשאות אדמין.');
       }
-      // Force sync from DB to avoid any client-side drift
+      
+      // Force sync from DB to get the real ID and ensure server truth wins
       await this.reload();
       return newProject;
     } catch (error) {
@@ -434,6 +422,7 @@ class PortfolioStore {
     
     // Apply optimistic update
     this.config.items[index] = updatedProject;
+    this.saveToLocalStorage(this.config); // Cache immediately
     this.dispatchUpdateEvent();
 
     try {
@@ -441,6 +430,7 @@ class PortfolioStore {
       if (!success) {
         // Revert optimistic update if save failed
         this.config.items[index] = originalProject;
+        this.saveToLocalStorage(this.config);
         this.dispatchUpdateEvent();
         // Show error message
         window.dispatchEvent(new CustomEvent('showToast', { 
@@ -459,6 +449,7 @@ class PortfolioStore {
       console.error('Error updating project:', error);
       // Revert optimistic update if save failed
       this.config.items[index] = originalProject;
+      this.saveToLocalStorage(this.config);
       this.dispatchUpdateEvent();
       // Show error message
       window.dispatchEvent(new CustomEvent('showToast', { 
@@ -499,96 +490,155 @@ class PortfolioStore {
     const filtered = projects.filter(p => 
       p.tags?.includes(category) || p.category === category
     );
-    return filtered.sort((a, b) => this.sortProjects(a, b, category));
+    console.log(`Filtered ${filtered.length} projects for category: ${category}`);
+    return filtered;
   }
 
-  setManualOrderForCategory(category: string, orderedIds: number[]): void {
-    const manual = this.config.manualOrderByCategory || {};
-    manual[category] = [...orderedIds];
-    this.config.manualOrderByCategory = manual;
-    this.dispatchUpdateEvent();
-  }
-
-  async togglePinned(id: string | number): Promise<boolean> {
-    if (!this.isLoaded) {
-      await this.loadConfig();
+  async saveProjectsBatch(projects: Project[]): Promise<boolean> {
+    if (this.isMutating) {
+      console.warn('Mutation in progress. Ignoring saveProjectsBatch call.');
+      return false;
     }
-    
-    const idx = this.config.items.findIndex(p => p.id == id);
-    if (idx === -1) return false;
-    
-    const current = this.config.items[idx].pinned === true;
-    const updates = { pinned: !current };
-    
-    return await this.updateProject(id, updates);
+    this.isMutating = true;
+    try {
+      // Update local config with batch
+      this.config.items = projects;
+      this.config.updatedAt = new Date().toISOString();
+      this.saveToLocalStorage(this.config);
+      this.dispatchUpdateEvent();
+      
+      // Note: Individual saves to Supabase happen through add/update/delete methods
+      return true;
+    } finally {
+      this.isMutating = false;
+    }
   }
 
-  // Bulk operations for import/export
-  async setProjects(projects: Project[]): Promise<void> {
-    // For bulk operations, we'll keep the local approach for now
-    // This is mainly used for import/export which should be rare
-    this.config.items = [...projects];
-    this.dispatchUpdateEvent();
+  async pinProject(id: string, pinned: boolean = true): Promise<boolean> {
+    return this.updateProject(id, { pinned });
   }
 
-  getConfigSync(): PortfolioConfig {
-    return { ...this.config };
-  }
-
-  exportConfig(): PortfolioConfig {
-    return this.getConfigSync();
-  }
-
-  importConfig(config: PortfolioConfig): void {
-    this.config = { ...config, updatedAt: new Date().toISOString() };
-    this.dispatchUpdateEvent();
-  }
-
-  // Reset to empty (admin can import mock data if needed)
-  reset(): void {
-    this.config = { items: [], initialized: true, updatedAt: new Date().toISOString(), manualOrderByCategory: {} };
-    this.dispatchUpdateEvent();
-  }
-
-  // Get available categories
-  getCategories() {
+  getAvailableCategories(): typeof categoryFilters {
     return categoryFilters;
   }
 
-  // Statistics for admin dashboard
-  async getStats() {
-    const projects = await this.getProjects();
-    const byCategory = categoryFilters.reduce((acc, cat) => {
-      if (cat.slug === 'all') return acc;
-      acc[cat.slug] = projects.filter(p => p.category === cat.slug).length;
+  // Manual ordering methods
+  async reorderProjects(category: string, newOrder: string[]): Promise<boolean> {
+    try {
+      this.config.manualOrderByCategory = {
+        ...this.config.manualOrderByCategory,
+        [category]: newOrder
+      };
+      this.saveToLocalStorage(this.config);
+      this.dispatchUpdateEvent();
+      return true;
+    } catch (error) {
+      console.error('Error reordering projects:', error);
+      return false;
+    }
+  }
+
+  async setManualOrderForCategory(category: string, projectIds: string[]): Promise<void> {
+    try {
+      this.config.manualOrderByCategory = {
+        ...this.config.manualOrderByCategory,
+        [category]: projectIds
+      };
+      this.saveToLocalStorage(this.config);
+      this.dispatchUpdateEvent();
+    } catch (error) {
+      console.error('Error setting manual order:', error);
+    }
+  }
+
+  async togglePinned(id: string): Promise<boolean> {
+    const project = this.config.items.find(p => p.id === id);
+    if (!project) return false;
+    return this.updateProject(id, { pinned: !project.pinned });
+  }
+
+  getStats() {
+    const projects = this.config.items;
+    const totalProjects = projects.length;
+    const pinnedProjects = projects.filter(p => p.pinned).length;
+    const byCategory = projects.reduce((acc, p) => {
+      acc[p.category] = (acc[p.category] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
-    const byServiceType = projects.reduce((acc, project) => {
-      acc[project.serviceType] = (acc[project.serviceType] || 0) + 1;
+    const byServiceType = projects.reduce((acc, p) => {
+      acc[p.serviceType] = (acc[p.serviceType] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
     return {
-      total: projects.length,
+      total: totalProjects,
+      totalProjects,
+      pinnedProjects,
       byCategory,
       byServiceType,
-      lastUpdated: this.config.updatedAt
+      lastUpdated: this.config.updatedAt || new Date().toISOString()
     };
   }
 
-  // Force reload from Supabase
-  // Cleanup realtime subscription
+  async setProjects(projects: Project[]): Promise<void> {
+    this.config.items = projects;
+    this.config.updatedAt = new Date().toISOString();
+    this.saveToLocalStorage(this.config);
+    this.dispatchUpdateEvent();
+  }
+
+  async exportConfig(): Promise<Blob> {
+    const config = await this.getConfig();
+    const exportData = {
+      ...config,
+      exportedAt: new Date().toISOString(),
+      version: 'v2'
+    };
+    return new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+  }
+
+  async importConfig(file: File): Promise<boolean> {
+    try {
+      const text = await file.text();
+      const importedData = JSON.parse(text);
+      
+      if (!importedData.items || !Array.isArray(importedData.items)) {
+        throw new Error('קובץ לא תקין');
+      }
+
+      this.config = {
+        items: importedData.items,
+        initialized: true,
+        updatedAt: new Date().toISOString(),
+        manualOrderByCategory: importedData.manualOrderByCategory || {}
+      };
+      
+      this.saveToLocalStorage(this.config);
+      this.dispatchUpdateEvent();
+      return true;
+    } catch (error) {
+      console.error('Error importing config:', error);
+      return false;
+    }
+  }
+
+  async reset(): Promise<void> {
+    this.config = {
+      items: [],
+      initialized: true,
+      updatedAt: new Date().toISOString(),
+      manualOrderByCategory: {}
+    };
+    this.saveToLocalStorage(this.config);
+    this.dispatchUpdateEvent();
+  }
+
   cleanup(): void {
     if (this.realtimeChannel) {
       supabase.removeChannel(this.realtimeChannel);
       this.realtimeChannel = null;
     }
-  }
-
-  async reload(): Promise<void> {
-    this.isLoaded = false;
-    await this.loadConfig();
   }
 }
 
