@@ -7,8 +7,10 @@ import {
   Users, 
   Handshake,
   ArrowLeft,
-  MessageCircle
+  MessageCircle,
+  Phone
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 
 const customSolutions = [
@@ -143,6 +145,63 @@ const CustomSolutions = () => {
               </Card>
             </motion.div>
           ))}
+          
+          {/* Contact CTA Card - Always appears last */}
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={isIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+            transition={{ duration: 0.6, delay: customSolutions.length * 0.1 }}
+            className="md:col-span-2"
+          >
+            <Card className="h-full border-2 border-secondary bg-gradient-to-br from-secondary/5 to-primary/5 hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 group">
+              <CardHeader>
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-secondary to-primary rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <Phone className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-xl font-assistant font-bold text-primary">
+                    רוצים פתרון מותאם לעסק שלכם?
+                  </h3>
+                </div>
+                
+                <p className="text-muted-foreground font-open-sans leading-relaxed">
+                  לא מצאתם בדיוק מה שחיפשתם? בואו נדבר ונבנה יחד את הפתרון המושלם בדיוק עבורכם
+                </p>
+              </CardHeader>
+              
+              <CardContent className="pt-0">
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-secondary rounded-full flex-shrink-0" />
+                    <span className="text-sm font-open-sans text-muted-foreground">
+                      שיחת ייעוץ ללא התחייבות
+                    </span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-secondary rounded-full flex-shrink-0" />
+                    <span className="text-sm font-open-sans text-muted-foreground">
+                      הצעה מותאמת אישית
+                    </span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-secondary rounded-full flex-shrink-0" />
+                    <span className="text-sm font-open-sans text-muted-foreground">
+                      תמיכה מקצועית לכל השאלות
+                    </span>
+                  </li>
+                </ul>
+                
+                <Link to="/contact">
+                  <Button 
+                    className="w-full bg-gradient-to-r from-primary to-secondary text-white hover:from-primary/90 hover:to-secondary/90 font-assistant group-hover:shadow-glow transition-all duration-300"
+                  >
+                    צרו איתנו קשר
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
 
         {/* Process Section */}
