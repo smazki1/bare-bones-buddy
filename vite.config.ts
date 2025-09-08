@@ -14,11 +14,25 @@ export default defineConfig(({ mode }) => ({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./src/setupTests.ts'],
+    setupFiles: ['src/test/setup.ts'],
+    testTimeout: 10000,
+    hookTimeout: 10000,
+    restoreMocks: true,
+    clearMocks: true,
+    unstubEnvs: true,
+    unstubGlobals: true,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],
-    },
+      exclude: [
+        'node_modules/**',
+        'dist/**',
+        '.next/**',
+        'coverage/**',
+        'src/**/*.test.*',
+        'src/components/icons/**'
+      ]
+    }
   },
   plugins: [
     react(),
