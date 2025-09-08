@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Project } from '@/data/portfolioMock';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { buildSupabaseSrcSet, toSupabaseRenderUrl, optimalWidthForSize } from '@/utils/imageUrls';
 
 interface ProjectCardProps {
   project: Project;
@@ -62,8 +63,10 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
   };
 
   const currentSrc = showBefore && project.imageBefore ? project.imageBefore : project.imageAfter;
-  // Block any Unsplash-derived srcsets to avoid old system images
-  const srcSet = undefined;
+  const targetW = optimalWidthForSize(project.size);
+  const displaySrc = toSupabaseRenderUrl(currentSrc, { width: targetW, quality: 78 });
+  const srcSet = buildSupabaseSrcSet(currentSrc);
+
 
   return (
     <motion.figure
@@ -92,18 +95,18 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
         <div ref={ref} className="relative w-full h-full">
           {!imageError && shouldLoadImage && (
             <img
-              src={currentSrc}
+              src={displaySrc}
               alt={`${project.businessName} - ${showBefore && project.imageBefore ? 'לפני' : 'אחרי'}`}
               className={`
                 w-full h-full object-cover transition-all duration-200
                 ${!imageLoaded ? 'opacity-0' : 'opacity-100'}
                 sm:group-hover:scale-105
               `}
-              loading={index < 2 ? 'eager' : 'lazy'}
+              loading={index < 6 ? 'eager' : 'lazy'}
               decoding="async"
               srcSet={srcSet}
               sizes={srcSet ? sizesAttr : "(max-width: 768px) 100vw, 33vw"}
-              fetchPriority={index < 2 ? 'high' : 'auto'}
+              fetchPriority={index < 6 ? 'high' : 'auto'}
               onLoad={() => setImageLoaded(true)}
               onError={() => {
                 setImageError(true);
