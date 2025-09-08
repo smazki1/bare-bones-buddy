@@ -100,12 +100,12 @@ const Portfolio = () => {
   // Filter projects based on active filter
   const filteredProjects = useMemo(() => {
     if (activeFilter === 'all') {
-      return allProjects;
+      return allProjects.filter(p => p.imageAfter && !p.imageAfter.includes('images.unsplash.com'));
     }
     // Support both legacy single category and new multi-tags
-    return allProjects.filter(project => 
-      project.category === activeFilter || project.tags?.includes(activeFilter)
-    );
+    return allProjects
+      .filter(project => project.category === activeFilter || project.tags?.includes(activeFilter))
+      .filter(p => p.imageAfter && !p.imageAfter.includes('images.unsplash.com'));
   }, [activeFilter, allProjects]);
 
   // Check if there are more pages to load and haven't reached max display limit

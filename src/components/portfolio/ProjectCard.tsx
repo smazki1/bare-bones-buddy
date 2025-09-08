@@ -62,7 +62,8 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
   };
 
   const currentSrc = showBefore && project.imageBefore ? project.imageBefore : project.imageAfter;
-  const srcSet = buildUnsplashSrcSet(currentSrc);
+  // Block any Unsplash-derived srcsets to avoid old system images
+  const srcSet = undefined;
 
   return (
     <motion.figure
