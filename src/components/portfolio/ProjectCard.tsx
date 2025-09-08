@@ -9,6 +9,12 @@ interface ProjectCardProps {
 }
 
 const ProjectCard = ({ project, index }: ProjectCardProps) => {
+  console.log('🎨 ProjectCard render:', {
+    businessName: project.businessName,
+    hasImageAfter: !!project.imageAfter,
+    imageAfterPreview: project.imageAfter?.substring(0, 50)
+  });
+  
   const [showBefore, setShowBefore] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 

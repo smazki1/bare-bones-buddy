@@ -10,6 +10,13 @@ interface MasonryGridProps {
 }
 
 const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridProps) => {
+  console.log('🎨 MasonryGrid render:', { 
+    projectsLength: projects.length, 
+    isLoading, 
+    hasReachedMaxItems,
+    firstProject: projects[0]?.businessName
+  });
+
   const renderSkeletons = () => {
     return Array.from({ length: 6 }, (_, index) => (
       <div key={`skeleton-${index}`} className="break-inside-avoid mb-5">

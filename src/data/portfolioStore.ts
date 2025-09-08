@@ -23,10 +23,17 @@ const normalizeSize = (s: any): 'small' | 'medium' | 'large' => {
 
 // Convert Supabase project to frontend format
 const convertFromSupabase = (dbProject: any): Project => {
+  console.log('🔄 Converting from Supabase:', {
+    id: dbProject.id,
+    business_name: dbProject.business_name,
+    hasImageAfter: !!dbProject.image_after,
+    imageAfterLength: dbProject.image_after?.length || 0
+  });
+  
   const tags = dbProject.tags || [dbProject.category];
   const syncedTags = syncProjectTags(tags, dbProject.category);
   
-  return {
+  const converted = {
     id: dbProject.id.toString(),
     businessName: dbProject.business_name,
     businessType: dbProject.business_type,
@@ -39,6 +46,14 @@ const convertFromSupabase = (dbProject: any): Project => {
     pinned: dbProject.pinned || false,
     createdAt: dbProject.created_at
   };
+  
+  console.log('✅ Converted project:', {
+    businessName: converted.businessName,
+    hasImageAfter: !!converted.imageAfter,
+    imageAfterPreview: converted.imageAfter?.substring(0, 50)
+  });
+  
+  return converted;
 };
 
 // Convert frontend project to Supabase format for update

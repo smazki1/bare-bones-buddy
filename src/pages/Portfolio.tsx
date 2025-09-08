@@ -27,21 +27,26 @@ const Portfolio = () => {
   // Load projects from Supabase and local store with instant loading
   useEffect(() => {
     const loadProjects = async () => {
+      console.log('🔄 Starting portfolio load...');
       try {
         // Check if we might have cached data for faster loading
         const hasCache = localStorage.getItem('portfolioConfig_v2');
+        console.log('📦 Cache status:', hasCache ? 'exists' : 'empty');
         
         if (!hasCache) {
           setIsInitialLoading(true);
         }
         
         const storedProjects = await portfolioStore.getProjects();
+        console.log('📊 Loaded projects:', storedProjects.length);
+        console.log('🖼️ First project:', storedProjects[0]?.businessName, storedProjects[0]?.imageAfter?.substring(0, 50));
         setAllProjects(storedProjects);
       } catch (error) {
-        console.error('Error loading projects:', error);
+        console.error('❌ Error loading projects:', error);
         setAllProjects([]); // Set empty array on error
       } finally {
         setIsInitialLoading(false);
+        console.log('✅ Portfolio load complete');
       }
     };
 
@@ -51,11 +56,13 @@ const Portfolio = () => {
     // Listen for real-time updates from admin - now just sync local state
     const handleUpdate = async () => {
       try {
+        console.log('🔄 Updating from realtime...');
         // Get updated projects from store (already updated by realtime)
         const updatedProjects = await portfolioStore.getProjects();
+        console.log('📊 Updated projects count:', updatedProjects.length);
         setAllProjects(updatedProjects);
       } catch (error) {
-        console.error('Error syncing projects:', error);
+        console.error('❌ Error syncing projects:', error);
       }
     };
 
@@ -134,8 +141,16 @@ const Portfolio = () => {
 
   // Load initial projects when filtered projects change
   useEffect(() => {
+    console.log('🔄 Loading initial projects...', { 
+      isInitialLoading, 
+      allProjectsLength: allProjects.length,
+      filteredProjectsLength: filteredProjects.length 
+    });
+    
     if (!isInitialLoading && allProjects.length > 0) {
       const initialProjects = filteredProjects.slice(0, ITEMS_PER_PAGE);
+      console.log('📋 Setting visible projects:', initialProjects.length);
+      console.log('🖼️ Sample project:', initialProjects[0]?.businessName, initialProjects[0]?.imageAfter?.substring(0, 50));
       setVisibleProjects(initialProjects);
       setCurrentPage(1);
     }
