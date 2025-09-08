@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { Button } from './ui/button';
+import { fetchProjects } from '@/lib/supabase';
 
 interface PortfolioItem {
   id: number;
@@ -18,6 +19,7 @@ const PortfolioSection = () => {
   const [hasNextPage, setHasNextPage] = useState(true);
   const [isFetching, setIsFetching] = useState(false);
   const [page, setPage] = useState(1);
+  const [usingRealData, setUsingRealData] = useState(false);
 
   // Mock data generator
   const generatePortfolioItems = (pageNum: number) => {
@@ -47,6 +49,7 @@ const PortfolioSection = () => {
 
   const fetchNextPage = async () => {
     if (isFetching) return;
+    if (usingRealData) return; // disable infinite scroll when using real data
     
     setIsFetching(true);
     
@@ -68,10 +71,54 @@ const PortfolioSection = () => {
   useInfiniteScroll({ hasNextPage, fetchNextPage, isFetching });
 
   useEffect(() => {
-    // Load initial items
-    const initialItems = generatePortfolioItems(1);
-    setPortfolioItems(initialItems);
+    // Try to load real projects from Supabase; fallback to mock
+    (async () => {
+      try {
+        const projects = await fetchProjects();
+        if (projects && projects.length > 0) {
+          const mapped: PortfolioItem[] = projects.slice(0, 12).map((p) => ({
+            id: p.id,
+            title: p.business_name,
+            category: p.category,
+            image: p.image_after,
+            tags: [],
+          }));
+          setPortfolioItems(mapped);
+          setUsingRealData(true);
+          setHasNextPage(false);
+          return;
+        }
+      } catch (e) {
+        // ignore and fallback
+      }
+      // Fallback to mock
+      const initialItems = generatePortfolioItems(1);
+      setPortfolioItems(initialItems);
+      setUsingRealData(false);
+    })();
   }, []);
+
+  // Build srcset for Unsplash images (small perf boost on mobile)
+  const buildUnsplashSrcSet = (url: string): string | undefined => {
+    try {
+      const parsed = new URL(url);
+      if (!parsed.host.includes('images.unsplash.com')) return undefined;
+      const widths = [300, 480, 600, 900];
+      return widths
+        .map((w) => {
+          const u = new URL(parsed.toString());
+          u.searchParams.set('w', String(w));
+          u.searchParams.set('q', '80');
+          if (!u.searchParams.has('auto')) u.searchParams.set('auto', 'format');
+          if (!u.searchParams.has('fit')) u.searchParams.set('fit', 'crop');
+          return `${u.toString()} ${w}w`;
+        })
+        .join(', ');
+    } catch {
+      return undefined;
+    }
+  };
+  const sizesAttr = '(max-width: 768px) 45vw, (max-width: 1024px) 25vw, 200px';
 
   return (
     <section ref={ref} className="py-20 bg-gradient-subtle">
@@ -107,6 +154,9 @@ const PortfolioSection = () => {
                     alt={item.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     loading="lazy"
+                    decoding="async"
+                    srcSet={buildUnsplashSrcSet(item.image)}
+                    sizes={sizesAttr}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   

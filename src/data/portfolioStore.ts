@@ -410,6 +410,7 @@ class PortfolioStore {
   }
 
   async reload(): Promise<void> {
+    // Force a fresh fetch from Supabase (avoid cached state)
     this.isLoaded = false;
     await this.loadConfig();
   }
