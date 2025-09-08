@@ -10,6 +10,29 @@ interface ProjectCardProps {
   index: number;
 }
 
+// Build an optimized srcset for Unsplash-hosted images; fallback to original URL otherwise
+const buildUnsplashSrcSet = (url: string): string | undefined => {
+  try {
+    const parsed = new URL(url);
+    if (!parsed.host.includes('images.unsplash.com')) return undefined;
+
+    const widths = [400, 600, 900, 1200];
+    const parts = widths.map((w) => {
+      const u = new URL(parsed.toString());
+      u.searchParams.set('w', String(w));
+      u.searchParams.set('q', '80');
+      if (!u.searchParams.has('auto')) u.searchParams.set('auto', 'format');
+      if (!u.searchParams.has('fit')) u.searchParams.set('fit', 'crop');
+      return `${u.toString()} ${w}w`;
+    });
+    return parts.join(', ');
+  } catch {
+    return undefined;
+  }
+};
+
+const sizesAttr = '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw';
+
 const ProjectCard = ({ project, index }: ProjectCardProps) => {
   const [showBefore, setShowBefore] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -38,12 +61,16 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
     }
   };
 
+  const currentSrc = showBefore && project.imageBefore ? project.imageBefore : project.imageAfter;
+  const srcSet = buildUnsplashSrcSet(currentSrc);
+
   return (
     <motion.figure
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.3) }}
       className="break-inside-avoid mb-4 sm:mb-5 group cursor-pointer touch-manipulation"
+      style={{ contentVisibility: 'auto' }}
       onClick={handleToggle}
       aria-label={`פרויקט: ${project.businessName}`}
       role="button"
@@ -64,7 +91,7 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
         <div ref={ref} className="relative w-full h-full">
           {!imageError && shouldLoadImage && (
             <img
-              src={showBefore && project.imageBefore ? project.imageBefore : project.imageAfter}
+              src={currentSrc}
               alt={`${project.businessName} - ${showBefore && project.imageBefore ? 'לפני' : 'אחרי'}`}
               className={`
                 w-full h-full object-cover transition-all duration-200
@@ -73,7 +100,8 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
               `}
               loading="lazy"
               decoding="async"
-              sizes="(max-width: 768px) 100vw, 33vw"
+              srcSet={srcSet}
+              sizes={srcSet ? sizesAttr : "(max-width: 768px) 100vw, 33vw"}
               fetchPriority={index < 2 ? 'high' : 'auto'}
               onLoad={() => setImageLoaded(true)}
               onError={() => {
