@@ -91,15 +91,70 @@ class PortfolioStore {
   private saveToLocalStorage(config: PortfolioConfig): void {
     try {
       if (typeof window === 'undefined') return;
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(config));
+      
+      // Create a lightweight version without base64 images to save space
+      const lightweightConfig = {
+        ...config,
+        items: config.items.map(item => ({
+          ...item,
+          // Keep only metadata, remove large base64 images
+          imageAfter: item.imageAfter ? 'cached' : undefined,
+          imageBefore: item.imageBefore ? 'cached' : undefined,
+          // Store image existence but not content
+          hasImageAfter: !!item.imageAfter,
+          hasImageBefore: !!item.imageBefore
+        }))
+      };
+      
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(lightweightConfig));
     } catch (error) {
       console.warn('Error saving to localStorage:', error);
+      // If still failing, clear old data and try with just basic info
+      try {
+        localStorage.removeItem(this.STORAGE_KEY);
+        const basicConfig = {
+          initialized: config.initialized,
+          items: config.items.map(item => ({
+            id: item.id,
+            businessName: item.businessName,
+            category: item.category || item.businessType,
+            tags: item.tags || [],
+            hasImageAfter: !!item.imageAfter,
+            hasImageBefore: !!item.imageBefore
+          }))
+        };
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(basicConfig));
+      } catch (secondError) {
+        console.warn('Failed to save even basic config:', secondError);
+      }
     }
+  }
+
+  private getFallbackConfig(): PortfolioConfig {
+    // Import fallback data from portfolioMock
+    const { portfolioMockData } = require('./portfolioMock');
+    return {
+      items: portfolioMockData.slice(0, 12), // Use first 12 items as fallback
+      initialized: true,
+      updatedAt: new Date().toISOString(),
+      manualOrderByCategory: {}
+    };
   }
 
   private async loadConfig(): Promise<void> {
     try {
       if (this.isLoaded) return;
+      
+      // Clear localStorage if it's corrupted or too large
+      try {
+        const stored = localStorage.getItem(this.STORAGE_KEY);
+        if (stored && stored.length > 5000000) { // 5MB limit
+          console.log('Clearing large localStorage cache');
+          localStorage.removeItem(this.STORAGE_KEY);
+        }
+      } catch (e) {
+        localStorage.removeItem(this.STORAGE_KEY);
+      }
       
       // Try to load from localStorage first for instant loading
       const cachedData = this.loadFromLocalStorage();
@@ -140,47 +195,44 @@ class PortfolioStore {
             manualOrderByCategory: {}
           };
           
-          // Save to localStorage for next time
+          // Try to save to localStorage for next time (will use lightweight version)
           this.saveToLocalStorage(this.config);
           console.log('Portfolio loaded from Supabase:', this.config.items.length, 'items');
+          
+          if (this.isLoaded) {
+            // If we already loaded from cache, dispatch update for new data
+            this.dispatchUpdateEvent();
+          } else {
+            this.isLoaded = true;
+            this.dispatchUpdateEvent();
+          }
         } else if (error) {
-          console.error('Error loading projects from Supabase:', error);
-          // If we have cached data, use it, otherwise create empty config
+          console.warn('Supabase error, using cache/fallback:', error);
+          // If we have cache, keep using it; otherwise use fallback
           if (!this.config.initialized) {
-            this.config = {
-              items: [],
-              initialized: true,
-              updatedAt: new Date().toISOString(),
-              manualOrderByCategory: {}
-            };
+            console.log('Loading fallback data');
+            this.config = this.getFallbackConfig();
+            this.isLoaded = true;
+            this.dispatchUpdateEvent();
           }
         }
-      } catch (fetchError) {
-        console.error('Supabase timeout or error:', fetchError);
-        // Use cached data if available
+      } catch (supabaseError) {
+        console.warn('Failed to load from Supabase:', supabaseError);
         if (!this.config.initialized) {
-          this.config = {
-            items: [],
-            initialized: true,
-            updatedAt: new Date().toISOString(),
-            manualOrderByCategory: {}
-          };
+          console.log('Loading fallback data due to Supabase error');
+          this.config = this.getFallbackConfig();
+          this.isLoaded = true;
+          this.dispatchUpdateEvent();
         }
       }
-      
-      this.isLoaded = true;
-      this.dispatchUpdateEvent();
     } catch (error) {
-      console.error('Error loading portfolio config:', error);
-      // Fallback to empty list (never re-seed automatically)
-      this.config = {
-        items: [],
-        initialized: true,
-        updatedAt: new Date().toISOString(),
-        manualOrderByCategory: {}
-      };
-      this.isLoaded = true;
-      this.dispatchUpdateEvent();
+      console.error('Error in loadConfig:', error);
+      // Final fallback
+      if (!this.isLoaded) {
+        this.config = this.getFallbackConfig();
+        this.isLoaded = true;
+        this.dispatchUpdateEvent();
+      }
     }
   }
 
