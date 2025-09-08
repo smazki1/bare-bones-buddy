@@ -12,6 +12,7 @@ import { Project, ProjectSize } from '@/data/portfolioMock';
 import { getAvailableTags, syncProjectTags, getTagLabel } from '@/utils/tagUtils';
 import { convertFileToDataUrl, isValidImageFile } from '@/utils/fileUtils';
 import { useToast } from '@/hooks/use-toast';
+import '../../data/solutionsSync'; // Import to trigger solutions sync
 
 interface AdminPortfolioEditorProps {
   isOpen: boolean;

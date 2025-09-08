@@ -1,5 +1,5 @@
 import { solutionsStore } from '@/data/solutionsStore';
-import { categoryFilters } from '@/data/portfolioMock';
+import { DEFAULT_SOLUTIONS_CONFIG } from '@/types/solutions';
 
 export interface TagFilter {
   label: string;
@@ -12,13 +12,13 @@ export interface TagFilter {
  */
 export function getAvailableTags(): TagFilter[] {
   try {
-    // Get solutions configuration
+    // Get solutions configuration - this is the ONLY source of truth for tags
     const solutionsConfig = solutionsStore.safeGetConfigOrDefaults();
     
     // Start with 'all' option
     const tags: TagFilter[] = [{ label: 'הכל', slug: 'all' }];
     
-    // Add enabled solutions as tags
+    // Add enabled solutions as tags - solutions are the ONLY valid tags
     const solutionTags = solutionsConfig.items
       .filter(item => item.enabled)
       .sort((a, b) => a.order - b.order)
@@ -29,20 +29,19 @@ export function getAvailableTags(): TagFilter[] {
     
     tags.push(...solutionTags);
     
-    // Add any legacy tags that might exist in projects but not in solutions
-    const solutionSlugs = new Set(solutionTags.map(tag => tag.slug));
-    const legacyTags = categoryFilters
-      .filter(cat => cat.slug !== 'all' && !solutionSlugs.has(cat.slug))
-      .map(cat => ({ label: cat.label, slug: cat.slug }));
-    
-    if (legacyTags.length > 0) {
-      tags.push(...legacyTags);
-    }
-    
     return tags;
   } catch (error) {
-    console.warn('Failed to load dynamic tags, falling back to static categories:', error);
-    return categoryFilters;
+    console.warn('Failed to load tags from solutions, using default solutions:', error);
+    // Even on error, use solutions as fallback - never use legacy categoryFilters
+    const solutionTags = DEFAULT_SOLUTIONS_CONFIG.items
+      .filter(item => item.enabled)
+      .sort((a, b) => a.order - b.order)
+      .map(item => ({
+        label: item.title,
+        slug: item.id
+      }));
+    
+    return [{ label: 'הכל', slug: 'all' }, ...solutionTags];
   }
 }
 
@@ -70,13 +69,22 @@ export function syncProjectTags(projectTags: string[] = [], fallbackCategory: st
   const availableTags = getAvailableTags();
   const availableSlugs = new Set(availableTags.map(t => t.slug).filter(s => s !== 'all'));
   
-  // Filter valid tags
+  // Filter only valid tags that exist in solutions
   const validTags = projectTags.filter(tag => availableSlugs.has(tag));
   
-  // If no valid tags, add fallback
+  // If no valid tags, add fallback (ensure fallback exists in solutions)
   if (validTags.length === 0) {
     return availableSlugs.has(fallbackCategory) ? [fallbackCategory] : [Array.from(availableSlugs)[0]];
   }
   
   return validTags;
+}
+
+/**
+ * Gets all valid tag slugs that can be used for projects
+ * Only tags from enabled solutions are valid
+ */
+export function getValidTagSlugs(): string[] {
+  const availableTags = getAvailableTags();
+  return availableTags.map(t => t.slug).filter(s => s !== 'all');
 }

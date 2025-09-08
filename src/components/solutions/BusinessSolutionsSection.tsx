@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { solutionsStore } from '@/data/solutionsStore';
 import { SolutionsConfig, SolutionCard } from '@/types/solutions';
+import '../data/solutionsSync'; // Import to trigger solutions sync
 
 
 
