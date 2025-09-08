@@ -35,6 +35,42 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_log: {
+        Row: {
+          created_at: string | null
+          id: string
+          new_values: Json | null
+          old_values: Json | null
+          operation: string
+          record_id: string | null
+          table_name: string
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          operation: string
+          record_id?: string | null
+          table_name: string
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          operation?: string
+          record_id?: string | null
+          table_name?: string
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       background_images: {
         Row: {
           active: boolean | null
@@ -339,6 +375,10 @@ export type Database = {
       }
       link_admin_user: {
         Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      verify_admin_user: {
+        Args: { user_id_param: string }
         Returns: boolean
       }
     }
