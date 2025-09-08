@@ -533,9 +533,7 @@ class PortfolioStore {
       return projects;
     }
     // Filter projects that have the category in their tags or as their primary category
-    const filtered = projects.filter(p => 
-      p.tags?.includes(category) || p.category === category
-    );
+    const filtered = projects.filter(p => p.tags?.includes(category) || p.category === category);
     console.log(`Filtered ${filtered.length} projects for category: ${category}`);
     return filtered;
   }

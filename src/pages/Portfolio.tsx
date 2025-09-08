@@ -12,6 +12,7 @@ import { Project } from '@/data/portfolioMock';
 import { portfolioStore, PORTFOLIO_UPDATE_EVENT } from '@/data/portfolioStore';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { fetchProjects, type DbProject } from '@/lib/supabase';
+import { syncProjectTags } from '@/utils/tagUtils';
 // Remote fetch disabled: local-only portfolio
 
 const ITEMS_PER_PAGE = 8;
@@ -51,7 +52,8 @@ const Portfolio = () => {
           imageBefore: p.image_before || undefined,
           size: (p.size as Project['size']) || 'medium',
           category: p.category,
-          tags: [p.category],
+          // Preserve DB tags (with sync); fallback to category
+          tags: syncProjectTags((p as any).tags || [p.category], p.category),
           pinned: p.pinned,
           createdAt: p.created_at,
         }));
@@ -80,7 +82,7 @@ const Portfolio = () => {
           imageBefore: p.image_before || undefined,
           size: (p.size as Project['size']) || 'medium',
           category: p.category,
-          tags: [p.category],
+          tags: syncProjectTags((p as any).tags || [p.category], p.category),
           pinned: p.pinned,
           createdAt: p.created_at,
         }));
