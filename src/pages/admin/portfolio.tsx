@@ -10,7 +10,7 @@ import AdminPortfolioEditor from '@/components/admin/portfolio/AdminPortfolioEdi
 import AdminPortfolioList from '@/components/admin/portfolio/AdminPortfolioList';
 import { portfolioStore, PORTFOLIO_UPDATE_EVENT } from '@/data/portfolioStore';
 import { Project } from '@/data/portfolioMock';
-import { portfolioMockData } from '@/data/portfolioMock';
+// import { portfolioMockData } from '@/data/portfolioMock';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -229,20 +229,11 @@ const AdminPortfolioPage = () => {
   };
 
   const handleLoadMockData = () => {
-    try {
-      portfolioStore.setProjects(portfolioMockData);
-      toast({
-        title: "הצלחה",
-        description: "נתוני דמו נטענו בהצלחה"
-      });
-      setHasUnsavedChanges(true);
-    } catch (error) {
-      toast({
-        title: "שגיאה",
-        description: "שגיאה בטעינת נתוני הדמו",
-        variant: "destructive"
-      });
-    }
+    toast({
+      title: "חסום",
+      description: "טעינת דמו בוטלה בסביבת פרודקשן",
+      variant: "destructive"
+    });
   };
 
   const handleReset = () => {

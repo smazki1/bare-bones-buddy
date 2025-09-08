@@ -29,21 +29,15 @@ const Portfolio = () => {
   const itemsPerPage = isMobile ? 4 : ITEMS_PER_PAGE;
   const LAST_DB_KEY = 'portfolio:lastDb:v1';
 
-  // Load projects from Supabase with instant local snapshot
+  // Load projects from Supabase only (no mock, no stale snapshot)
   useEffect(() => {
     const loadProjects = async () => {
       try {
         setIsInitialLoading(true);
-        // Instant: use last DB snapshot if available
+        // Purge any old local snapshots to prevent showing system images
         try {
-          const cached = localStorage.getItem(LAST_DB_KEY);
-          if (cached) {
-            const parsed = JSON.parse(cached) as Project[];
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              setAllProjects(parsed);
-              setIsInitialLoading(false);
-            }
-          }
+          localStorage.removeItem(LAST_DB_KEY);
+          localStorage.removeItem('portfolioConfig_v2');
         } catch {}
 
         // Authoritative: fetch from Supabase
@@ -62,7 +56,6 @@ const Portfolio = () => {
           createdAt: p.created_at,
         }));
         setAllProjects(mapped);
-        try { localStorage.setItem(LAST_DB_KEY, JSON.stringify(mapped)); } catch {}
         setIsInitialLoading(false);
       } catch (error) {
         console.error('Error loading projects:', error);
@@ -74,10 +67,9 @@ const Portfolio = () => {
     // Load initially
     loadProjects();
 
-    // Listen for real-time updates from admin - now just sync local state
+    // Listen for real-time updates – always refetch from Supabase
     const handleUpdate = async () => {
       try {
-        // Always refetch from Supabase to avoid local mock overrides
         const dbItems: DbProject[] = await fetchProjects();
         const mapped: Project[] = dbItems.map((p) => ({
           id: p.id.toString(),
@@ -93,7 +85,6 @@ const Portfolio = () => {
           createdAt: p.created_at,
         }));
         setAllProjects(mapped);
-        try { localStorage.setItem(LAST_DB_KEY, JSON.stringify(mapped)); } catch {}
       } catch (error) {
         console.error('Error syncing projects:', error);
       }

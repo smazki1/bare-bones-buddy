@@ -71,29 +71,25 @@ const PortfolioSection = () => {
   useInfiniteScroll({ hasNextPage, fetchNextPage, isFetching });
 
   useEffect(() => {
-    // Try to load real projects from Supabase; fallback to mock
+    // Load ONLY real projects from Supabase; never show mock
     (async () => {
       try {
         const projects = await fetchProjects();
-        if (projects && projects.length > 0) {
-          const mapped: PortfolioItem[] = projects.slice(0, 12).map((p) => ({
+        const mapped: PortfolioItem[] = (projects || []).slice(0, 12).map((p) => ({
             id: p.id,
             title: p.business_name,
             category: p.category,
             image: p.image_after,
             tags: [],
           }));
-          setPortfolioItems(mapped);
-          setUsingRealData(true);
-          setHasNextPage(false);
-          return;
-        }
+        setPortfolioItems(mapped);
+        setUsingRealData(true);
+        setHasNextPage(false);
+        return;
       } catch (e) {
-        // ignore and fallback
+        // keep empty; do not fallback to mock
       }
-      // Fallback to mock
-      const initialItems = generatePortfolioItems(1);
-      setPortfolioItems(initialItems);
+      setPortfolioItems([]);
       setUsingRealData(false);
     })();
   }, []);
