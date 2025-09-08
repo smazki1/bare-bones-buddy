@@ -24,6 +24,20 @@
     <link rel="dns-prefetch" href="https://images.unsplash.com">
     <link rel="preconnect" href="https://unsplash.com" crossorigin>
     <link rel="dns-prefetch" href="https://unsplash.com">
+    
+    <!-- Image optimization: WebP/AVIF support hints -->
+    <meta name="format-detection" content="telephone=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    
+    <!-- Preload critical CSS for skeleton animations -->
+    <style>
+      .skeleton-pulse { animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+      @keyframes skeleton-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: .5; }
+      }
+    </style>
   </head>
 
   <body>
