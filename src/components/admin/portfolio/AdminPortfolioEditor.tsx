@@ -38,6 +38,8 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject, onAutoS
   const [previewImages, setPreviewImages] = useState<{
     after?: string;
     before?: string;
+    afterName?: string;
+    beforeName?: string;
   }>({});
   const [autoSaveTimer, setAutoSaveTimer] = useState<number | null>(null);
   const [availableTags, setAvailableTags] = useState(() => getAvailableTags());
@@ -133,7 +135,7 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject, onAutoS
   }, [formData, isOpen, editingProject]);
 
   const handleImageUpload = async (file: File, type: 'after' | 'before') => {
-    if (!isValidImageFile(file)) {
+    if (typeof isValidImageFile === 'function' && !isValidImageFile(file)) {
       toast({
         title: "שגיאה",
         description: "יש להעלות קובץ תמונה תקין (JPG, PNG, WebP) עד 12MB",
@@ -153,7 +155,8 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject, onAutoS
       
       setPreviewImages(prev => ({
         ...prev,
-        [type]: dataUrl
+        [type]: dataUrl,
+        [type === 'after' ? 'afterName' : 'beforeName']: file.name
       }));
 
       toast({
@@ -196,7 +199,8 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject, onAutoS
     }));
     setPreviewImages(prev => ({
       ...prev,
-      [type]: undefined
+      [type]: undefined,
+      [type === 'after' ? 'afterName' : 'beforeName']: undefined
     }));
   };
 
@@ -291,6 +295,7 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject, onAutoS
                   variant="destructive"
                   onClick={() => removeImage(type)}
                   className="text-xs"
+                  aria-label={`הסר תמונה "${type === 'after' ? 'אחרי' : 'לפני'}"`}
                 >
                   <X className="w-3 h-3 mr-1" />
                   הסר
@@ -319,6 +324,12 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject, onAutoS
                 <p className="text-xs text-muted-foreground">
                   JPG, PNG, WebP עד 12MB
                 </p>
+                {type === 'after' && previewImages.afterName && (
+                  <p className="text-xs text-muted-foreground">{previewImages.afterName}</p>
+                )}
+                {type === 'before' && previewImages.beforeName && (
+                  <p className="text-xs text-muted-foreground">{previewImages.beforeName}</p>
+                )}
               </div>
             )}
           </div>
