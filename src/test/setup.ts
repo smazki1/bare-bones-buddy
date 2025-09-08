@@ -13,7 +13,7 @@ class MockIntersectionObserver {
   takeRecords(): IntersectionObserverEntry[] { return []; }
 }
 
-// @ts-expect-error jsdom environment
+// Mock IntersectionObserver for jsdom environment
 global.IntersectionObserver = MockIntersectionObserver as unknown as typeof IntersectionObserver;
 
 // Supabase global mock to avoid network/WS handles
