@@ -31,14 +31,14 @@ const Portfolio = () => {
   useEffect(() => {
     const loadProjects = async () => {
       try {
-        // Start loading immediately without checking cache for faster perceived loading
-        setIsInitialLoading(false); // Show content immediately
-        
+        setIsInitialLoading(true);
         const storedProjects = await portfolioStore.getProjects();
         setAllProjects(storedProjects);
+        setIsInitialLoading(false);
       } catch (error) {
         console.error('Error loading projects:', error);
         setAllProjects([]); // Set empty array on error
+        setIsInitialLoading(false);
       }
     };
 
@@ -83,18 +83,17 @@ const Portfolio = () => {
     if (isLoading || !hasNextPage) return;
     
     setIsLoading(true);
+    // Simulate small UX delay for button feedback
+    await new Promise(resolve => setTimeout(resolve, 200));
     
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-  // Calculate next batch, ensuring we don't exceed MAX_ITEMS_DISPLAY
-  const nextItemsCount = Math.min(
-    (currentPage + 1) * itemsPerPage,
-    MAX_ITEMS_DISPLAY
-  );
-    
+    // Calculate next batch, ensuring we don't exceed MAX_ITEMS_DISPLAY
+    const nextItemsCount = Math.min(
+      (currentPage + 1) * itemsPerPage,
+      MAX_ITEMS_DISPLAY
+    );
+      
     const nextPageProjects = filteredProjects.slice(0, nextItemsCount);
-    
+      
     setVisibleProjects(nextPageProjects);
     setCurrentPage(prev => prev + 1);
     setIsLoading(false);

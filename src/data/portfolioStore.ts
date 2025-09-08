@@ -146,10 +146,9 @@ class PortfolioStore {
   }
 
   private getFallbackConfig(): PortfolioConfig {
-    // Import fallback data from portfolioMock
-    const { portfolioMockData } = require('./portfolioMock');
+    // Return empty list to avoid showing mock data
     return {
-      items: portfolioMockData.slice(0, 12), // Use first 12 items as fallback
+      items: [],
       initialized: true,
       updatedAt: new Date().toISOString(),
       manualOrderByCategory: {}
@@ -171,14 +170,8 @@ class PortfolioStore {
         localStorage.removeItem(this.STORAGE_KEY);
       }
       
-      // Try to load from localStorage first for instant loading
-      const cachedData = this.loadFromLocalStorage();
-      if (cachedData && cachedData.items.length > 0) {
-        this.config = cachedData;
-        this.isLoaded = true;
-        this.dispatchUpdateEvent();
-        console.log('Portfolio loaded from cache:', cachedData.items.length, 'items');
-      }
+      // Skip loading from localStorage to avoid stale/placeholder data
+      console.log('Skipping localStorage cache for portfolio to ensure fresh data');
       
       // Then try to load from Supabase in background with shorter timeout
       try {
