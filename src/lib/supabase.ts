@@ -1,31 +1,13 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { supabase as typedSupabase } from '@/integrations/supabase/client';
 
-const supabaseUrl = (import.meta as any)?.env?.VITE_SUPABASE_URL || (window as any)?.SUPABASE_URL;
-const supabaseAnonKey = (import.meta as any)?.env?.VITE_SUPABASE_ANON_KEY || (window as any)?.SUPABASE_PUBLISHABLE_KEY;
+// Use the typed, statically configured client everywhere (works on GitHub Pages)
+export const supabase: SupabaseClient = typedSupabase as any;
 
-// Guard against undefined env on static hosts (e.g., GitHub Pages). When missing, avoid crashing.
-let supabase: SupabaseClient | null = null;
-if (typeof supabaseUrl === 'string' && supabaseUrl && typeof supabaseAnonKey === 'string' && supabaseAnonKey) {
-  supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: { persistSession: false },
-  });
+// Backwards-compatible helper
+export function getSupabase(): SupabaseClient {
+  return supabase;
 }
-
-// Lazily initialize from localStorage if env/window are not available (e.g., GitHub Pages)
-export function getSupabase(): SupabaseClient | null {
-  if (supabase) return supabase;
-  try {
-    const lsUrl = typeof window !== 'undefined' ? localStorage.getItem('aiMaster:supabaseUrl') || '' : '';
-    const lsKey = typeof window !== 'undefined' ? localStorage.getItem('aiMaster:supabaseAnon') || '' : '';
-    if (lsUrl && lsKey) {
-      supabase = createClient(lsUrl, lsKey, { auth: { persistSession: false } });
-      return supabase;
-    }
-  } catch {}
-  return null;
-}
-
-export { supabase };
 
 export type DbProject = {
   id: number;
