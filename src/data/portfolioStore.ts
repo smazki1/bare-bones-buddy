@@ -145,7 +145,13 @@ class PortfolioStore {
 
   private async saveProjectToSupabase(project: Project, mode: 'add' | 'update'): Promise<boolean> {
     try {
-      console.log('Attempting to save project to Supabase:', { mode, projectId: project.id, businessName: project.businessName });
+      console.log('Attempting to save project to Supabase:', { 
+        mode, 
+        projectId: project.id, 
+        businessName: project.businessName,
+        size: project.size,
+        tags: project.tags 
+      });
 
       if (mode === 'add') {
         // Insert without overriding identity columns

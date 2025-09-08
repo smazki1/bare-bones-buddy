@@ -101,12 +101,29 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject, onAutoS
   useEffect(() => {
     if (!isOpen || !onAutoSave || !editingProject) return;
 
-    const payload = { ...editingProject, ...formData };
+    // Ensure tags are synced before auto-save
+    const syncedTags = syncProjectTags(formData.tags, formData.category);
+    const payload = { 
+      ...editingProject, 
+      ...formData,
+      tags: syncedTags 
+    };
+
+    console.log('Auto-save payload:', { 
+      id: payload.id, 
+      size: payload.size, 
+      businessName: payload.businessName,
+      tags: payload.tags 
+    });
 
     if (autoSaveTimer) window.clearTimeout(autoSaveTimer);
     const t = window.setTimeout(() => {
-      try { onAutoSave(payload); } catch {}
-    }, 800);
+      try { 
+        onAutoSave(payload); 
+      } catch (error) {
+        console.error('Auto-save failed:', error);
+      }
+    }, 1500); // Increased from 800ms to 1500ms to reduce server load
     setAutoSaveTimer(t);
 
     return () => {
@@ -218,6 +235,13 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject, onAutoS
     const projectToSave = editingProject 
       ? { ...editingProject, ...finalFormData }
       : finalFormData;
+
+    console.log('Final save payload:', { 
+      id: editingProject?.id || 'new', 
+      size: projectToSave.size, 
+      businessName: projectToSave.businessName,
+      tags: projectToSave.tags 
+    });
 
     onSave(projectToSave);
   };
