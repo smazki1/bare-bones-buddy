@@ -13,10 +13,25 @@ export default defineConfig(({ mode }) => ({
   },
   test: {
     environment: 'jsdom',
-    setupFiles: [],
+    setupFiles: ['src/test/setup.ts'],
+    exit: true,
+    testTimeout: 10000,
+    hookTimeout: 10000,
+    restoreMocks: true,
+    clearMocks: true,
+    unstubEnvs: true,
+    unstubGlobals: true,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],
+      exclude: [
+        'node_modules/**',
+        'dist/**',
+        '.next/**',
+        'coverage/**',
+        'src/**/__tests__/**',
+        'src/components/icons/**'
+      ],
     },
   },
   plugins: [

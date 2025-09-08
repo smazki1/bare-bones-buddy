@@ -26,12 +26,13 @@ A Hebrew RTL website for a food photography business that creates professional i
 - Tailwind CSS for styling
 - Framer Motion for animations
 - Shadcn/ui components
-- Local storage for admin data persistence
+- Supabase (Postgres, Auth, Realtime, Edge Functions) for data, auth, and admin CRUD
+- Local storage for config mirroring (fallback and fast loads)
 - React Router for navigation
 
 ## Success Criteria
-- All admin panels work correctly with real-time updates
+- All admin panels work correctly with realtime updates via Supabase
 - Proper RTL text rendering throughout
 - Mobile-responsive design
 - Fast loading and smooth user experience
-- Easy content management for business owners
+- Easy content management for business owners (solutions/visual solutions via `site_configs`)

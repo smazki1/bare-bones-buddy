@@ -14,16 +14,16 @@
 - [x] Admin solutions editor (business solutions)
 - [x] Admin visual solutions editor
 - [x] Admin markets editor
-- [x] Real-time updates between admin and frontend
+- [x] Realtime updates via Supabase on `projects`
 - [x] File upload functionality for visual solutions
 - [x] Drag and drop reordering
 
 ### Content Management
-- [x] Business solutions section on homepage
-- [x] Visual solutions section on homepage
-- [x] Portfolio showcase
+- [x] Business solutions section on homepage (from `site_configs` when available)
+- [x] Visual solutions section on homepage (from `site_configs` when available)
+- [x] Portfolio showcase (from Supabase `projects`)
 - [x] Contact form with WhatsApp integration
-- [x] Local storage persistence for admin data
+- [x] Local storage persistence for configs (mirror of Supabase)
 
 ### UI/UX Improvements
 - [x] RTL text handling throughout
@@ -41,6 +41,9 @@
 - [x] Tailwind CSS styling
 - [x] Framer Motion animations
 - [x] Shadcn/ui components
+- [x] Supabase integration (client, auth, RPC, Edge Function)
+- [x] Realtime subscriptions for `projects`
+- [x] Site configs stored in Supabase `site_configs`
 - [x] File upload utilities
 - [x] Event-driven updates between admin and frontend
 - [x] Proper BiDi text handling with dir="rtl" and unicode-bidi
@@ -52,10 +55,10 @@ All features are complete and tested. The website is ready for production deploy
 None - all reported issues have been resolved.
 
 ## 🔄 Recent Fixes
-1. Admin panel real-time updates
-2. Portfolio card simplification
-3. Homepage section restructuring
-4. Navigation improvements
-5. Contact page simplification
-6. RTL text rendering fixes
-7. WhatsApp integration cleanup
+1. Supabase migrations for `site_configs`, `testimonials`, realtime on `projects`
+2. Edge Function `portfolio-admin` with admin JWT check
+3. Portfolio store direct write + Edge Function fallback
+4. Solutions/Visual Solutions stores synced with `site_configs`
+5. Auth hook admin check via `get_admin_user`
+6. Homepage/Navigation/Contact simplifications retained
+7. RTL text rendering fixes and WhatsApp integration cleanup

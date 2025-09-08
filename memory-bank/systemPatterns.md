@@ -1,7 +1,7 @@
 # System Patterns
 
 ## Architecture Overview
-The application follows a component-based React architecture with clear separation between admin and customer-facing features.
+The application follows a component-based React architecture with clear separation between admin and customer-facing features, backed by Supabase (Postgres, Auth, Realtime, Edge Functions).
 
 ## Key Patterns
 
@@ -9,10 +9,12 @@ The application follows a component-based React architecture with clear separati
 - **Local Storage**: Admin data persisted in localStorage via custom stores
 - **Event-Driven Updates**: Custom events for real-time sync between admin and frontend
 - **React State**: Component-level state for forms and UI interactions
+- **Supabase Data Source**: Primary persistence for `projects`, `site_configs`, `testimonials`
 
 ### Data Flow
 ```
-Admin Panel → Local Storage → Custom Event → Frontend Components
+Admin Panel → Supabase (tables/RPC/Edge) → Realtime → Frontend Components
+              ↘ localStorage mirror (configs) ↙
 ```
 
 ### File Structure
@@ -31,9 +33,10 @@ src/
 
 ### Admin Panel Pattern
 - Each admin section has: Editor, List, and main page
-- Real-time updates via custom events
+- Realtime: Supabase `projects` subscription (+ REPLICA IDENTITY FULL) and custom DOM events
 - File upload with validation
 - Drag-and-drop reordering
+- AuthZ: Admin verification via `get_admin_user` RPC; privileged writes via Edge Function `portfolio-admin`
 
 ### RTL Support Pattern
 - All text containers use `dir="rtl"`
@@ -51,3 +54,10 @@ src/
 - WhatsApp integration for submissions
 - Validation and error handling
 - Success state management
+
+### Supabase Integration Pattern
+- Client: `src/integrations/supabase/client.ts` (typed via `types.ts`)
+- Auth flow: `useSupabaseAuth` subscribes to auth state, checks admin via `get_admin_user`, and links via `link_admin_user`
+- Portfolio CRUD: `portfolio-store` attempts direct writes; on RLS failure, falls back to `portfolio-admin` Edge Function
+- Site configs: `solutionsStore` and `visualSolutionsStore` read/write `site_configs` keys (`solutions_v1`, `visual_solutions_v1`), syncing to localStorage for quick loads
+- Realtime handling: `portfolioStore` subscribes to `projects` table changes and updates the in-memory config accordingly

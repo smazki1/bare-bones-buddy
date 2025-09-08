@@ -27,10 +27,13 @@ const Portfolio = () => {
   useEffect(() => {
     const loadProjects = async () => {
       try {
+        setIsLoading(true);
         const storedProjects = await portfolioStore.getProjects();
         setAllProjects(storedProjects);
       } catch (error) {
         console.error('Error loading projects:', error);
+      } finally {
+        // isLoading will be turned off after initial visibleProjects are computed
       }
     };
 
@@ -123,6 +126,7 @@ const Portfolio = () => {
     const initialProjects = filteredProjects.slice(0, ITEMS_PER_PAGE);
     setVisibleProjects(initialProjects);
     setCurrentPage(1);
+    setIsLoading(false);
   }, [filteredProjects]);
 
   // Update filter from URL param on mount
