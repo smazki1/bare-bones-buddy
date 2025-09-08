@@ -11,6 +11,7 @@ import { Upload, X, Image, Eye, Loader2, Plus } from 'lucide-react';
 import { Project, ProjectSize } from '@/data/portfolioMock';
 import { getAvailableTags, syncProjectTags, getTagLabel } from '@/utils/tagUtils';
 import { convertFileToDataUrl, isValidImageFile } from '@/utils/fileUtils';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import '../../../data/solutionsSync'; // Import to trigger solutions sync
 
@@ -146,18 +147,44 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject, onAutoS
 
     setIsUploading(true);
     try {
+      // 1) Create local preview immediately
       const dataUrl = await convertFileToDataUrl(file);
-      
-      setFormData(prev => ({
-        ...prev,
-        [type === 'after' ? 'imageAfter' : 'imageBefore']: dataUrl
-      }));
-      
       setPreviewImages(prev => ({
         ...prev,
         [type]: dataUrl,
         [type === 'after' ? 'afterName' : 'beforeName']: file.name
       }));
+
+      // 2) Upload to Supabase Storage for fast CDN delivery
+      const bucket = 'projects';
+      const ext = file.name.split('.').pop() || 'jpg';
+      const path = `${type}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, {
+        cacheControl: '31536000',
+        upsert: false
+      });
+      if (!upErr) {
+        const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+        const publicUrl = data?.publicUrl || '';
+        if (publicUrl) {
+          setFormData(prev => ({
+            ...prev,
+            [type === 'after' ? 'imageAfter' : 'imageBefore']: publicUrl
+          }));
+        } else {
+          // Fallback to data URL if public URL cannot be resolved
+          setFormData(prev => ({
+            ...prev,
+            [type === 'after' ? 'imageAfter' : 'imageBefore']: dataUrl
+          }));
+        }
+      } else {
+        // Upload failed → fallback to data URL
+        setFormData(prev => ({
+          ...prev,
+          [type === 'after' ? 'imageAfter' : 'imageBefore']: dataUrl
+        }));
+      }
 
       toast({
         title: "הצלחה",
