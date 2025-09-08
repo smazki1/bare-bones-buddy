@@ -98,7 +98,7 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
                 ${!imageLoaded ? 'opacity-0' : 'opacity-100'}
                 sm:group-hover:scale-105
               `}
-              loading="lazy"
+              loading={index < 2 ? 'eager' : 'lazy'}
               decoding="async"
               srcSet={srcSet}
               sizes={srcSet ? sizesAttr : "(max-width: 768px) 100vw, 33vw"}
