@@ -10,37 +10,12 @@ interface ProjectCardProps {
   index: number;
 }
 
-// Build an optimized srcset for Unsplash-hosted images; fallback to original URL otherwise
-const buildUnsplashSrcSet = (url: string): string | undefined => {
-  try {
-    const parsed = new URL(url);
-    if (!parsed.host.includes('images.unsplash.com')) return undefined;
-
-    const widths = [400, 600, 900, 1200];
-    const parts = widths.map((w) => {
-      const u = new URL(parsed.toString());
-      u.searchParams.set('w', String(w));
-      u.searchParams.set('q', '80');
-      if (!u.searchParams.has('auto')) u.searchParams.set('auto', 'format');
-      if (!u.searchParams.has('fit')) u.searchParams.set('fit', 'crop');
-      return `${u.toString()} ${w}w`;
-    });
-    return parts.join(', ');
-  } catch {
-    return undefined;
-  }
-};
-
 const sizesAttr = '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw';
 
 const ProjectCard = ({ project, index }: ProjectCardProps) => {
   const [showBefore, setShowBefore] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const isMobile = useIsMobile();
-  
-  // Load all images immediately - no lazy loading delays
-  const shouldLoadImage = true;
 
   const getSizeClasses = (size: Project['size']) => {
     switch (size) {
@@ -95,33 +70,16 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
           <img
             src={displaySrc}
             alt={`${project.businessName} - ${showBefore && project.imageBefore ? 'לפני' : 'אחרי'}`}
-            className={`
-              w-full h-full object-cover transition-all duration-200
-              ${!imageLoaded ? 'opacity-0' : 'opacity-100'}
-              sm:group-hover:scale-105
-            `}
+            className="w-full h-full object-cover sm:group-hover:scale-105 transition-transform duration-200"
             loading="eager"
             decoding="async"
             srcSet={srcSet}
             sizes={srcSet ? sizesAttr : "(max-width: 768px) 100vw, 33vw"}
             fetchPriority="high"
-            onLoad={() => setImageLoaded(true)}
-            onError={() => {
-              setImageError(true);
-              setImageLoaded(true);
-            }}
+            onError={() => setImageError(true)}
           />
           
-          {/* Loading skeleton */}
-          {!imageLoaded && !imageError && (
-            <div className="absolute inset-0 bg-gradient-to-br from-muted via-muted/80 to-muted animate-pulse">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-6 h-6 sm:w-8 sm:h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
-              </div>
-            </div>
-          )}
-          
-          {/* Error state */}
+          {/* Error state only */}
           {imageError && (
             <div className="absolute inset-0 bg-muted flex items-center justify-center">
               <div className="text-muted-foreground text-center">
