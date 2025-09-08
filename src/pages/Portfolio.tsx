@@ -27,37 +27,42 @@ const Portfolio = () => {
   const [allProjects, setAllProjects] = useState<Project[]>([]);
   const isMobile = useIsMobile();
   const itemsPerPage = isMobile ? 4 : ITEMS_PER_PAGE;
+  const LAST_DB_KEY = 'portfolio:lastDb:v1';
 
-  // Load projects from Supabase and local store with instant loading
+  // Load projects from Supabase with instant local snapshot
   useEffect(() => {
     const loadProjects = async () => {
       try {
         setIsInitialLoading(true);
-        const storedProjects = await portfolioStore.getProjects();
-        setAllProjects(storedProjects);
-
-        // Fallback: if nothing loaded (e.g., cache empty or RLS glitch), fetch directly
-        if (!storedProjects || storedProjects.length === 0) {
-          const dbItems: DbProject[] = await fetchProjects();
-          const mapped: Project[] = dbItems.map((p) => ({
-            id: p.id.toString(),
-            businessName: p.business_name,
-            businessType: p.business_type,
-            serviceType: p.service_type,
-            imageAfter: p.image_after,
-            imageBefore: p.image_before || undefined,
-            size: (p.size as Project['size']) || 'medium',
-            category: p.category,
-            tags: [p.category],
-            pinned: p.pinned,
-            createdAt: p.created_at,
-          }));
-          if (mapped.length > 0) {
-            setAllProjects(mapped);
-            // Seed the store/cache for next visits
-            void portfolioStore.setProjects(mapped);
+        // Instant: use last DB snapshot if available
+        try {
+          const cached = localStorage.getItem(LAST_DB_KEY);
+          if (cached) {
+            const parsed = JSON.parse(cached) as Project[];
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setAllProjects(parsed);
+              setIsInitialLoading(false);
+            }
           }
-        }
+        } catch {}
+
+        // Authoritative: fetch from Supabase
+        const dbItems: DbProject[] = await fetchProjects();
+        const mapped: Project[] = dbItems.map((p) => ({
+          id: p.id.toString(),
+          businessName: p.business_name,
+          businessType: p.business_type,
+          serviceType: p.service_type,
+          imageAfter: p.image_after,
+          imageBefore: p.image_before || undefined,
+          size: (p.size as Project['size']) || 'medium',
+          category: p.category,
+          tags: [p.category],
+          pinned: p.pinned,
+          createdAt: p.created_at,
+        }));
+        setAllProjects(mapped);
+        try { localStorage.setItem(LAST_DB_KEY, JSON.stringify(mapped)); } catch {}
         setIsInitialLoading(false);
       } catch (error) {
         console.error('Error loading projects:', error);
@@ -69,15 +74,26 @@ const Portfolio = () => {
     // Load initially
     loadProjects();
 
-    // Background hard refresh to ensure latest data
-    void portfolioStore.reload();
-
     // Listen for real-time updates from admin - now just sync local state
     const handleUpdate = async () => {
       try {
-        // Get updated projects from store (already updated by realtime)
-        const updatedProjects = await portfolioStore.getProjects();
-        setAllProjects(updatedProjects);
+        // Always refetch from Supabase to avoid local mock overrides
+        const dbItems: DbProject[] = await fetchProjects();
+        const mapped: Project[] = dbItems.map((p) => ({
+          id: p.id.toString(),
+          businessName: p.business_name,
+          businessType: p.business_type,
+          serviceType: p.service_type,
+          imageAfter: p.image_after,
+          imageBefore: p.image_before || undefined,
+          size: (p.size as Project['size']) || 'medium',
+          category: p.category,
+          tags: [p.category],
+          pinned: p.pinned,
+          createdAt: p.created_at,
+        }));
+        setAllProjects(mapped);
+        try { localStorage.setItem(LAST_DB_KEY, JSON.stringify(mapped)); } catch {}
       } catch (error) {
         console.error('Error syncing projects:', error);
       }
