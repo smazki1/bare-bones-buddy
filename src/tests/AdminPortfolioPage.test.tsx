@@ -486,7 +486,7 @@ describe('AdminPortfolioPage', () => {
 
   describe('Import/Export', () => {
     it('should export config', async () => {
-      const mockConfig = { projects: mockProjects };
+      const mockConfig = { items: mockProjects };
       mockPortfolioStore.exportConfig.mockReturnValue(mockConfig);
 
       // Mock DOM API

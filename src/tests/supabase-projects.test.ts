@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 vi.mock('@/integrations/supabase/client');
 
-const mockSupabase = vi.mocked(supabase);
+const mockSupabase = supabase as any;
 
 describe('supabase-projects', () => {
   beforeEach(() => {
