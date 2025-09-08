@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Project } from '@/data/portfolioMock';
+import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 
 interface ProjectCardProps {
   project: Project;
@@ -12,6 +13,7 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
   const [showBefore, setShowBefore] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const { ref, isIntersecting } = useIntersectionObserver({ threshold: 0.1, rootMargin: '200px' });
 
   const getSizeClasses = (size: Project['size']) => {
     switch (size) {
@@ -55,8 +57,8 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
         ${getSizeClasses(project.size)}
       `}>
         {/* Main Image */}
-        <div className="relative w-full h-full">
-          {!imageError && (
+        <div ref={ref} className="relative w-full h-full">
+          {!imageError && isIntersecting && (
             <img
               src={showBefore && project.imageBefore ? project.imageBefore : project.imageAfter}
               alt={`${project.businessName} - ${showBefore && project.imageBefore ? 'לפני' : 'אחרי'}`}
@@ -67,6 +69,7 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
               `}
               loading="lazy"
               decoding="async"
+              sizes="(max-width: 768px) 100vw, 33vw"
               onLoad={() => setImageLoaded(true)}
               onError={() => {
                 setImageError(true);

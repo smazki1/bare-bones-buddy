@@ -10,6 +10,7 @@ import PortfolioCTA from '@/components/portfolio/PortfolioCTA';
 // Infinite scroll disabled; using manual "Load more" button
 import { Project } from '@/data/portfolioMock';
 import { portfolioStore, PORTFOLIO_UPDATE_EVENT } from '@/data/portfolioStore';
+import { useIsMobile } from '@/hooks/use-mobile';
 // Remote fetch disabled: local-only portfolio
 
 const ITEMS_PER_PAGE = 12;
@@ -23,6 +24,8 @@ const Portfolio = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [allProjects, setAllProjects] = useState<Project[]>([]);
+  const isMobile = useIsMobile();
+  const itemsPerPage = isMobile ? 6 : ITEMS_PER_PAGE;
 
   // Load projects from Supabase and local store with instant loading
   useEffect(() => {
@@ -73,7 +76,7 @@ const Portfolio = () => {
 
   // Check if there are more pages to load and haven't reached max display limit
   const hasReachedMaxItems = visibleProjects.length >= MAX_ITEMS_DISPLAY;
-  const hasNextPage = currentPage * ITEMS_PER_PAGE < filteredProjects.length && !hasReachedMaxItems;
+  const hasNextPage = currentPage * itemsPerPage < filteredProjects.length && !hasReachedMaxItems;
 
   // Load next page of projects
   const fetchNextPage = async () => {
@@ -84,11 +87,11 @@ const Portfolio = () => {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    // Calculate next batch, ensuring we don't exceed MAX_ITEMS_DISPLAY
-    const nextItemsCount = Math.min(
-      (currentPage + 1) * ITEMS_PER_PAGE,
-      MAX_ITEMS_DISPLAY
-    );
+  // Calculate next batch, ensuring we don't exceed MAX_ITEMS_DISPLAY
+  const nextItemsCount = Math.min(
+    (currentPage + 1) * itemsPerPage,
+    MAX_ITEMS_DISPLAY
+  );
     
     const nextPageProjects = filteredProjects.slice(0, nextItemsCount);
     
@@ -117,23 +120,23 @@ const Portfolio = () => {
     }
     setSearchParams(searchParams);
     
-    // Load initial projects for new filter
-    setTimeout(() => {
-      const filteredData = filter === 'all' ? allProjects : allProjects.filter(p => p.category === filter);
-      const initialProjects = filteredData.slice(0, ITEMS_PER_PAGE);
-      setVisibleProjects(initialProjects);
-      setIsLoading(false);
-    }, 300);
+  // Load initial projects for new filter
+  setTimeout(() => {
+    const filteredData = filter === 'all' ? allProjects : allProjects.filter(p => p.category === filter);
+    const initialProjects = filteredData.slice(0, itemsPerPage);
+    setVisibleProjects(initialProjects);
+    setIsLoading(false);
+  }, 300);
   };
 
   // Load initial projects when filtered projects change
   useEffect(() => {
     if (allProjects.length > 0) {
-      const initialProjects = filteredProjects.slice(0, ITEMS_PER_PAGE);
+      const initialProjects = filteredProjects.slice(0, itemsPerPage);
       setVisibleProjects(initialProjects);
       setCurrentPage(1);
     }
-  }, [filteredProjects, allProjects]);
+  }, [filteredProjects, allProjects, itemsPerPage]);
 
   // Update filter from URL param on mount
   useEffect(() => {
