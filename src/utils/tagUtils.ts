@@ -1,5 +1,6 @@
 import { solutionsStore } from '@/data/solutionsStore';
 import { DEFAULT_SOLUTIONS_CONFIG } from '@/types/solutions';
+import { migrateTags } from './tagMigration';
 
 export interface TagFilter {
   label: string;
@@ -64,13 +65,17 @@ export function isValidTag(slug: string): boolean {
 
 /**
  * Syncs project tags to ensure they're valid and adds missing categories
+ * Also migrates old/duplicate tags to new consolidated tags
  */
 export function syncProjectTags(projectTags: string[] = [], fallbackCategory: string = 'restaurants'): string[] {
   const availableTags = getAvailableTags();
   const availableSlugs = new Set(availableTags.map(t => t.slug).filter(s => s !== 'all'));
   
-  // Filter only valid tags that exist in solutions
-  const validTags = projectTags.filter(tag => availableSlugs.has(tag));
+  // First migrate old/duplicate tags to new consolidated tags
+  const migratedTags = migrateTags(projectTags);
+  
+  // Filter only valid tags that exist in solutions after migration
+  const validTags = migratedTags.filter(tag => availableSlugs.has(tag));
   
   // If no valid tags, add fallback (ensure fallback exists in solutions)
   if (validTags.length === 0) {

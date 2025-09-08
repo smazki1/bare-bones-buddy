@@ -31,7 +31,7 @@ export const DEFAULT_SOLUTIONS_CONFIG: SolutionsConfig = {
     },
     {
       id: 'bakeries',
-      title: 'מאפיות',
+      title: 'מאפיות ועוגות',
       imageSrc: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
       tagSlug: 'bakeries',
       href: '/portfolio?tag=bakeries',
@@ -49,7 +49,7 @@ export const DEFAULT_SOLUTIONS_CONFIG: SolutionsConfig = {
     },
     {
       id: 'fast-food',
-      title: 'אוכל מהיר ורשתות',
+      title: 'אוכל מהיר ופיצה',
       imageSrc: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
       tagSlug: 'fast-food',
       href: '/portfolio?tag=fast-food',
@@ -84,22 +84,13 @@ export const DEFAULT_SOLUTIONS_CONFIG: SolutionsConfig = {
       order: 6
     },
     {
-      id: 'ambiance',
-      title: 'אווירה',
-      imageSrc: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-      tagSlug: 'ambiance',
-      href: '/portfolio?tag=ambiance',
+      id: 'coffee',
+      title: 'קפה ומשקאות',
+      imageSrc: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+      tagSlug: 'coffee',
+      href: '/portfolio?tag=coffee',
       enabled: true,
       order: 7
-    },
-    {
-      id: 'pizza',
-      title: 'פיצריה',
-      imageSrc: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-      tagSlug: 'pizza',
-      href: '/portfolio?tag=pizza',
-      enabled: true,
-      order: 8
     },
     {
       id: 'sushi',
@@ -108,43 +99,16 @@ export const DEFAULT_SOLUTIONS_CONFIG: SolutionsConfig = {
       tagSlug: 'sushi',
       href: '/portfolio?tag=sushi',
       enabled: true,
-      order: 9
-    },
-    {
-      id: 'cakes',
-      title: 'עוגות',
-      imageSrc: 'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-      tagSlug: 'cakes',
-      href: '/portfolio?tag=cakes',
-      enabled: true,
-      order: 10
-    },
-    {
-      id: 'coffee',
-      title: 'קפה ומשקאות',
-      imageSrc: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-      tagSlug: 'coffee',
-      href: '/portfolio?tag=coffee',
-      enabled: true,
-      order: 11
+      order: 8
     },
     {
       id: 'products',
-      title: 'מוצרים',
+      title: 'מוצרים וממרחים',
       imageSrc: 'https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
       tagSlug: 'products',
       href: '/portfolio?tag=products',
       enabled: true,
-      order: 12
-    },
-    {
-      id: 'spreads',
-      title: 'ממרחים',
-      imageSrc: 'https://images.unsplash.com/photo-1506084868230-bb9d95c24759?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-      tagSlug: 'spreads',
-      href: '/portfolio?tag=spreads',
-      enabled: true,
-      order: 13
+      order: 9
     },
     {
       id: 'jewelry',
@@ -153,7 +117,7 @@ export const DEFAULT_SOLUTIONS_CONFIG: SolutionsConfig = {
       tagSlug: 'jewelry',
       href: '/portfolio?tag=jewelry',
       enabled: true,
-      order: 14
+      order: 10
     }
   ],
   updatedAt: new Date().toISOString()
