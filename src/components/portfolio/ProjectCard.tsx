@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Project } from '@/data/portfolioMock';
-import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { buildSupabaseSrcSet, toSupabaseRenderUrl, optimalWidthForSize } from '@/utils/imageUrls';
 
@@ -38,10 +37,10 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
   const [showBefore, setShowBefore] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const { ref, isIntersecting } = useIntersectionObserver({ threshold: 0.1, rootMargin: '100px' });
   const isMobile = useIsMobile();
-  // Load immediately for mobile and first items, otherwise use intersection observer
-  const shouldLoadImage = isMobile || index < 8 || isIntersecting;
+  
+  // Load all images immediately - no lazy loading delays
+  const shouldLoadImage = true;
 
   const getSizeClasses = (size: Project['size']) => {
     switch (size) {
@@ -92,31 +91,29 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
         ${getSizeClasses(project.size)}
       `}>
         {/* Main Image */}
-        <div ref={ref} className="relative w-full h-full">
-          {!imageError && shouldLoadImage && (
-            <img
-              src={displaySrc}
-              alt={`${project.businessName} - ${showBefore && project.imageBefore ? 'לפני' : 'אחרי'}`}
-              className={`
-                w-full h-full object-cover transition-all duration-200
-                ${!imageLoaded ? 'opacity-0' : 'opacity-100'}
-                sm:group-hover:scale-105
-              `}
-              loading={index < 6 ? 'eager' : 'lazy'}
-              decoding="async"
-              srcSet={srcSet}
-              sizes={srcSet ? sizesAttr : "(max-width: 768px) 100vw, 33vw"}
-              fetchPriority={index < 6 ? 'high' : 'auto'}
-              onLoad={() => setImageLoaded(true)}
-              onError={() => {
-                setImageError(true);
-                setImageLoaded(true);
-              }}
-            />
-          )}
+        <div className="relative w-full h-full">
+          <img
+            src={displaySrc}
+            alt={`${project.businessName} - ${showBefore && project.imageBefore ? 'לפני' : 'אחרי'}`}
+            className={`
+              w-full h-full object-cover transition-all duration-200
+              ${!imageLoaded ? 'opacity-0' : 'opacity-100'}
+              sm:group-hover:scale-105
+            `}
+            loading="eager"
+            decoding="async"
+            srcSet={srcSet}
+            sizes={srcSet ? sizesAttr : "(max-width: 768px) 100vw, 33vw"}
+            fetchPriority="high"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => {
+              setImageError(true);
+              setImageLoaded(true);
+            }}
+          />
           
           {/* Loading skeleton */}
-          {!imageLoaded && (
+          {!imageLoaded && !imageError && (
             <div className="absolute inset-0 bg-gradient-to-br from-muted via-muted/80 to-muted animate-pulse">
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="w-6 h-6 sm:w-8 sm:h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>

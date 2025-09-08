@@ -123,8 +123,7 @@ const Portfolio = () => {
     if (isLoading || !hasNextPage) return;
     
     setIsLoading(true);
-    // Simulate small UX delay for button feedback
-    await new Promise(resolve => setTimeout(resolve, 200));
+    // No artificial delay - immediate loading
     
     // Calculate next batch, ensuring we don't exceed MAX_ITEMS_DISPLAY
     const nextItemsCount = Math.min(
@@ -147,7 +146,7 @@ const Portfolio = () => {
   // Handle filter change
   const handleFilterChange = (filter: string) => {
     setActiveFilter(filter);
-    setCurrentPage(1);
+    setCurrentPage(2); // Start from page 2 since we load double initially
     setVisibleProjects([]);
     setIsLoading(true);
     
@@ -159,21 +158,19 @@ const Portfolio = () => {
     }
     setSearchParams(searchParams);
     
-  // Load initial projects for new filter
-  setTimeout(() => {
-    const filteredData = filter === 'all' ? allProjects : allProjects.filter(p => p.category === filter);
-    const initialProjects = filteredData.slice(0, itemsPerPage);
-    setVisibleProjects(initialProjects);
-    setIsLoading(false);
-  }, 300);
+  // Load more initial projects for new filter - no delay
+  const filteredData = filter === 'all' ? allProjects : allProjects.filter(p => p.category === filter);
+  const initialProjects = filteredData.slice(0, itemsPerPage * 2); // Load double amount
+  setVisibleProjects(initialProjects);
+  setIsLoading(false);
   };
 
   // Load initial projects when filtered projects change
   useEffect(() => {
     if (allProjects.length > 0) {
-      const initialProjects = filteredProjects.slice(0, itemsPerPage);
+      const initialProjects = filteredProjects.slice(0, itemsPerPage * 2); // Load more initially
       setVisibleProjects(initialProjects);
-      setCurrentPage(1);
+      setCurrentPage(2); // Start from page 2 since we loaded more
     }
   }, [filteredProjects, allProjects, itemsPerPage]);
 
