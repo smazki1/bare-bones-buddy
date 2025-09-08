@@ -21,16 +21,20 @@ const Portfolio = () => {
   const [visibleProjects, setVisibleProjects] = useState<Project[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [allProjects, setAllProjects] = useState<Project[]>([]);
 
   // Load projects from Supabase and local store
   useEffect(() => {
     const loadProjects = async () => {
       try {
+        setIsInitialLoading(true);
         const storedProjects = await portfolioStore.getProjects();
         setAllProjects(storedProjects);
       } catch (error) {
         console.error('Error loading projects:', error);
+      } finally {
+        setIsInitialLoading(false);
       }
     };
 
@@ -120,10 +124,12 @@ const Portfolio = () => {
 
   // Load initial projects when filtered projects change
   useEffect(() => {
-    const initialProjects = filteredProjects.slice(0, ITEMS_PER_PAGE);
-    setVisibleProjects(initialProjects);
-    setCurrentPage(1);
-  }, [filteredProjects]);
+    if (!isInitialLoading && allProjects.length > 0) {
+      const initialProjects = filteredProjects.slice(0, ITEMS_PER_PAGE);
+      setVisibleProjects(initialProjects);
+      setCurrentPage(1);
+    }
+  }, [filteredProjects, isInitialLoading, allProjects]);
 
   // Update filter from URL param on mount
   useEffect(() => {
@@ -148,7 +154,7 @@ const Portfolio = () => {
           <section className="py-12">
             <MasonryGrid 
               projects={visibleProjects}
-              isLoading={isLoading && visibleProjects.length === 0}
+              isLoading={isInitialLoading || (isLoading && visibleProjects.length === 0)}
               hasReachedMaxItems={hasReachedMaxItems}
             />
             
