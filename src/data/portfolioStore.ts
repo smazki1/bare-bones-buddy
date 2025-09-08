@@ -106,22 +106,8 @@ class PortfolioStore {
   private saveToLocalStorage(config: PortfolioConfig): void {
     try {
       if (typeof window === 'undefined') return;
-      
-      // Create a lightweight version without base64 images to save space
-      const lightweightConfig = {
-        ...config,
-        items: config.items.map(item => ({
-          ...item,
-          // Keep only metadata, remove large base64 images
-          imageAfter: item.imageAfter ? 'cached' : undefined,
-          imageBefore: item.imageBefore ? 'cached' : undefined,
-          // Store image existence but not content
-          hasImageAfter: !!item.imageAfter,
-          hasImageBefore: !!item.imageBefore
-        }))
-      };
-      
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(lightweightConfig));
+      // Store full URLs to allow instant display on next load
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(config));
     } catch (error) {
       console.warn('Error saving to localStorage:', error);
       // If still failing, clear old data and try with just basic info
@@ -158,7 +144,18 @@ class PortfolioStore {
   private async loadConfig(): Promise<void> {
     try {
       if (this.isLoaded) return;
-      
+
+      // Try warm start from localStorage for instant UI
+      const cached = this.loadFromLocalStorage();
+      if (cached && !this.isLoaded) {
+        this.config = cached;
+        this.isLoaded = true;
+        this.dispatchUpdateEvent();
+        // Fetch fresh in background without blocking UI
+        void this.fetchFromSupabaseFresh();
+        return;
+      }
+
       // Clear localStorage if it's corrupted or too large
       try {
         const stored = localStorage.getItem(this.STORAGE_KEY);
@@ -169,74 +166,61 @@ class PortfolioStore {
       } catch (e) {
         localStorage.removeItem(this.STORAGE_KEY);
       }
-      
-      // Skip loading from localStorage to avoid stale/placeholder data
-      console.log('Skipping localStorage cache for portfolio to ensure fresh data');
-      
-      // Then try to load from Supabase in background with very short timeout
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
-        
-        const { data: projects, error } = await supabase
-          .from('projects')
-          .select('*')
-          .order('pinned', { ascending: false })
-          .order('created_at', { ascending: false })
-          .order('id', { ascending: false })
-          .limit(20) // Much smaller initial load
-          .abortSignal(controller.signal);
+      // No cache: fetch fresh (awaited)
+      await this.fetchFromSupabaseFresh();
+    } catch (error) {
+      console.error('Error in loadConfig:', error);
+      // Final fallback
+      if (!this.isLoaded) {
+        this.config = this.getFallbackConfig();
+        this.isLoaded = true;
+        this.dispatchUpdateEvent();
+      }
+    }
+  }
 
-        clearTimeout(timeoutId);
+  private async fetchFromSupabaseFresh(): Promise<void> {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
 
-        if (!error && projects && projects.length > 0) {
-          // Deduplicate by id to avoid any accidental duplicates from race conditions
-          const map = new Map<string, any>();
-          for (const p of projects) {
-            const key = String(p.id);
-            if (!map.has(key)) map.set(key, p);
-          }
-          const deduped = Array.from(map.values());
-          this.config = {
-            items: deduped.map(convertFromSupabase),
-            initialized: true,
-            updatedAt: new Date().toISOString(),
-            manualOrderByCategory: {}
-          };
-          
-          // Try to save to localStorage for next time (will use lightweight version)
-          this.saveToLocalStorage(this.config);
-          console.log('Portfolio loaded from Supabase:', this.config.items.length, 'items');
-          
-          if (this.isLoaded) {
-            // If we already loaded from cache, dispatch update for new data
-            this.dispatchUpdateEvent();
-          } else {
-            this.isLoaded = true;
-            this.dispatchUpdateEvent();
-          }
-        } else if (error) {
-          console.warn('Supabase error, using cache/fallback:', error);
-          // If we have cache, keep using it; otherwise use fallback
-          if (!this.config.initialized) {
-            console.log('Loading fallback data');
-            this.config = this.getFallbackConfig();
-            this.isLoaded = true;
-            this.dispatchUpdateEvent();
-          }
+      const { data: projects, error } = await supabase
+        .from('projects')
+        .select('*')
+        .order('pinned', { ascending: false })
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
+        .limit(50)
+        .abortSignal(controller.signal);
+
+      clearTimeout(timeoutId);
+
+      if (!error && projects && projects.length > 0) {
+        const map = new Map<string, any>();
+        for (const p of projects) {
+          const key = String(p.id);
+          if (!map.has(key)) map.set(key, p);
         }
-      } catch (supabaseError) {
-        console.warn('Failed to load from Supabase:', supabaseError);
-        if (!this.config.initialized) {
-          console.log('Loading fallback data due to Supabase error');
+        const deduped = Array.from(map.values());
+        this.config = {
+          items: deduped.map(convertFromSupabase),
+          initialized: true,
+          updatedAt: new Date().toISOString(),
+          manualOrderByCategory: {}
+        };
+        this.saveToLocalStorage(this.config);
+        this.isLoaded = true;
+        this.dispatchUpdateEvent();
+      } else if (error) {
+        console.warn('Supabase error while fetching fresh:', error);
+        if (!this.isLoaded) {
           this.config = this.getFallbackConfig();
           this.isLoaded = true;
           this.dispatchUpdateEvent();
         }
       }
-    } catch (error) {
-      console.error('Error in loadConfig:', error);
-      // Final fallback
+    } catch (e) {
+      console.warn('Fetch fresh failed:', e);
       if (!this.isLoaded) {
         this.config = this.getFallbackConfig();
         this.isLoaded = true;
