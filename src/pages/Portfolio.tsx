@@ -28,21 +28,13 @@ const Portfolio = () => {
   useEffect(() => {
     const loadProjects = async () => {
       try {
-<<<<<<< HEAD
-        setIsLoading(true);
-=======
         setIsInitialLoading(true);
->>>>>>> origin/main
         const storedProjects = await portfolioStore.getProjects();
         setAllProjects(storedProjects);
       } catch (error) {
         console.error('Error loading projects:', error);
       } finally {
-<<<<<<< HEAD
-        // isLoading will be turned off after initial visibleProjects are computed
-=======
         setIsInitialLoading(false);
->>>>>>> origin/main
       }
     };
 
@@ -135,20 +127,12 @@ const Portfolio = () => {
 
   // Load initial projects when filtered projects change
   useEffect(() => {
-<<<<<<< HEAD
-    const initialProjects = filteredProjects.slice(0, ITEMS_PER_PAGE);
-    setVisibleProjects(initialProjects);
-    setCurrentPage(1);
-    setIsLoading(false);
-  }, [filteredProjects]);
-=======
     if (!isInitialLoading && allProjects.length > 0) {
       const initialProjects = filteredProjects.slice(0, ITEMS_PER_PAGE);
       setVisibleProjects(initialProjects);
       setCurrentPage(1);
     }
   }, [filteredProjects, isInitialLoading, allProjects]);
->>>>>>> origin/main
 
   // Update filter from URL param on mount
   useEffect(() => {
