@@ -1,6 +1,7 @@
 import { Project, categoryFilters } from './portfolioMock';
 import { supabase } from '@/integrations/supabase/client';
 import { callPortfolioAdmin } from '@/lib/supabase-projects';
+import { syncProjectTags } from '@/utils/tagUtils';
 
 // Event for real-time updates between admin and frontend
 export const PORTFOLIO_UPDATE_EVENT = 'portfolioConfigUpdate';
@@ -12,48 +13,69 @@ export interface PortfolioConfig {
   manualOrderByCategory?: Record<string, number[]>;
 }
 
+// Normalize and validate project size
+const normalizeSize = (s: any): 'small' | 'medium' | 'large' => {
+  if (s === 'small' || s === 'medium' || s === 'large') return s;
+  const lower = typeof s === 'string' ? s.toLowerCase().trim() : '';
+  if (lower === 'small' || lower === 'medium' || lower === 'large') return lower as any;
+  return 'medium';
+};
+
 // Convert Supabase project to frontend format
-const convertFromSupabase = (dbProject: any): Project => ({
-  id: dbProject.id.toString(),
-  businessName: dbProject.business_name,
-  businessType: dbProject.business_type,
-  serviceType: dbProject.service_type,
-  imageAfter: dbProject.image_after,
-  imageBefore: dbProject.image_before,
-  size: dbProject.size,
-  category: dbProject.category,
-  tags: dbProject.tags || [dbProject.category], // Use tags or fallback to category
-  pinned: dbProject.pinned || false,
-  createdAt: dbProject.created_at
-});
+const convertFromSupabase = (dbProject: any): Project => {
+  const tags = dbProject.tags || [dbProject.category];
+  const syncedTags = syncProjectTags(tags, dbProject.category);
+  
+  return {
+    id: dbProject.id.toString(),
+    businessName: dbProject.business_name,
+    businessType: dbProject.business_type,
+    serviceType: dbProject.service_type,
+    imageAfter: dbProject.image_after,
+    imageBefore: dbProject.image_before,
+    size: normalizeSize(dbProject.size),
+    category: dbProject.category,
+    tags: syncedTags,
+    pinned: dbProject.pinned || false,
+    createdAt: dbProject.created_at
+  };
+};
 
 // Convert frontend project to Supabase format for update
-const convertToSupabaseUpdate = (project: Project) => ({
-  business_name: project.businessName,
-  business_type: project.businessType,
-  service_type: project.serviceType,
-  image_after: project.imageAfter,
-  image_before: project.imageBefore || null,
-  size: project.size,
-  category: project.tags?.[0] || project.category, // Use first tag as category for compatibility
-  tags: project.tags || [project.category],
-  pinned: project.pinned || false,
-});
+const convertToSupabaseUpdate = (project: Project) => {
+  const syncedTags = syncProjectTags(project.tags, project.category);
+  
+  return {
+    business_name: project.businessName,
+    business_type: project.businessType,
+    service_type: project.serviceType,
+    image_after: project.imageAfter,
+    image_before: project.imageBefore || null,
+    size: normalizeSize(project.size),
+    category: syncedTags[0] || project.category,
+    tags: syncedTags,
+    pinned: project.pinned || false,
+  };
+};
 
 // Convert frontend project to Supabase format for insert  
-const convertToSupabaseInsert = (project: Project) => ({
-  id: Number(project.id),
-  business_name: project.businessName,
-  business_type: project.businessType,
-  service_type: project.serviceType,
-  image_after: project.imageAfter,
-  image_before: project.imageBefore,
-  size: project.size,
-  category: project.tags?.[0] || project.category, // Use first tag as category for compatibility
-  tags: project.tags || [project.category],
-  pinned: project.pinned || false,
-  created_at: project.createdAt
-});
+const convertToSupabaseInsert = (project: Project) => {
+  const syncedTags = syncProjectTags(project.tags, project.category);
+  
+  return {
+    id: Number(project.id),
+    business_name: project.businessName,
+    business_type: project.businessType,
+    service_type: project.serviceType,
+    image_after: project.imageAfter,
+    image_before: project.imageBefore,
+    size: normalizeSize(project.size),
+    category: syncedTags[0] || project.category,
+    tags: syncedTags,
+    pinned: project.pinned || false,
+    created_at: project.createdAt
+  };
+};
 
 class PortfolioStore {
   private config: PortfolioConfig = { items: [], initialized: false };
@@ -131,21 +153,27 @@ class PortfolioStore {
 
   private async saveProjectToSupabase(project: Project, mode: 'add' | 'update'): Promise<boolean> {
     try {
-      console.log('Attempting to save project to Supabase:', { mode, projectId: project.id, businessName: project.businessName });
+      console.log('Attempting to save project to Supabase:', { 
+        mode, 
+        projectId: project.id, 
+        businessName: project.businessName,
+        size: project.size,
+        tags: project.tags 
+      });
 
       if (mode === 'add') {
         // Insert without overriding identity columns
-        const insertPayload = {
-          business_name: project.businessName,
-          business_type: project.businessType,
-          service_type: project.serviceType,
-          image_after: project.imageAfter,
-          image_before: project.imageBefore || null,
-          size: project.size,
-          category: project.tags?.[0] || project.category,
-          tags: project.tags || [project.category],
-          pinned: project.pinned || false,
-        };
+          const insertPayload = {
+            business_name: project.businessName,
+            business_type: project.businessType,
+            service_type: project.serviceType,
+            image_after: project.imageAfter,
+            image_before: project.imageBefore || null,
+            size: normalizeSize(project.size),
+            category: project.tags?.[0] || project.category,
+            tags: project.tags || [project.category],
+            pinned: project.pinned || false,
+          };
 
         console.log('Insert payload:', insertPayload);
 

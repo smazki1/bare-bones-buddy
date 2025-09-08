@@ -120,6 +120,7 @@ const AdminPortfolioPage = () => {
   const handleAutoSave = async (projectData: Omit<Project, 'id'> | Project) => {
     try {
       if ('id' in projectData) {
+        const tags = projectData.tags || [projectData.category];
         await portfolioStore.updateProject(projectData.id, {
           businessName: projectData.businessName,
           businessType: projectData.businessType,
@@ -127,7 +128,8 @@ const AdminPortfolioPage = () => {
           imageAfter: projectData.imageAfter,
           imageBefore: projectData.imageBefore,
           size: projectData.size,
-          category: projectData.category,
+          category: tags[0] || projectData.category,
+          tags,
           pinned: projectData.pinned,
         });
       }

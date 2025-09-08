@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useToast } from '@/hooks/use-toast';
 import { VisualSolutionCard } from '@/types/visualSolutions';
 import { visualSolutionsStore } from '@/data/visualSolutionsStore';
-import { convertFileToDataUrl, isValidImageFile, isValidVideoFile } from '@/utils/fileUtils';
+import { convertFileToDataUrl, isValidImageFile, isValidVideoFile, compressImageToDataUrl } from '@/utils/fileUtils';
 
 interface AdminVisualSolutionsEditorProps {
   isOpen: boolean;
@@ -117,10 +117,17 @@ const AdminVisualSolutionsEditor = ({
           console.log('Invalid image file dropped:', file.name, file.type);
           return;
         }
-        console.log('Converting dropped image to data URL');
-        const dataUrl = await convertFileToDataUrl(file);
+        console.log('Compressing dropped image to optimized data URL');
+        const dataUrl = await compressImageToDataUrl(file, {
+          maxWidth: 1600,
+          maxHeight: 1200,
+          maxSizeKB: 200,
+          mimeType: 'image/webp',
+          initialQuality: 0.85,
+          minQuality: 0.6,
+        });
         setFormData(prev => ({ ...prev, imageSrc: dataUrl }));
-        console.log('Image replaced via drag & drop');
+        console.log('Image replaced via drag & drop (compressed)');
       } else {
         if (!isValidVideoFile(file)) {
           console.log('Invalid video file dropped:', file.name, file.type);
@@ -153,8 +160,15 @@ const AdminVisualSolutionsEditor = ({
     console.log('Starting image upload process for:', file.name);
     setIsUploading(true);
     try {
-      const dataUrl = await convertFileToDataUrl(file);
-      console.log('Image converted to data URL, length:', dataUrl.length);
+      const dataUrl = await compressImageToDataUrl(file, {
+        maxWidth: 1600,
+        maxHeight: 1200,
+        maxSizeKB: 200,
+        mimeType: 'image/webp',
+        initialQuality: 0.85,
+        minQuality: 0.6,
+      });
+      console.log('Image compressed to data URL, length:', dataUrl.length);
       setFormData(prev => {
         const newData = { ...prev, imageSrc: dataUrl };
         console.log('FormData updated with new image');

@@ -12,9 +12,9 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   test: {
+    globals: true,
     environment: 'jsdom',
-    setupFiles: ['src/test/setup.ts'],
-    exit: true,
+    setupFiles: ['src/test/setup.ts', 'src/setupTests.ts'],
     testTimeout: 10000,
     hookTimeout: 10000,
     restoreMocks: true,

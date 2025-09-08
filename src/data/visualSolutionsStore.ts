@@ -72,8 +72,20 @@ class VisualSolutionsStore {
     };
     
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(configToSave));
-      console.log('Visual solutions config saved:', configToSave);
+      // Try to save with size limit check
+      const configStr = JSON.stringify(configToSave);
+      if (configStr.length > 5000000) { // 5MB limit
+        console.warn('Visual solutions config too large, truncating...');
+        const truncatedConfig = {
+          ...configToSave,
+          items: configToSave.items.slice(0, 50) // Keep only first 50 items
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(truncatedConfig));
+      } else {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(configToSave));
+      }
+      
+      console.log('Visual solutions config saved successfully');
       
       // Notify same-tab listeners with a small delay to ensure storage is written
       setTimeout(() => {

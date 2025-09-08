@@ -21,19 +21,28 @@ const Portfolio = () => {
   const [visibleProjects, setVisibleProjects] = useState<Project[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [allProjects, setAllProjects] = useState<Project[]>([]);
 
   // Load projects from Supabase and local store
   useEffect(() => {
     const loadProjects = async () => {
       try {
+<<<<<<< HEAD
         setIsLoading(true);
+=======
+        setIsInitialLoading(true);
+>>>>>>> origin/main
         const storedProjects = await portfolioStore.getProjects();
         setAllProjects(storedProjects);
       } catch (error) {
         console.error('Error loading projects:', error);
       } finally {
+<<<<<<< HEAD
         // isLoading will be turned off after initial visibleProjects are computed
+=======
+        setIsInitialLoading(false);
+>>>>>>> origin/main
       }
     };
 
@@ -63,7 +72,10 @@ const Portfolio = () => {
     if (activeFilter === 'all') {
       return allProjects;
     }
-    return allProjects.filter(project => project.category === activeFilter);
+    // Support both legacy single category and new multi-tags
+    return allProjects.filter(project => 
+      project.category === activeFilter || project.tags?.includes(activeFilter)
+    );
   }, [activeFilter, allProjects]);
 
   // Check if there are more pages to load and haven't reached max display limit
@@ -123,11 +135,20 @@ const Portfolio = () => {
 
   // Load initial projects when filtered projects change
   useEffect(() => {
+<<<<<<< HEAD
     const initialProjects = filteredProjects.slice(0, ITEMS_PER_PAGE);
     setVisibleProjects(initialProjects);
     setCurrentPage(1);
     setIsLoading(false);
   }, [filteredProjects]);
+=======
+    if (!isInitialLoading && allProjects.length > 0) {
+      const initialProjects = filteredProjects.slice(0, ITEMS_PER_PAGE);
+      setVisibleProjects(initialProjects);
+      setCurrentPage(1);
+    }
+  }, [filteredProjects, isInitialLoading, allProjects]);
+>>>>>>> origin/main
 
   // Update filter from URL param on mount
   useEffect(() => {
@@ -152,7 +173,7 @@ const Portfolio = () => {
           <section className="py-12">
             <MasonryGrid 
               projects={visibleProjects}
-              isLoading={isLoading && visibleProjects.length === 0}
+              isLoading={isInitialLoading || (isLoading && visibleProjects.length === 0)}
               hasReachedMaxItems={hasReachedMaxItems}
             />
             

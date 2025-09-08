@@ -9,9 +9,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Upload, X, Image, Eye, Loader2, Plus } from 'lucide-react';
 import { Project, ProjectSize } from '@/data/portfolioMock';
-import { categoryFilters } from '@/data/portfolioMock';
+import { getAvailableTags, syncProjectTags, getTagLabel } from '@/utils/tagUtils';
 import { convertFileToDataUrl, isValidImageFile } from '@/utils/fileUtils';
 import { useToast } from '@/hooks/use-toast';
+import '../../../data/solutionsSync'; // Import to trigger solutions sync
 
 interface AdminPortfolioEditorProps {
   isOpen: boolean;
@@ -39,14 +40,22 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject, onAutoS
     before?: string;
   }>({});
   const [autoSaveTimer, setAutoSaveTimer] = useState<number | null>(null);
+  const [availableTags, setAvailableTags] = useState(() => getAvailableTags());
 
   const afterInputRef = useRef<HTMLInputElement>(null);
   const beforeInputRef = useRef<HTMLInputElement>(null);
 
-  // Initialize/refresh form data when dialog opens or project changes
+  // Refresh available tags and form data when dialog opens
   useEffect(() => {
     if (!isOpen) return;
+    
+    // Update available tags from solutions
+    setAvailableTags(getAvailableTags());
+    
     if (editingProject) {
+      // Sync existing project tags with current available tags
+      const syncedTags = syncProjectTags(editingProject.tags || [editingProject.category], editingProject.category);
+      
       setFormData({
         businessName: editingProject.businessName,
         businessType: editingProject.businessType,
@@ -55,13 +64,15 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject, onAutoS
         imageBefore: editingProject.imageBefore || '',
         size: editingProject.size,
         category: editingProject.category,
-        tags: editingProject.tags || [editingProject.category]
+        tags: syncedTags
       });
       setPreviewImages({
         after: editingProject.imageAfter,
         before: editingProject.imageBefore
       });
     } else {
+      // For new projects, start with first available tag
+      const firstTag = availableTags.find(t => t.slug !== 'all')?.slug || 'restaurants';
       setFormData({
         businessName: '',
         businessType: '',
@@ -69,23 +80,50 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject, onAutoS
         imageAfter: '',
         imageBefore: '',
         size: 'medium',
-        category: 'restaurants',
-        tags: []
+        category: firstTag,
+        tags: [firstTag]
       });
       setPreviewImages({});
     }
   }, [isOpen, editingProject]);
 
+  // Listen for solutions updates to refresh available tags
+  useEffect(() => {
+    const handleSolutionsUpdate = () => {
+      setAvailableTags(getAvailableTags());
+    };
+
+    window.addEventListener('solutions:updated', handleSolutionsUpdate);
+    return () => window.removeEventListener('solutions:updated', handleSolutionsUpdate);
+  }, []);
+
   // Debounced autosave ONLY when editing existing projects
   useEffect(() => {
     if (!isOpen || !onAutoSave || !editingProject) return;
 
-    const payload = { ...editingProject, ...formData };
+    // Ensure tags are synced before auto-save
+    const syncedTags = syncProjectTags(formData.tags, formData.category);
+    const payload = { 
+      ...editingProject, 
+      ...formData,
+      tags: syncedTags 
+    };
+
+    console.log('Auto-save payload:', { 
+      id: payload.id, 
+      size: payload.size, 
+      businessName: payload.businessName,
+      tags: payload.tags 
+    });
 
     if (autoSaveTimer) window.clearTimeout(autoSaveTimer);
     const t = window.setTimeout(() => {
-      try { onAutoSave(payload); } catch {}
-    }, 800);
+      try { 
+        onAutoSave(payload); 
+      } catch (error) {
+        console.error('Auto-save failed:', error);
+      }
+    }, 1500); // Increased from 800ms to 1500ms to reduce server load
     setAutoSaveTimer(t);
 
     return () => {
@@ -146,6 +184,8 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject, onAutoS
     const files = e.target.files;
     if (files && files[0]) {
       handleImageUpload(files[0], type);
+      // Reset input value to allow selecting the same file again
+      e.target.value = '';
     }
   };
 
@@ -187,15 +227,23 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject, onAutoS
       return;
     }
 
-    // Ensure tags array is properly set
+    // Ensure tags array is properly set with synced tags
+    const syncedTags = syncProjectTags(formData.tags, formData.category);
     const finalFormData = {
       ...formData,
-      tags: formData.tags && formData.tags.length > 0 ? formData.tags : [formData.category]
+      tags: syncedTags
     };
 
     const projectToSave = editingProject 
       ? { ...editingProject, ...finalFormData }
       : finalFormData;
+
+    console.log('Final save payload:', { 
+      id: editingProject?.id || 'new', 
+      size: projectToSave.size, 
+      businessName: projectToSave.businessName,
+      tags: projectToSave.tags 
+    });
 
     onSave(projectToSave);
   };
@@ -381,7 +429,7 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject, onAutoS
             {formData.tags && formData.tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {formData.tags.map((tag) => {
-                  const tagLabel = categoryFilters.find(cat => cat.slug === tag)?.label || tag;
+                  const tagLabel = availableTags.find(cat => cat.slug === tag)?.label || tag;
                   return (
                     <Badge key={tag} variant="secondary" className="gap-2">
                       {tagLabel}
@@ -401,14 +449,14 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject, onAutoS
                 <SelectValue placeholder="הוסף תגית..." />
               </SelectTrigger>
               <SelectContent>
-                {categoryFilters.filter(cat => 
-                  cat.slug !== 'all' && 
-                  !formData.tags?.includes(cat.slug)
-                ).map((category) => (
-                  <SelectItem key={category.slug} value={category.slug}>
+                {availableTags.filter(tag => 
+                  tag.slug !== 'all' && 
+                  !formData.tags?.includes(tag.slug)
+                ).map((tag) => (
+                  <SelectItem key={tag.slug} value={tag.slug}>
                     <div className="flex items-center gap-2">
                       <Plus className="w-4 h-4" />
-                      {category.label}
+                      {tag.label}
                     </div>
                   </SelectItem>
                 ))}

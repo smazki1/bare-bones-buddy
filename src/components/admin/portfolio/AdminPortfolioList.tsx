@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, memo } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,16 +27,17 @@ const AdminPortfolioList = ({ projects, onEdit, onDelete, onDuplicate }: AdminPo
   const [localOrder, setLocalOrder] = useState<number[]>([]);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
 
-  const filteredProjects = projects.filter(project => {
-    const matchesSearch = project.businessName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.businessType.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = categoryFilter === 'all' || project.category === categoryFilter;
-    const matchesService = serviceFilter === 'all' || project.serviceType === serviceFilter;
-    
-    return matchesSearch && matchesCategory && matchesService;
-  });
+  const filteredProjects = useMemo(() => {
+    return projects.filter(project => {
+      const matchesSearch = project.businessName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           project.businessType.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = categoryFilter === 'all' || project.category === categoryFilter;
+      const matchesService = serviceFilter === 'all' || project.serviceType === serviceFilter;
+      return matchesSearch && matchesCategory && matchesService;
+    });
+  }, [projects, searchTerm, categoryFilter, serviceFilter]);
 
-  const visibleCategory = categoryFilter === 'all' ? '' : categoryFilter;
+  const visibleCategory = useMemo(() => (categoryFilter === 'all' ? '' : categoryFilter), [categoryFilter]);
 
   useEffect(() => {
     if (sortMode && visibleCategory) {
@@ -110,7 +111,7 @@ const AdminPortfolioList = ({ projects, onEdit, onDelete, onDuplicate }: AdminPo
     setDragIndex(null);
   };
 
-  const ProjectCard = ({ project }: { project: Project }) => (
+  const ProjectCard = memo(({ project }: { project: Project }) => (
     <motion.div
       initial={sortMode ? false : { opacity: 0, y: 20 }}
       animate={sortMode ? undefined : { opacity: 1, y: 0 }}
@@ -187,6 +188,8 @@ const AdminPortfolioList = ({ projects, onEdit, onDelete, onDuplicate }: AdminPo
                     alt="תמונה אחרי"
                     className="w-full h-full object-cover"
                     draggable={false}
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
               </div>
@@ -200,6 +203,8 @@ const AdminPortfolioList = ({ projects, onEdit, onDelete, onDuplicate }: AdminPo
                     alt="תמונה לפני"
                     className="w-full h-full object-cover"
                     draggable={false}
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
               </div>
@@ -282,14 +287,16 @@ const AdminPortfolioList = ({ projects, onEdit, onDelete, onDuplicate }: AdminPo
         </CardContent>
       </Card>
     </motion.div>
-  );
+  ));
 
   // Compute displayed list (used for both rendering and DnD index mapping)
-  const displayedProjects = (sortMode && visibleCategory
-    ? [...filteredProjects].sort((a, b) => localOrder.indexOf(Number(a.id)) - localOrder.indexOf(Number(b.id)))
-    : filteredProjects);
+  const displayedProjects = useMemo(() => (
+    sortMode && visibleCategory
+      ? [...filteredProjects].sort((a, b) => localOrder.indexOf(Number(a.id)) - localOrder.indexOf(Number(b.id)))
+      : filteredProjects
+  ), [sortMode, visibleCategory, filteredProjects, localOrder]);
 
-  const displayedIds = displayedProjects.map(p => Number(p.id));
+  const displayedIds = useMemo(() => displayedProjects.map(p => Number(p.id)), [displayedProjects]);
 
   return (
     <div className="space-y-6">

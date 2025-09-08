@@ -71,7 +71,8 @@ serve(async (req) => {
           image_after: payload.image_after,
           image_before: payload.image_before || null,
           size: payload.size,
-          category: payload.category,
+          category: payload.category ?? (Array.isArray(payload.tags) && payload.tags.length > 0 ? payload.tags[0] : null),
+          tags: Array.isArray(payload.tags) ? payload.tags : null,
           pinned: payload.pinned || false,
         };
         
@@ -118,7 +119,23 @@ serve(async (req) => {
         if (payload.image_before !== undefined) updateFields.image_before = payload.image_before;
         if (payload.size !== undefined) updateFields.size = payload.size;
         if (payload.category !== undefined) updateFields.category = payload.category;
+        if (payload.tags !== undefined) updateFields.tags = payload.tags;
         if (payload.pinned !== undefined) updateFields.pinned = payload.pinned;
+
+        // If category not provided but tags are, keep category in sync with first tag
+        if (updateFields.category === undefined && Array.isArray(updateFields.tags) && updateFields.tags.length > 0) {
+          updateFields.category = updateFields.tags[0];
+        }
+
+        if (Object.keys(updateFields).length === 0) {
+          return new Response(
+            JSON.stringify({ ok: false, error: 'No fields to update' }),
+            { 
+              status: 400, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          );
+        }
 
         const { data: updateData, error: updateError } = await supabase
           .from('projects')
