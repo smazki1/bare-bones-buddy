@@ -38,7 +38,7 @@ const convertFromSupabase = (dbProject: any): Project => {
     businessName: dbProject.business_name,
     businessType: dbProject.business_type,
     serviceType: dbProject.service_type,
-    imageAfter: dbProject.image_after,
+    imageAfter: dbProject.image_after || '',
     imageBefore: dbProject.image_before,
     size: normalizeSize(dbProject.size),
     category: dbProject.category,
@@ -180,7 +180,7 @@ class PortfolioStore {
         
         const { data: projects, error } = await supabase
           .from('projects')
-          .select('*')
+          .select('id,pinned,created_at,size,category,tags,business_name,business_type,service_type')
           .order('pinned', { ascending: false })
           .order('created_at', { ascending: false })
           .order('id', { ascending: false })
@@ -699,6 +699,22 @@ class PortfolioStore {
     if (this.realtimeChannel) {
       supabase.removeChannel(this.realtimeChannel);
       this.realtimeChannel = null;
+    }
+  }
+
+  // Fetch heavy image fields only when needed (on-demand per card)
+  async fetchProjectImagesById(id: string | number): Promise<{ image_after: string; image_before?: string | null }> {
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('image_after,image_before')
+        .eq('id', Number(id))
+        .single();
+      if (error) throw error;
+      return { image_after: data?.image_after || '', image_before: data?.image_before };
+    } catch (e) {
+      console.error('Failed to fetch project images', id, e);
+      return { image_after: '' };
     }
   }
 }
