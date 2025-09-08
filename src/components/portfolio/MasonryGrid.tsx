@@ -12,25 +12,25 @@ interface MasonryGridProps {
 const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridProps) => {
   const renderSkeletons = () => {
     return Array.from({ length: 6 }, (_, index) => (
-      <div key={`skeleton-${index}`} className="break-inside-avoid mb-5">
+      <div key={`skeleton-${index}`} className="break-inside-avoid mb-4 sm:mb-5">
         <div className={`
-          w-full rounded-xl bg-gradient-to-br from-muted via-muted/80 to-muted animate-pulse
-          ${index % 3 === 0 ? 'h-64' : index % 3 === 1 ? 'h-96' : 'h-80'}
+          w-full rounded-lg sm:rounded-xl bg-gradient-to-br from-muted via-muted/80 to-muted animate-pulse
+          ${index % 3 === 0 ? 'h-72 sm:h-64' : index % 3 === 1 ? 'h-80 sm:h-96' : 'h-64 sm:h-80'}
           flex items-center justify-center
         `}>
-          <div className="w-6 h-6 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+          <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
         </div>
       </div>
     ));
   };
 
   return (
-    <div className="container mx-auto px-4">
+    <div className="container mx-auto px-3 sm:px-4">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.4 }}
-        className="columns-1 md:columns-2 lg:columns-3 gap-5 space-y-0"
+        transition={{ duration: 0.3, delay: 0.1 }}
+        className="columns-1 sm:columns-2 lg:columns-3 gap-4 sm:gap-5 space-y-0"
       >
         {projects.map((project, index) => {
           // Apply fade effect to last 6 items when max reached
@@ -43,8 +43,8 @@ const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridPro
               initial={{ opacity: 0 }}
               animate={{ opacity: fadeOpacity }}
               transition={{ 
-                duration: hasReachedMaxItems ? 1.2 : 0.6,
-                delay: hasReachedMaxItems && isLastRow ? (index - (projects.length - 6)) * 0.1 : 0
+                duration: hasReachedMaxItems ? 0.8 : 0.3,
+                delay: hasReachedMaxItems && isLastRow ? (index - (projects.length - 6)) * 0.05 : 0
               }}
             >
               <ProjectCard
