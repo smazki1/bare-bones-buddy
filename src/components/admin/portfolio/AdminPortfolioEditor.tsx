@@ -184,6 +184,8 @@ const AdminPortfolioEditor = ({ isOpen, onClose, onSave, editingProject, onAutoS
     const files = e.target.files;
     if (files && files[0]) {
       handleImageUpload(files[0], type);
+      // Reset input value to allow selecting the same file again
+      e.target.value = '';
     }
   };
 
