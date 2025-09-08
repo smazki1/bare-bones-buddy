@@ -41,8 +41,9 @@ const Portfolio = () => {
           localStorage.removeItem('portfolioConfig_v2');
         } catch {}
 
-        // Authoritative: fetch from Supabase
+        // Authoritative: fetch from Supabase (only real uploaded projects)
         const dbItems: DbProject[] = await fetchProjects();
+        console.log(`Portfolio: Loaded ${dbItems.length} real projects from Supabase`);
         const mapped: Project[] = dbItems.map((p) => ({
           id: p.id.toString(),
           businessName: p.business_name,
@@ -101,13 +102,16 @@ const Portfolio = () => {
 
   // Filter projects based on active filter
   const filteredProjects = useMemo(() => {
+    // Only show projects with valid image URLs (already filtered by fetchProjects)
+    const validProjects = allProjects.filter(p => !!p.imageAfter);
+    
     if (activeFilter === 'all') {
-      return allProjects.filter(p => !!p.imageAfter);
+      return validProjects;
     }
     // Support both legacy single category and new multi-tags
-    return allProjects
-      .filter(project => project.category === activeFilter || project.tags?.includes(activeFilter))
-      .filter(p => !!p.imageAfter);
+    return validProjects.filter(project => 
+      project.category === activeFilter || project.tags?.includes(activeFilter)
+    );
   }, [activeFilter, allProjects]);
 
   // Check if there are more pages to load and haven't reached max display limit

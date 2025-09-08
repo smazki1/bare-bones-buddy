@@ -36,7 +36,33 @@ export async function fetchProjects(): Promise<DbProject[]> {
     .order('id', { ascending: false });
   if (error) throw error;
   const rows = data ?? [];
-  return rows as DbProject[];
+  // Only show real uploaded projects (filter out any demo/system data)
+  const realProjects = rows.filter(project => {
+    // Must have actual image_after
+    if (!project.image_after) return false;
+    
+    // Filter out demo/mock images
+    const url = project.image_after;
+    if (url.includes('images.unsplash.com') || 
+        url.includes('unsplash.com') ||
+        url.includes('placeholder') ||
+        url.includes('demo') ||
+        url.includes('mock')) {
+      return false;
+    }
+    
+    // Must have real business name (not demo names)
+    if (!project.business_name || 
+        project.business_name.includes('Demo') ||
+        project.business_name.includes('Test') ||
+        project.business_name.includes('דמו')) {
+      return false;
+    }
+    
+    return true;
+  });
+  
+  return realProjects as DbProject[];
 }
 
 
