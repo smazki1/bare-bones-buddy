@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { getAvailableTags } from '@/utils/tagUtils';
 import { useState, useEffect } from 'react';
-import '../data/solutionsSync'; // Import to trigger solutions sync
+import '../../data/solutionsSync'; // Import to trigger solutions sync
 
 interface FilterPillsProps {
   activeFilter: string;
