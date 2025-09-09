@@ -4,14 +4,14 @@ import { Badge } from '@/components/ui/badge';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { Project } from '@/data/portfolioMock';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { optimalWidthForSize } from '@/utils/imageUrls';
+// import { optimalWidthForSize } from '@/utils/imageUrls';
 
 interface ProjectCardProps {
   project: Project;
   index: number;
 }
 
-const sizesAttr = '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw';
+// const sizesAttr = '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw';
 
 const ProjectCard = ({ project, index }: ProjectCardProps) => {
   const [showBefore, setShowBefore] = useState(false);
@@ -37,8 +37,8 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
   };
 
   const currentSrc = showBefore && project.imageBefore ? project.imageBefore : project.imageAfter;
-  const targetW = optimalWidthForSize(project.size);
-
+  const targetW = 600;
+ 
 
   return (
     <motion.figure
@@ -70,11 +70,12 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
             alt={`${project.businessName} - ${showBefore && project.imageBefore ? 'לפני' : 'אחרי'}`}
             width={targetW}
             quality={78}
-            priority={index < 6} // First 6 images load with priority
+            priority={isMobile || index < 6}
             className="sm:group-hover:scale-105 transition-transform duration-200"
             blur={true}
-            showSkeleton={false} // We handle our own skeleton
+            showSkeleton={false}
           />
+        </div>
 
           {/* Before/After badge */}
           {project.imageBefore && (
