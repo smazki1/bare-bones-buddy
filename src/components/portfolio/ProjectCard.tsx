@@ -105,7 +105,6 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
             </h3>
           </motion.div>
         </figcaption>
-      </div>
     </motion.figure>
   );
 };
