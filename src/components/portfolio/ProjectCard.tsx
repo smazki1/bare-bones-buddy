@@ -71,8 +71,7 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
             width={targetW}
             quality={78}
             priority={isMobile || index < 6}
-            className="w-full h-full"
-            aspectRatio="auto"
+            className="w-full h-full object-cover"
             blur={true}
             showSkeleton={false}
           />
