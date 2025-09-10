@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import PortfolioHero from '@/components/portfolio/PortfolioHero';
@@ -182,8 +183,25 @@ const Portfolio = () => {
     }
   }, [searchParams]);
 
+  // Get first 6 projects for preloading
+  const projectsToPreload = visibleProjects.slice(0, 6);
+
   return (
     <div className="min-h-screen bg-background" dir="rtl">
+        <Helmet>
+          {/* Preload first 6 images above the fold */}
+          {projectsToPreload.map(project => (
+            project.imageAfter && (
+              <link 
+                key={`preload-${project.id}`} 
+                rel="preload" 
+                as="image" 
+                href={project.imageAfter}
+              />
+            )
+          ))}
+        </Helmet>
+        
         <Navigation theme="light" />
         
         <main className="pt-20">
