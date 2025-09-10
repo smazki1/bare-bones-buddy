@@ -92,7 +92,7 @@ const FAQ = () => {
   const whyFoodVisionPoints = [
     {
       icon: <TrendingUp className="w-10 h-10 text-secondary" />,
-      title: 'מכירות גבוהות יותר במשלוחים',
+      title: 'מכירות גבוהות יותר',
       description: 'התמונות שלנו מותאמות בצורה מושלמת לוולט, 10ביס וכל אפליקציות המשלוחים, כדי למשוך את העין ולהגדיל את יחס ההמרה וההזמנות.'
     },
     {
