@@ -1,126 +1,110 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
-import { Skeleton } from '@/components/ui/skeleton'; // <--- תיקון שגיאת ה-import
+import { Badge } from '@/components/ui/badge';
+import { OptimizedImage } from '@/components/ui/optimized-image';
+import { Project } from '@/data/portfolioMock';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { optimalWidthForSize } from '@/utils/imageUrls';
 
-// --- הגדרת מאפיינים (Props) ---
-// הוספנו את 'objectFit' כדי לשלוט ישירות על חיתוך התמונה
-interface OptimizedImageProps {
-  src: string;
-  alt: string;
-  className?: string;
-  aspectRatio?: 'square' | '4/3' | '16/9' | '3/2' | string;
-  objectFit?: 'cover' | 'contain'; // זה המאפיין החדש שפותר את בעיית החיתוך
-  priority?: boolean; 
-  showSkeleton?: boolean;
-  onClick?: () => void;
+interface ProjectCardProps {
+  project: Project;
+  index: number;
 }
 
-// --- Placeholder מטושטש ---
-// Placeholder קטן ויעיל למניעת קפיצות בעמוד ולחווית טעינה חלקה
-const generateBlurDataUrl = (width = 10, height = 10): string => {
-  return `data:image/svg+xml;base64,${btoa(
-    `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="#e5e7eb"/></svg>`
-  )}`;
-};
+const ProjectCard = ({ project, index }: ProjectCardProps) => {
+  const [showBefore, setShowBefore] = useState(false);
+  const isMobile = useIsMobile();
 
-
-// --- הרכיב ---
-// זו הגרסה הסופית, הפשוטה והחזקה.
-// היא כבר לא מבצעת שינויים בתמונה בזמן אמת, אלא מתמקדת בהצגה מושלמת שלה.
-const OptimizedImage = ({
-  src,
-  alt,
-  className,
-  aspectRatio = 'square',
-  objectFit = 'cover', // ברירת המחדל היא 'cover' (חותך), אבל עכשיו אפשר לשנות את זה!
-  priority = false,
-  showSkeleton = true,
-  onClick,
-}: OptimizedImageProps) => {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  // מתחילים עם placeholder מטושטש למעבר חלק
-  const [imageSrc, setImageSrc] = useState<string>(generateBlurDataUrl());
-
-  const aspectClasses = {
-    'square': 'aspect-square',
-    '4/3': 'aspect-[4/3]',
-    '16/9': 'aspect-video',
-    '3/2': 'aspect-[3/2]',
-  };
-  const aspectClass = aspectClasses[aspectRatio as keyof typeof aspectClasses] || aspectRatio;
-
-  useEffect(() => {
-    if (!src) {
-      setHasError(true);
-      return;
+  const getSizeClasses = (size: Project['size']) => {
+    switch (size) {
+      case 'small':
+        return 'h-64 sm:h-64';
+      case 'medium':
+        return 'h-80 sm:h-96';
+      case 'large':
+        return 'h-96 sm:h-[34rem]';
+      default:
+        return 'h-72 sm:h-80';
     }
+  };
 
-    const img = new Image();
-    img.onload = () => {
-      setImageSrc(src); // ברגע שהתמונה נטענת, מחליפים למקור האמיתי
-      setIsLoaded(true);
-    };
-    img.onerror = () => {
-      setHasError(true);
-      setIsLoaded(true); // מפסיקים להציג את ה-skeleton גם אם יש שגיאה
-    };
+  const handleToggle = () => {
+    if (project.imageBefore) {
+      setShowBefore(!showBefore);
+    }
+  };
 
-    // מתחילים לטעון את התמונה
-    img.src = src;
+  const currentSrc = showBefore && project.imageBefore ? project.imageBefore : project.imageAfter;
+  const targetW = optimalWidthForSize(project.size);
 
-  }, [src]); // האפקט הזה רץ רק כשה-`src` משתנה
-
-  if (hasError) {
-    return (
-      <div className={cn(
-        "relative overflow-hidden bg-muted flex items-center justify-center rounded-lg",
-        aspectClass,
-        className
-      )}>
-        <div className="text-muted-foreground text-center">
-          <span role="img" aria-label="Error Icon" className="text-2xl">🖼️</span>
-          <p className="text-sm mt-2">שגיאה בטעינת התמונה</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div 
-      className={cn(
-        "relative overflow-hidden rounded-lg",
-        aspectClass,
-        onClick && "cursor-pointer",
-        className
-      )}
-      onClick={onClick}
+    <motion.figure
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.3) }}
+      className="break-inside-avoid mb-4 sm:mb-5 group cursor-pointer touch-manipulation"
+      style={{ contentVisibility: 'auto' }}
+      onClick={handleToggle}
+      aria-label={`פרויקט: ${project.businessName}`}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleToggle();
+        }
+      }}
     >
-      {/* מציגים skeleton רק בזמן טעינה ורק אם האפשרות מופעלת */}
-      {!isLoaded && showSkeleton && (
-        <Skeleton className="absolute inset-0 w-full h-full" />
-      )}
-      
-      {/* התמונה עצמה עם אפקטים */}
-      <motion.img
-        src={imageSrc}
-        alt={alt}
-        className={cn(
-          "w-full h-full",
-          objectFit === 'cover' ? 'object-cover' : 'object-contain' // קובע באופן דינמי אם לחתוך או להכיל
-        )}
-        loading={priority ? "eager" : "lazy"}
-        fetchPriority={priority ? "high" : "auto"}
-        initial={{ opacity: 0, filter: "blur(10px)" }}
-        animate={{ 
-          opacity: isLoaded ? 1 : 0,
-          filter: isLoaded ? "blur(0px)" : "blur(10px)"
-        }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-      />
-    </div>
+      <div className={`
+        relative overflow-hidden rounded-lg sm:rounded-xl shadow-elegant 
+        transition-all duration-200 active:scale-[0.98] sm:hover:shadow-warm sm:group-hover:scale-[1.02] 
+        ${getSizeClasses(project.size)}
+      `}>
+        {/* Main Image */}
+        <div className="relative w-full h-full">
+          <OptimizedImage
+            src={currentSrc}
+            alt={`${project.businessName} - ${showBefore && project.imageBefore ? 'לפני' : 'אחרי'}`}
+            width={targetW}
+            quality={78}
+            priority={index < 6} 
+            className="sm:group-hover:scale-105 transition-transform duration-200"
+            blur={true}
+            showSkeleton={false}
+            objectFit="contain"
+          />
+
+          {/* Before/After badge */}
+          {project.imageBefore && (
+            <Badge 
+              variant="secondary" 
+              className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-background/90 text-foreground border text-xs sm:text-sm"
+            >
+              {showBefore ? 'לפני' : 'אחרי'}
+            </Badge>
+          )}
+
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
+          
+        </div>
+
+        {/* Project title only */}
+        <figcaption className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 text-white">
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, delay: 0.05 }}
+          >
+            <h3 className="text-base sm:text-lg font-assistant font-semibold mb-1 text-shadow-sm leading-tight">
+              {project.businessName}
+            </h3>
+          </motion.div>
+        </figcaption>
+      </div>
+    </motion.figure>
   );
 };
 
-export { OptimizedImage };
+export default ProjectCard;
