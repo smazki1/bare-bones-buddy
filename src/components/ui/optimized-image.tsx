@@ -60,10 +60,8 @@ const OptimizedImage = ({
     ? toSupabaseRenderUrl(displaySrc, { width, quality, format: 'webp' })
     : displaySrc;
     
-  // Generate responsive srcSet for Supabase images
-  const srcSet = isSupabasePublicUrl(displaySrc) 
-    ? buildSupabaseSrcSet(displaySrc, [400, 600, 900, 1200], quality)
-    : undefined;
+  // Disable srcSet to prevent multiple image requests and cold starts
+  const srcSet = undefined;
 
   const aspectClasses = {
     'square': 'aspect-square',

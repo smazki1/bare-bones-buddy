@@ -81,8 +81,8 @@ class PortfolioStore {
   private readonly STORAGE_KEY = 'portfolioConfig_v2';
 
   constructor() {
-    this.loadConfig();
-    this.setupRealtimeSubscription();
+    // this.loadConfig();
+    // this.setupRealtimeSubscription();
   }
 
   private loadFromLocalStorage(): PortfolioConfig | null {
