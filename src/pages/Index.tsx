@@ -1,6 +1,6 @@
 import HeroSection from '@/components/HeroSection';
 import BusinessSolutionsSection from '@/components/solutions/BusinessSolutionsSection';
-// import FeatureWorkSection from '@/components/FeatureWorkSection';
+import FeatureWorkSection from '@/components/FeatureWorkSection';
 // import PackagesSection from '@/components/packages/PackagesSection';
 import VisualSolutionsSection from '@/components/VisualSolutionsSection';
 import TestimonialsSection from '@/components/TestimonialsSection';
@@ -14,10 +14,10 @@ const Index = () => {
     <div className="min-h-screen">
       <HeroSection />
       <BusinessSolutionsSection />
+      <FeatureWorkSection />
       <VisualSolutionsSection />
       {/* PackagesSection hidden per request */}
-      
-      {/* TestimonialsSection hidden per request */}
+      <TestimonialsSection />
       <SectorsSection />
       <CTASection />
       <Footer />
