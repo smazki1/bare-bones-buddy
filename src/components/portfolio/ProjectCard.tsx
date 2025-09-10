@@ -63,15 +63,16 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
         transition-all duration-200 active:scale-[0.98] sm:hover:shadow-warm sm:group-hover:scale-[1.02] 
         ${getSizeClasses(project.size)}
       `}>
-        {/* Main Image */}
-        <div className="relative w-full h-full">
+        {/* Main Image - fills entire card */}
+        <div className="absolute inset-0 w-full h-full sm:group-hover:scale-105 transition-transform duration-200">
           <OptimizedImage
             src={currentSrc}
             alt={`${project.businessName} - ${showBefore && project.imageBefore ? 'לפני' : 'אחרי'}`}
             width={targetW}
             quality={78}
             priority={isMobile || index < 6}
-            className="sm:group-hover:scale-105 transition-transform duration-200"
+            className="w-full h-full"
+            aspectRatio="auto"
             blur={true}
             showSkeleton={false}
           />
