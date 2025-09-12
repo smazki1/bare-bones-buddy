@@ -1,41 +1,68 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from './ui/button';
 import { StaticImage } from './ui/StaticImage';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 const FeatureWorkSection = () => {
   const { ref, isIntersecting } = useIntersectionObserver({ threshold: 0.2 });
-
-  const featureItems = [
+  const navigate = useNavigate();
+  const [categories, setCategories] = useState([
     {
-      id: 1,
-      title: 'ספקי מזון',
+      id: '1',
+      name: 'ספקי מזון',
       description: 'פתרונות לאירועים',
-      image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      category: 'suppliers'
+      icon_url: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      slug: 'suppliers'
     },
     {
-      id: 2,
-      title: 'מסעדות',
+      id: '2',
+      name: 'מסעדות',
       description: 'תפריטים מושלמים',
-      image: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      category: 'restaurants'
+      icon_url: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      slug: 'restaurants'
     },
     {
-      id: 3,
-      title: 'אוכל מהיר',
+      id: '3',
+      name: 'אוכל מהיר',
       description: 'מהירות ושיווק',
-      image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      category: 'fast-food'
+      icon_url: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      slug: 'fast-food'
     },
     {
-      id: 4,
-      title: 'מאפיות',
+      id: '4',
+      name: 'מאפיות',
       description: 'מסורת במראה חדש',
-      image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      category: 'bakeries'
+      icon_url: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      slug: 'bakeries'
     },
-  ];
+  ]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const { data } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('order_index');
+
+      if (data && data.length > 0) {
+        setCategories(data);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
+  const handleCategoryClick = (categorySlug: string) => {
+    navigate(`/portfolio?category=${categorySlug}`);
+  };
 
   return (
     <section ref={ref} className="py-20 bg-background">
@@ -57,34 +84,36 @@ const FeatureWorkSection = () => {
         {/* Horizontal Scroll Container */}
         <div className="overflow-x-auto scrollbar-hide">
           <div className="flex gap-8 pb-4" style={{ width: 'max-content' }}>
-            {featureItems.map((item, index) => (
+            {categories.map((category, index) => (
               <motion.div
-                key={item.id}
+                key={category.id}
                 initial={{ opacity: 0, x: 100 }}
                 animate={isIntersecting ? { opacity: 1, x: 0 } : { opacity: 0, x: 100 }}
                 transition={{ duration: 0.6, delay: index * 0.2 }}
                 className="flex-shrink-0 w-80 group cursor-pointer"
+                onClick={() => handleCategoryClick(category.slug)}
               >
                 <div className="relative overflow-hidden rounded-2xl shadow-elegant hover:shadow-warm transition-all duration-500 group-hover:scale-105">
                   <div className="aspect-[4/3] relative">
                     <StaticImage
-                      src={item.image}
-                      alt={item.title}
+                      src={category.icon_url || `https://images.unsplash.com/photo-156${category.id}620905732-2d1ec7ab7445?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80`}
+                      alt={category.name}
                       className="aspect-[4/3] transition-transform duration-500 group-hover:scale-110"
-                      priority={index < 2} // First 2 images load with priority
+                      priority={index < 2}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
                     
                     <div className="absolute bottom-6 left-6 right-6 text-white">
                       <h3 className="text-2xl font-assistant font-bold mb-2">
-                        {item.title}
+                        {category.name}
                       </h3>
                       <p className="text-white/90 font-open-sans text-lg mb-4">
-                        {item.description}
+                        {category.description}
                       </p>
                       <Button
                         variant="outline"
                         className="border-white/30 text-white hover:bg-white/10 font-assistant"
+                        onClick={() => handleCategoryClick(category.slug)}
                       >
                         צפה בדוגמאות
                       </Button>

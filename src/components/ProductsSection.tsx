@@ -1,17 +1,20 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from './ui/button';
 import { Check } from 'lucide-react';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 const ProductsSection = () => {
   const { ref, isIntersecting } = useIntersectionObserver({ threshold: 0.2 });
-
-  const products = [
+  const navigate = useNavigate();
+  const [services, setServices] = useState([
     {
-      id: 1,
+      id: '1',
       name: 'חבילת התנסות',
       price: '499₪',
-      originalPrice: null,
+      originalPrice: null as string | null,
       description: 'מושלם להתחלה',
       features: [
         '60 תמונות מקצועיות',
@@ -21,10 +24,11 @@ const ProductsSection = () => {
         'תמונות לרשתות חברתיות'
       ],
       popular: false,
-      cta: 'בחר חבילה'
+      cta: 'בחר חבילה',
+      cta_link: '/contact'
     },
     {
-      id: 2,
+      id: '2',
       name: 'נוכחות דיגיטלית מלאה',
       price: '1,190₪',
       originalPrice: '1,689₪',
@@ -39,10 +43,11 @@ const ProductsSection = () => {
         'תמונות לאפליקציות משלוחים'
       ],
       popular: true,
-      cta: 'בחר חבילה'
+      cta: 'בחר חבילה',
+      cta_link: '/contact'
     },
     {
-      id: 3,
+      id: '3',
       name: 'הפקת פרימיום',
       price: '2,440₪',
       originalPrice: '2,939₪',
@@ -58,9 +63,79 @@ const ProductsSection = () => {
         'ייעוץ מיתוג ושיווק דיגיטלי'
       ],
       popular: false,
-      cta: 'בחר חבילה'
+      cta: 'בחר חבילה',
+      cta_link: '/contact'
     }
-  ];
+  ]);
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  const fetchServices = async () => {
+    try {
+      const { data } = await supabase
+        .from('services')
+        .select('*')
+        .eq('is_active', true)
+        .order('order_index')
+        .limit(6);
+
+      if (data && data.length > 0) {
+        // Transform services data to match expected format
+        const transformedServices = data.map((service, index) => ({
+          id: service.id,
+          name: service.name,
+          price: extractPrice(service.description) || '499₪',
+          originalPrice: null as string | null,
+          description: service.description || 'מתאים לעסקים קטנים',
+          features: extractFeatures(service.description) || [
+            'תמונות מקצועיות',
+            'עיצוב גרפי מותאם',
+            'רזולוציה גבוהה'
+          ],
+          popular: index === 1,
+          cta: service.cta_text || 'בחר חבילה',
+          cta_link: service.cta_link || '/contact'
+        }));
+        setServices(transformedServices);
+      }
+    } catch (error) {
+      console.error('Error fetching services:', error);
+    }
+  };
+
+  const extractPrice = (description: string) => {
+    const priceMatch = description?.match(/(\d+)₪/);
+    return priceMatch ? `${priceMatch[1]}₪` : null;
+  };
+
+  const extractFeatures = (description: string) => {
+    // Simple feature extraction - you can enhance this
+    if (description?.includes('150')) {
+      return [
+        '150 תמונות מקצועיות',
+        '25-30 מנות לבחירתך',
+        'עיצוב גרפי מותאם',
+        'תמונות ברזולוציה גבוהה',
+        'תמונות לרשתות חברתיות',
+        '5 סרטוני וידאו קצרים'
+      ];
+    }
+    return [
+      'תמונות מקצועיות',
+      'עיצוב גרפי מותאם',
+      'רזולוציה גבוהה'
+    ];
+  };
+
+  const handleServiceClick = (service: any) => {
+    if (service.cta_link?.startsWith('https://wa.me/')) {
+      window.open(service.cta_link, '_blank');
+    } else {
+      navigate('/contact');
+    }
+  };
 
   return (
     <section ref={ref} className="py-20 bg-background">
@@ -80,7 +155,7 @@ const ProductsSection = () => {
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          {products.map((product, index) => (
+          {services.map((product, index) => (
             <motion.div
               key={product.id}
               initial={{ opacity: 0, y: 50 }}
@@ -159,6 +234,7 @@ const ProductsSection = () => {
                     : 'bg-primary hover:bg-primary/90 text-white'
                 }`}
                 size="lg"
+                onClick={() => handleServiceClick(product)}
               >
                 {product.cta}
               </Button>
@@ -179,6 +255,7 @@ const ProductsSection = () => {
             variant="outline" 
             size="lg"
             className="border-primary text-primary hover:bg-primary hover:text-white font-assistant"
+            onClick={() => navigate('/contact')}
           >
             צור קשר לייעוץ חינם
           </Button>

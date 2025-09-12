@@ -8,108 +8,39 @@ import PortfolioHero from '@/components/portfolio/PortfolioHero';
 import FilterPills from '@/components/portfolio/FilterPills';
 import MasonryGrid from '@/components/portfolio/MasonryGrid';
 import PortfolioCTA from '@/components/portfolio/PortfolioCTA';
-// Infinite scroll disabled; using manual "Load more" button
-import { Project } from '@/data/portfolioMock';
-
 import { useIsMobile } from '@/hooks/use-mobile';
-import { fetchProjects, type DbProject } from '@/lib/supabase';
-import { syncProjectTags } from '@/utils/tagUtils';
-// Remote fetch disabled: local-only portfolio
+import { usePortfolioStore } from '@/data/portfolioStore';
 
 const ITEMS_PER_PAGE = 8;
 const MAX_ITEMS_DISPLAY = 16;
 
 const Portfolio = () => {
+  const { projects, loading, fetchProjects } = usePortfolioStore();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeFilter, setActiveFilter] = useState(searchParams.get('tag') || 'all');
-  const [visibleProjects, setVisibleProjects] = useState<Project[]>([]);
+  const [visibleProjects, setVisibleProjects] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const [allProjects, setAllProjects] = useState<Project[]>([]);
   const isMobile = useIsMobile();
+
   const itemsPerPage = isMobile ? 4 : ITEMS_PER_PAGE;
-  const LAST_DB_KEY = 'portfolio:lastDb:v1';
 
-  // Load projects from Supabase only (no mock, no stale snapshot)
+  // Load projects from Supabase using Zustand store
   useEffect(() => {
-    const loadProjects = async () => {
-      try {
-        setIsInitialLoading(true);
-        // Purge any old local snapshots to prevent showing system images
-        try {
-          localStorage.removeItem(LAST_DB_KEY);
-          localStorage.removeItem('portfolioConfig_v2');
-        } catch {}
-
-        // Authoritative: fetch from Supabase (only real uploaded projects)
-        const dbItems: DbProject[] = await fetchProjects();
-        console.log(`Portfolio: Loaded ${dbItems.length} real projects from Supabase`);
-        const mapped: Project[] = dbItems.map((p) => ({
-          id: p.id.toString(),
-          businessName: p.business_name,
-          businessType: p.business_type,
-          serviceType: p.service_type,
-          imageAfter: p.image_after,
-          imageBefore: p.image_before || undefined,
-          size: (p.size as Project['size']) || 'medium',
-          category: p.category,
-          // Preserve DB tags (with sync); fallback to category
-          tags: syncProjectTags((p as any).tags || [p.category], p.category),
-          pinned: p.pinned,
-          createdAt: p.created_at,
-        }));
-        setAllProjects(mapped);
-        setIsInitialLoading(false);
-      } catch (error) {
-        console.error('Error loading projects:', error);
-        setAllProjects([]);
-        setIsInitialLoading(false);
-      }
-    };
-
-    // Load initially
-    loadProjects();
-
-    // Listen for real-time updates – always refetch from Supabase
-    const handleUpdate = async () => {
-      try {
-        const dbItems: DbProject[] = await fetchProjects();
-        const mapped: Project[] = dbItems.map((p) => ({
-          id: p.id.toString(),
-          businessName: p.business_name,
-          businessType: p.business_type,
-          serviceType: p.service_type,
-          imageAfter: p.image_after,
-          imageBefore: p.image_before || undefined,
-          size: (p.size as Project['size']) || 'medium',
-          category: p.category,
-          tags: syncProjectTags((p as any).tags || [p.category], p.category),
-          pinned: p.pinned,
-          createdAt: p.created_at,
-        }));
-        setAllProjects(mapped);
-      } catch (error) {
-        console.error('Error syncing projects:', error);
-      }
-    };
-
-  // Remove old event listener setup since we use Zustand store now
-  }, []);
+    fetchProjects();
+  }, [fetchProjects]);
 
   // Filter projects based on active filter
   const filteredProjects = useMemo(() => {
-    // Only show projects with valid image URLs (already filtered by fetchProjects)
-    const validProjects = allProjects.filter(p => !!p.imageAfter);
-    
     if (activeFilter === 'all') {
-      return validProjects;
+      return projects;
     }
     // Support both legacy single category and new multi-tags
-    return validProjects.filter(project => 
-      project.category === activeFilter || project.tags?.includes(activeFilter)
+    return projects.filter(project => 
+      project.category_ids?.includes(activeFilter) || 
+      project.title?.toLowerCase().includes(activeFilter.toLowerCase())
     );
-  }, [activeFilter, allProjects]);
+  }, [activeFilter, projects]);
 
   // Check if there are more pages to load and haven't reached max display limit
   const hasReachedMaxItems = visibleProjects.length >= MAX_ITEMS_DISPLAY;
@@ -156,7 +87,9 @@ const Portfolio = () => {
     setSearchParams(searchParams);
     
   // Load more initial projects for new filter - no delay
-  const filteredData = filter === 'all' ? allProjects : allProjects.filter(p => p.category === filter);
+  const filteredData = filter === 'all' ? projects : projects.filter(p => 
+    p.category_ids?.includes(filter) || p.title?.toLowerCase().includes(filter.toLowerCase())
+  );
   const initialProjects = filteredData.slice(0, itemsPerPage * 2); // Load double amount
   setVisibleProjects(initialProjects);
   setIsLoading(false);
@@ -164,12 +97,12 @@ const Portfolio = () => {
 
   // Load initial projects when filtered projects change
   useEffect(() => {
-    if (allProjects.length > 0) {
+    if (projects.length > 0) {
       const initialProjects = filteredProjects.slice(0, itemsPerPage * 2); // Load more initially
       setVisibleProjects(initialProjects);
       setCurrentPage(2); // Start from page 2 since we loaded more
     }
-  }, [filteredProjects, allProjects, itemsPerPage]);
+  }, [filteredProjects, projects, itemsPerPage]);
 
   // Update filter from URL param on mount
   useEffect(() => {
@@ -211,7 +144,7 @@ const Portfolio = () => {
           <section className="py-12">
             <MasonryGrid 
               projects={visibleProjects}
-              isLoading={isInitialLoading || (isLoading && visibleProjects.length === 0)}
+              isLoading={loading || (isLoading && visibleProjects.length === 0)}
               hasReachedMaxItems={hasReachedMaxItems}
             />
             

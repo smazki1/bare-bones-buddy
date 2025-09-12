@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import Navigation from '@/components/Navigation';
@@ -13,46 +14,75 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Camera, Sparkles, Shield, Zap, Flame, Phone, Palette, Users, Rocket, TrendingUp, PackageCheck } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
  
 
 const FAQ = () => {
   const { ref: faqRef, isIntersecting } = useIntersectionObserver({ threshold: 0.1 });
   const { ref: whyRef, isIntersecting: whyIntersecting } = useIntersectionObserver({ threshold: 0.2 });
 
-  const faqs = [
+  const [faqs, setFaqs] = useState([
     {
+      id: '1',
       question: 'האם התמונות באמת נראות אמיתיות?',
       answer: 'כן! התמונות שלנו נראות אמיתיות לחלוטין. אנחנו משתמשים בטכנולוגיית AI מתקדמת ששומרת על הפרטים הקטנים ביותר של המנה - הטקסטורות, הצבעים, והרכיבים. הלקוחות שלנו מדווחים שהתמונות נראות טוב יותר ממנות אמיתיות!'
     },
     {
+      id: '2',
       question: 'איך אני יודע שהלקוחות לא יבחינו שזה טכנולוגיה מתקדמת?',
       answer: 'הטכנולוגיה שלנו מבוססת על אלגוריתמים מתקדמים שיוצרים תמונות פוטוריאליסטיות. התמונות עוברות בקרת איכות ידנית מקפידה, ואנחנו דואגים שכל תמונה תראה כמו צולמה על ידי צלם מקצועי. הלקוחות שלכם יראו רק תמונות יפות של המנות.'
     },
     {
+      id: '3',
       question: 'האם התמונות מאושרות לשימוש בוולט ו-10ביס?',
       answer: 'בהחלט! התמונות שלנו עומדות בסטנדרטים הטכניים של כל הפלטפורמות - וולט, 10ביס, גט, דומינוס, ואתרי משלוחים אחרים. אנחנו מייצרים את התמונות ברזולוציה גבוהה ובפורמטים מותאמים לכל פלטפורמה.'
     },
     {
+      id: '4',
       question: 'כמה זה עולה בהשוואה לצלם?',
       answer: 'השירות שלנו עולה כ-80% פחות מצלם מקצועי! במקום לשלם אלפי שקלים על יום צילומים, תקבלו תמונות מקצועיות תוך ימים ספורים במחיר שמתחיל מ-99₪ לתמונה בודדת. זה חיסכון משמעותי בזמן ובכסף.'
     },
     {
+      id: '5',
       question: 'מה קורה אם אני לא מרוצה?',
       answer: 'בשביל זה יצרנו את חבילת ההשקה המיוחדת – לנסות בלי סיכון. מקבלים 10–12 תמונות מקצועיות, פגישת אפיון אישית, וזיכוי מלא של 499₪ בחבילה הבאה. מתאים לכל סוגי העסקים שרוצים לראות איך זה עובד לפני שמתחייבים'
     },
     {
+      id: '6',
       question: 'איזה חומרים אני צריך לספק?',
       answer: 'אתם צריכים לשלוח לנו תמונות בסיסיות של המנות (אפילו מהטלפון), רשימת המנות שרוצים לצלם, ופרטים על הסגנון הרצוי. אם יש לכם תמונות קיימות - נהדר. אם לא - אנחנו נסביר איך לצלם תמונות פשוטות שיעזרו לנו.'
     },
     {
+      id: '7',
       question: 'האם זה מתאים לרשת עם כמה סניפים?',
       answer: 'בהחלט! אנחנו מתמחים ברשתות מזון ובעלי כמה סניפים. התמונות נבנות פעם אחת ויכולות לשמש את כל הסניפים. יש לנו מחירים מיוחדים לרשתות ואפשרויות ניהול מרכזי של כל התמונות.'
     },
     {
+      id: '8',
       question: 'למי שייכות זכויות השימוש?',
       answer: 'זכויות השימוש שייכות לכם במלואן! אתם יכולים להשתמש בתמונות כמה שאתם רוצים, לערוך אותן, ואפילו להעביר אותן לסוכנות השיווק שלכם. אין הגבלות זמן או שימוש.'
     },
-  ];
+  ]);
+
+  useEffect(() => {
+    fetchFAQs();
+  }, []);
+
+  const fetchFAQs = async () => {
+    try {
+      const { data } = await supabase
+        .from('faq')
+        .select('*')
+        .eq('is_active', true)
+        .order('order_index');
+
+      if (data && data.length > 0) {
+        setFaqs(data);
+      }
+    } catch (error) {
+      console.error('Error fetching FAQs:', error);
+    }
+  };
 
   
 
@@ -205,7 +235,7 @@ const FAQ = () => {
                 <Accordion type="single" collapsible className="space-y-4">
                   {faqs.map((faq, index) => (
                     <AccordionItem 
-                      key={index} 
+                      key={faq.id} 
                       value={`item-${index}`}
                       className="border border-border rounded-lg px-6"
                     >

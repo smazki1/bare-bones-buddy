@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Testimonial {
   id: string;
@@ -34,7 +36,34 @@ const mockTestimonials: Testimonial[] = [
 ];
 
 const TestimonialsSection = () => {
-  const testimonials = mockTestimonials;
+  const [testimonials, setTestimonials] = useState(mockTestimonials);
+
+  useEffect(() => {
+    fetchTestimonials();
+  }, []);
+
+  const fetchTestimonials = async () => {
+    try {
+      const { data } = await supabase
+        .from('testimonials')
+        .select('*')
+        .eq('is_featured', true)
+        .order('order_index')
+        .limit(6);
+
+      if (data && data.length > 0) {
+        setTestimonials(data);
+      }
+    } catch (error) {
+      console.error('Error fetching testimonials:', error);
+    }
+  };
+
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <Star key={i} className={`w-4 h-4 ${i < rating ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
+    ));
+  };
 
   return (
     <section className="py-20 bg-gradient-subtle">
@@ -64,9 +93,7 @@ const TestimonialsSection = () => {
               <Card className="h-full bg-card/50 border-border/50">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-1 mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-primary text-primary" />
-                    ))}
+                    {renderStars(testimonial.rating)}
                   </div>
                   
                   <blockquote className="text-foreground/90 mb-4 text-sm leading-relaxed">

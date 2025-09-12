@@ -12,7 +12,7 @@ import NotFound from "./pages/NotFound";
 import AdminIndex from "./pages/admin/index";
 import AdminLogin from "./pages/admin/login";
 import AdminDashboard from "./pages/admin/dashboard";
-import AdminProjects from "./pages/admin/projects";
+
 import AdminCategories from "./pages/admin/categories";
 import AdminSolutions from "./pages/admin/solutions";
 import AdminVisualSolutions from "./pages/admin/visualSolutions";
@@ -41,7 +41,7 @@ const App = () => (
           <Route path="/admin" element={<AdminIndex />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/projects" element={<AdminProjects />} />
+          
           <Route path="/admin/categories" element={<AdminCategories />} />
           <Route path="/admin/solutions" element={<AdminSolutions />} />
           <Route path="/admin/visual-solutions" element={<AdminVisualSolutions />} />

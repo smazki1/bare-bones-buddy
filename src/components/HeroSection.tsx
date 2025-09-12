@@ -3,20 +3,30 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { Button } from './ui/button';
 import { useNavigate } from 'react-router-dom';
 import Navigation from './Navigation';
+import { supabase } from '@/integrations/supabase/client';
 
 const HeroSection = () => {
   const [currentImage, setCurrentImage] = useState(0);
+  const [heroImages, setHeroImages] = useState([
+    "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
+    "https://images.unsplash.com/photo-1546833999-b9f581a1996d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
+    "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
+    "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
+  ]);
+  const [content, setContent] = useState({
+    hero_title: 'מנות מושלמות. תמונות מושלמות.',
+    hero_subtitle: 'מה שלקח שבועות עם צלם — אצלנו מוכן תוך ימים, וב־90% פחות כסף',
+    hero_cta_primary: 'התחילו עכשיו',
+    hero_cta_secondary: 'איך זה עובד'
+  });
   const navigate = useNavigate();
   const { scrollY } = useScroll();
   const y = useTransform(scrollY, [0, 500], [0, 250]);
 
-  // Sample images for the carousel - you'll replace these with actual Food Vision images
-  const heroImages = [
-    "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80", // Beautiful pasta dish
-    "https://images.unsplash.com/photo-1546833999-b9f581a1996d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80", // Gourmet burger
-    "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80", // Pizza
-    "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80", // Dessert
-  ];
+  useEffect(() => {
+    fetchSiteContent();
+    fetchBackgroundImages();
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -24,6 +34,41 @@ const HeroSection = () => {
     }, 4000);
     return () => clearInterval(interval);
   }, [heroImages.length]);
+
+  const fetchSiteContent = async () => {
+    try {
+      const { data } = await supabase
+        .from('site_content')
+        .select('key, value')
+        .in('key', ['hero_title', 'hero_subtitle', 'hero_cta_primary', 'hero_cta_secondary']);
+
+      if (data) {
+        const contentMap = data.reduce((acc, item) => ({
+          ...acc,
+          [item.key]: item.value
+        }), {});
+        setContent(prev => ({ ...prev, ...contentMap }));
+      }
+    } catch (error) {
+      console.error('Error fetching site content:', error);
+    }
+  };
+
+  const fetchBackgroundImages = async () => {
+    try {
+      const { data } = await supabase
+        .from('background_images')
+        .select('url, title')
+        .eq('active', true)
+        .order('id');
+
+      if (data && data.length > 0) {
+        setHeroImages(data.map(img => img.url));
+      }
+    } catch (error) {
+      console.error('Error fetching background images:', error);
+    }
+  };
 
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -86,7 +131,7 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.2 }}
           >
-            מנות <span className="text-secondary">מושלמות</span>. תמונות <span className="text-secondary">מושלמות</span>.
+            {content.hero_title}
           </motion.h1>
 
           <motion.p
@@ -95,7 +140,7 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.4 }}
           >
-            מה שלקח <strong>שבועות</strong> עם צלם — אצלנו מוכן <strong>תוך ימים</strong>, וב־<strong className="text-secondary text-2xl md:text-3xl lg:text-4xl">90% פחות כסף</strong>
+            {content.hero_subtitle}
           </motion.p>
 
           <motion.div
@@ -109,7 +154,7 @@ const HeroSection = () => {
               className="bg-secondary hover:bg-secondary/90 text-white px-10 py-7 text-xl font-assistant font-bold shadow-warm transition-all duration-300 hover:scale-105"
               onClick={() => navigate('/services')}
             >
-              התחילו עכשיו
+              {content.hero_cta_primary}
             </Button>
             <Button 
               variant="outline" 
@@ -117,7 +162,7 @@ const HeroSection = () => {
               className="bg-white/95 text-primary hover:bg-white px-10 py-7 text-xl font-assistant font-bold border-0 shadow-lg transition-all duration-300 hover:scale-105"
               onClick={() => navigate('/faq#top')}
             >
-              איך זה עובד
+              {content.hero_cta_secondary}
             </Button>
           </motion.div>
         </div>
