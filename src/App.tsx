@@ -10,6 +10,9 @@ import Contact from "./pages/Contact";
 import FAQ from "./pages/FAQ";
 import NotFound from "./pages/NotFound";
 import AdminIndex from "./pages/admin/index";
+import AdminLogin from "./pages/admin/login";
+import AdminDashboard from "./pages/admin/dashboard";
+import AdminProjects from "./pages/admin/projects";
 import AdminSolutions from "./pages/admin/solutions";
 import AdminVisualSolutions from "./pages/admin/visualSolutions";
 import AdminMarkets from "./pages/admin/markets";
@@ -36,6 +39,9 @@ const App = () => (
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/admin" element={<AdminIndex />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/projects" element={<AdminProjects />} />
           <Route path="/admin/solutions" element={<AdminSolutions />} />
           <Route path="/admin/visual-solutions" element={<AdminVisualSolutions />} />
           <Route path="/admin/markets" element={<AdminMarkets />} />

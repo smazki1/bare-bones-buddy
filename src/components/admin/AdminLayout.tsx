@@ -29,17 +29,17 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
 
   useEffect(() => {
     if (!isLoading && (!user || !isAdmin)) {
-      navigate('/admin');
+      navigate('/admin/login');
     }
   }, [user, isAdmin, isLoading, navigate]);
 
   const handleLogout = async () => {
     await signOut();
-    navigate('/admin');
+    navigate('/admin/login');
   };
 
   const navigation = [
-    { name: 'סקירה כללית', href: '/admin', icon: Home },
+    { name: 'סקירה כללית', href: '/admin/dashboard', icon: Home },
     { name: 'ניהול פרויקטים', href: '/admin/projects', icon: Image },
     { name: 'ניהול קטגוריות', href: '/admin/categories', icon: Tag },
     { name: 'ניהול שירותים', href: '/admin/services', icon: Settings },

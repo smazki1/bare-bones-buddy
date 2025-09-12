@@ -157,7 +157,7 @@ export default function ProjectsAdmin() {
           </div>
           <Button
             onClick={() => setShowForm(true)}
-            className="font-assistant"
+            className="font-assistant bg-secondary hover:bg-secondary/90"
           >
             <Plus className="ml-2 h-4 w-4" />
             הוסף פרויקט חדש
