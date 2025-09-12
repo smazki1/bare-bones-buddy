@@ -66,3 +66,21 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
     }
   }
 }))
+
+// Compatibility exports to avoid runtime errors from legacy imports
+export const PORTFOLIO_UPDATE_EVENT = 'portfolio:update'
+
+export const portfolioStore = {
+  subscribe: (callback: () => void) => {
+    const handler = () => callback()
+    window.addEventListener(PORTFOLIO_UPDATE_EVENT, handler)
+    return () => window.removeEventListener(PORTFOLIO_UPDATE_EVENT, handler)
+  },
+  emitUpdate: () => {
+    try {
+      window.dispatchEvent(new CustomEvent(PORTFOLIO_UPDATE_EVENT))
+    } catch (e) {
+      console.warn('Failed to dispatch portfolio update event', e)
+    }
+  },
+}

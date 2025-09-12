@@ -10,7 +10,7 @@ import MasonryGrid from '@/components/portfolio/MasonryGrid';
 import PortfolioCTA from '@/components/portfolio/PortfolioCTA';
 // Infinite scroll disabled; using manual "Load more" button
 import { Project } from '@/data/portfolioMock';
-import { usePortfolioStore } from '@/data/portfolioStore';
+
 import { useIsMobile } from '@/hooks/use-mobile';
 import { fetchProjects, type DbProject } from '@/lib/supabase';
 import { syncProjectTags } from '@/utils/tagUtils';
