@@ -10,7 +10,7 @@ import MasonryGrid from '@/components/portfolio/MasonryGrid';
 import PortfolioCTA from '@/components/portfolio/PortfolioCTA';
 // Infinite scroll disabled; using manual "Load more" button
 import { Project } from '@/data/portfolioMock';
-import { portfolioStore, PORTFOLIO_UPDATE_EVENT } from '@/data/portfolioStore';
+import { usePortfolioStore } from '@/data/portfolioStore';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { fetchProjects, type DbProject } from '@/lib/supabase';
 import { syncProjectTags } from '@/utils/tagUtils';
@@ -94,11 +94,7 @@ const Portfolio = () => {
       }
     };
 
-    window.addEventListener(PORTFOLIO_UPDATE_EVENT, handleUpdate);
-    
-    return () => {
-      window.removeEventListener(PORTFOLIO_UPDATE_EVENT, handleUpdate);
-    };
+  // Remove old event listener setup since we use Zustand store now
   }, []);
 
   // Filter projects based on active filter

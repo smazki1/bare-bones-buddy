@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Button } from './ui/button';
-import { OptimizedImage } from './ui/optimized-image';
+import { StaticImage } from './ui/StaticImage';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 
 const FeatureWorkSection = () => {
@@ -67,13 +67,10 @@ const FeatureWorkSection = () => {
               >
                 <div className="relative overflow-hidden rounded-2xl shadow-elegant hover:shadow-warm transition-all duration-500 group-hover:scale-105">
                   <div className="aspect-[4/3] relative">
-                    <OptimizedImage
+                    <StaticImage
                       src={item.image}
                       alt={item.title}
-                      aspectRatio="4/3"
-                      quality={80}
-                      width={800}
-                      className="transition-transform duration-500 group-hover:scale-110"
+                      className="aspect-[4/3] transition-transform duration-500 group-hover:scale-110"
                       priority={index < 2} // First 2 images load with priority
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />

@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
-import { OptimizedImage } from '@/components/ui/optimized-image';
+import { StaticImage } from '@/components/ui/StaticImage';
 import { Project } from '@/data/portfolioMock';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { optimalWidthForSize } from '@/utils/imageUrls';
 
 interface ProjectCardProps {
   project: Project;
@@ -35,7 +34,6 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
   };
 
   const currentSrc = showBefore && project.imageBefore ? project.imageBefore : project.imageAfter;
-  const targetW = optimalWidthForSize(project.size);
 
 
   return (
@@ -63,11 +61,9 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
       `}>
         {/* Main Image */}
         <div className="relative w-full h-full">
-          <OptimizedImage
+          <StaticImage
             src={currentSrc}
             alt={`${project.businessName} - ${showBefore && project.imageBefore ? 'לפני' : 'אחרי'}`}
-            width={targetW}
-            quality={78}
             priority={index < 6} 
             className="w-full h-full object-cover sm:group-hover:scale-105 transition-transform duration-200"
             blur={true}

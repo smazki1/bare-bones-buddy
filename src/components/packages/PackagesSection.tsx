@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { motion } from 'framer-motion';
 import PackageCard from './PackageCard';
-import PackageModal from './PackageModal';
+// import PackageModal from './PackageModal';
 
 export type PackageItem = {
   id: string;
@@ -191,12 +191,7 @@ const PackagesSection = ({ autoOpenId }: { autoOpenId?: string } = {}) => {
         </div>
       </section>
 
-      {selectedPackage && (
-        <PackageModal
-          package={selectedPackage}
-          onClose={() => setSelectedPackage(null)}
-        />
-      )}
+      {/* Package modal removed during cleanup */}
     </>
   );
 };

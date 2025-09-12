@@ -17,7 +17,6 @@ import AdminCategories from "./pages/admin/categories";
 import AdminSolutions from "./pages/admin/solutions";
 import AdminVisualSolutions from "./pages/admin/visualSolutions";
 import AdminMarkets from "./pages/admin/markets";
-import AdminPortfolio from "./pages/admin/portfolio";
 import AdminClients from "./pages/admin/clients";
 import AdminTestimonials from "./pages/admin/testimonials";
 import Terms from "./pages/Terms";
@@ -47,7 +46,6 @@ const App = () => (
           <Route path="/admin/solutions" element={<AdminSolutions />} />
           <Route path="/admin/visual-solutions" element={<AdminVisualSolutions />} />
           <Route path="/admin/markets" element={<AdminMarkets />} />
-          <Route path="/admin/portfolio" element={<AdminPortfolio />} />
           <Route path="/admin/clients" element={<AdminClients />} />
           <Route path="/admin/testimonials" element={<AdminTestimonials />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
