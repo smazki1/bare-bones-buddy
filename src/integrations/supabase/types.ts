@@ -261,43 +261,43 @@ export type Database = {
       }
       projects: {
         Row: {
-          business_name: string
-          business_type: string
-          category: string
+          category_ids: string[] | null
           created_at: string
-          id: number
-          image_after: string
-          image_before: string | null
-          pinned: boolean
-          service_type: string
-          size: string
-          tags: string[] | null
+          description: string | null
+          id: string
+          image_after_thumb_url: string
+          image_after_url: string
+          image_before_url: string
+          is_featured: boolean | null
+          order_index: number | null
+          title: string
+          updated_at: string
         }
         Insert: {
-          business_name: string
-          business_type: string
-          category: string
+          category_ids?: string[] | null
           created_at?: string
-          id?: never
-          image_after: string
-          image_before?: string | null
-          pinned?: boolean
-          service_type: string
-          size: string
-          tags?: string[] | null
+          description?: string | null
+          id?: string
+          image_after_thumb_url: string
+          image_after_url: string
+          image_before_url: string
+          is_featured?: boolean | null
+          order_index?: number | null
+          title: string
+          updated_at?: string
         }
         Update: {
-          business_name?: string
-          business_type?: string
-          category?: string
+          category_ids?: string[] | null
           created_at?: string
-          id?: never
-          image_after?: string
-          image_before?: string | null
-          pinned?: boolean
-          service_type?: string
-          size?: string
-          tags?: string[] | null
+          description?: string | null
+          id?: string
+          image_after_thumb_url?: string
+          image_after_url?: string
+          image_before_url?: string
+          is_featured?: boolean | null
+          order_index?: number | null
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
