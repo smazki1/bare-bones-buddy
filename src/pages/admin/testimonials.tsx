@@ -16,82 +16,150 @@ const AdminTestimonialsPage = () => {
   const { user, isLoading: authLoading, isAdmin } = useSupabaseAuth();
   const { toast } = useToast();
 
-  const [items, setItems] = useState<Testimonial[]>([]);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showEditor, setShowEditor] = useState(false);
   const [editingItem, setEditingItem] = useState<Testimonial | null>(null);
 
-  const loadData = async () => {
-    if (!user || !isAdmin) return;
-    setIsLoading(true);
+  const fetchTestimonials = async () => {
     try {
       const { data, error } = await supabase
         .from('testimonials')
         .select('*')
-        .order('display_order', { ascending: true })
-        .order('created_at', { ascending: false });
+        .order('order_index', { ascending: true });
+      
       if (error) throw error;
-      setItems((data || []) as Testimonial[]);
-    } catch (e) {
-      console.error(e);
-      toast({ title: 'שגיאה', description: 'שגיאה בטעינת נתונים', variant: 'destructive' });
-    } finally {
-      setIsLoading(false);
+      
+      setTestimonials(data || []);
+    } catch (error) {
+      console.error('Error fetching testimonials:', error);
     }
   };
 
-  useEffect(() => { loadData(); }, [user, isAdmin]);
+  const createTestimonial = async (testimonialData: Omit<Testimonial, 'id' | 'created_at' | 'updated_at'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('testimonials')
+        .insert([testimonialData])
+        .select()
+        .single();
 
-  const handleAdd = () => { setEditingItem(null); setShowEditor(true); };
-  const handleEdit = (item: Testimonial) => { setEditingItem(item); setShowEditor(true); };
-
-  const handleSave = async (payload: Partial<Testimonial> & { business_name: string; category: string; image_url: string }) => {
-    if (payload.id) {
-      const { error } = await supabase.from('testimonials').update(payload).eq('id', payload.id);
       if (error) throw error;
-      setItems((prev) => prev.map((i) => (i.id === payload.id ? { ...i, ...payload } as Testimonial : i)));
-    } else {
-      const nextOrder = (items[items.length - 1]?.display_order ?? 0) + 1;
-      const { data, error } = await supabase.from('testimonials').insert([{ ...payload, display_order: nextOrder }]).select().single();
-      if (error) throw error;
-      setItems((prev) => [...prev, data as Testimonial]);
+      
+      setTestimonials(prev => [...prev, data]);
+      return data;
+    } catch (error) {
+      console.error('Error creating testimonial:', error);
+      throw error;
     }
-    setShowEditor(false);
+  };
+
+  const updateTestimonial = async (id: string, updates: Partial<Omit<Testimonial, 'id' | 'created_at' | 'updated_at'>>) => {
+    try {
+      const { data, error } = await supabase
+        .from('testimonials')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setTestimonials(prev => prev.map(t => t.id === id ? data : t));
+      return data;
+    } catch (error) {
+      console.error('Error updating testimonial:', error);
+      throw error;
+    }
+  };
+
+  const reorderTestimonials = async (reorderedItems: Testimonial[]) => {
+    try {
+      const updates = reorderedItems.map((item, index) => ({
+        id: item.id,
+        order_index: index
+      }));
+
+      for (const update of updates) {
+        await supabase
+          .from('testimonials')
+          .update({ order_index: update.order_index })
+          .eq('id', update.id);
+      }
+
+      setTestimonials(reorderedItems);
+    } catch (error) {
+      console.error('Error reordering testimonials:', error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    if (user && isAdmin) {
+      fetchTestimonials();
+    }
+  }, [user, isAdmin]);
+
+  const handleAdd = () => {
+    setEditingItem(null);
+    setShowEditor(true);
+  };
+
+  const handleEdit = (item: Testimonial) => {
+    setEditingItem(item);
+    setShowEditor(true);
+  };
+
+  const handleSave = async (testimonialData: Partial<Testimonial>) => {
+    try {
+      if (editingItem) {
+        await updateTestimonial(editingItem.id, testimonialData);
+        toast({
+          title: "הצלחה",
+          description: "המלצה עודכנה בהצלחה",
+        });
+      } else {
+        const nextOrder = testimonials.length > 0 ? Math.max(...testimonials.map(t => t.order_index)) + 1 : 0;
+        await createTestimonial({
+          ...testimonialData,
+          order_index: nextOrder
+        } as Omit<Testimonial, 'id' | 'created_at' | 'updated_at'>);
+        toast({
+          title: "הצלחה",
+          description: "המלצה נוספה בהצלחה",
+        });
+      }
+      setShowEditor(false);
+      await fetchTestimonials();
+    } catch (error) {
+      toast({
+        title: "שגיאה",
+        description: "שמירה נכשלה",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase.from('testimonials').delete().eq('id', id);
-    if (error) { toast({ title: 'שגיאה', description: 'מחיקה נכשלה', variant: 'destructive' }); return; }
-    setItems((prev) => prev.filter((i) => i.id !== id));
-  };
-
-  const handleToggle = async (id: string, enabled: boolean) => {
-    const { error } = await supabase.from('testimonials').update({ enabled }).eq('id', id);
-    if (error) { toast({ title: 'שגיאה', description: 'עדכון סטטוס נכשל', variant: 'destructive' }); return; }
-    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, enabled } : i)) as Testimonial[]);
-  };
-
-  const handleMove = async (id: string, direction: 'up' | 'down') => {
-    const currentIndex = items.findIndex((i) => i.id === id);
-    if (currentIndex === -1) return;
-    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-    if (targetIndex < 0 || targetIndex >= items.length) return;
-    const reordered = [...items];
-    const [moved] = reordered.splice(currentIndex, 1);
-    reordered.splice(targetIndex, 0, moved);
-    // Re-assign display_order sequentially
-    const withOrders = reordered.map((it, idx) => ({ ...it, display_order: idx }));
-    setItems(withOrders as Testimonial[]);
-    // Persist each row to satisfy TS types
     try {
-      await Promise.all(
-        withOrders.map(({ id, display_order }) =>
-          supabase.from('testimonials').update({ display_order }).eq('id', id)
-        )
-      );
+      const { error } = await supabase
+        .from('testimonials')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setTestimonials(prev => prev.filter(t => t.id !== id));
+      toast({
+        title: "הצלחה",
+        description: "המלצה נמחקה בהצלחה",
+      });
     } catch (error) {
-      console.error(error);
-      toast({ title: 'שגיאה', description: 'שמירת סדר נכשלה', variant: 'destructive' });
+      toast({
+        title: "שגיאה",
+        description: "מחיקה נכשלה",
+        variant: "destructive",
+      });
     }
   };
 
@@ -114,7 +182,9 @@ const AdminTestimonialsPage = () => {
             <Users className="w-12 h-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-assistant font-semibold mb-2">גישה מוגבלת</h3>
             <p className="text-muted-foreground font-open-sans mb-4">יש צורך בהרשאות מנהל</p>
-            <Link to="/admin"><Button className="font-assistant">חזרה לממשק ניהול</Button></Link>
+            <Link to="/admin">
+              <Button className="font-assistant">חזרה לממשק ניהול</Button>
+            </Link>
           </CardContent>
         </Card>
       </div>
@@ -124,26 +194,44 @@ const AdminTestimonialsPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex justify-between items-center mb-8">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex justify-between items-center mb-8"
+        >
           <div className="text-right">
             <div className="flex items-center gap-2 mb-2">
-              <Link to="/admin"><Button variant="ghost" size="sm" className="font-assistant"><ArrowRight className="w-4 h-4 mr-1" />חזרה</Button></Link>
+              <Link to="/admin">
+                <Button variant="ghost" size="sm" className="font-assistant">
+                  <ArrowRight className="w-4 h-4 mr-1" />
+                  חזרה
+                </Button>
+              </Link>
             </div>
-            <h1 className="text-3xl font-assistant font-bold text-primary mb-2">ניהול לקוחות (Testimonials)</h1>
-            <p className="text-muted-foreground font-open-sans">נהל את הכרטיסים המופיעים בסקשן "הלקוחות שלנו"</p>
+            <h1 className="text-3xl font-assistant font-bold text-primary mb-2">
+              ניהול המלצות לקוחות
+            </h1>
+            <p className="text-muted-foreground font-open-sans">
+              נהל את המלצות הלקוחות המופיעות באתר
+            </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={loadData} size="sm" className="font-assistant"><RefreshCw className="w-4 h-4 mr-1" />רענן</Button>
-            <Button onClick={handleAdd} className="font-assistant"><Plus className="w-4 h-4 mr-2" />כרטיס חדש</Button>
+            <Button variant="outline" onClick={fetchTestimonials} size="sm" className="font-assistant">
+              <RefreshCw className="w-4 h-4 mr-1" />
+              רענן
+            </Button>
+            <Button onClick={handleAdd} className="font-assistant">
+              <Plus className="w-4 h-4 mr-2" />
+              המלצה חדשה
+            </Button>
           </div>
         </motion.div>
 
         <AdminTestimonialsList
-          items={items}
+          items={testimonials}
           onEdit={handleEdit}
           onDelete={handleDelete}
-          onToggle={handleToggle}
-          onMove={handleMove}
+          onReorder={reorderTestimonials}
         />
 
         <AdminTestimonialsEditor

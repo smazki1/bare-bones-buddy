@@ -1,89 +1,47 @@
-import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Instagram, Twitter, Facebook, ExternalLink } from 'lucide-react';
-import { OptimizedImage } from './ui/optimized-image';
-import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
+import { Star } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+
+interface Testimonial {
+  id: string;
+  client_name: string;
+  client_business?: string;
+  content: string;
+  rating: number;
+  is_featured: boolean;
+  order_index: number;
+}
+
+const mockTestimonials: Testimonial[] = [
+  {
+    id: '1',
+    client_name: 'יוסי כהן',
+    client_business: 'מסעדת הדג הזהב',
+    content: 'התמונות שקיבלנו פשוט מדהימות! המכירות שלנו עלו ב-30% מאז שהתחלנו להשתמש בתמונות מ-Food Vision',
+    rating: 5,
+    is_featured: true,
+    order_index: 1
+  },
+  {
+    id: '2',
+    client_name: 'רחל לוי',
+    client_business: 'מאפיית שושנה',
+    content: 'שירות מקצועי ומהיר. התמונות של החלות והעוגות שלנו נראות כמו במגזינים!',
+    rating: 5,
+    is_featured: true,
+    order_index: 2
+  }
+];
 
 const TestimonialsSection = () => {
-  const { ref, isIntersecting } = useIntersectionObserver({ threshold: 0.2 });
-
-  // Load from Supabase
-  const [items, setItems] = useState<Array<{
-    id: string;
-    business_name: string;
-    category: string;
-    image_url: string;
-    link_instagram?: string | null;
-    link_facebook?: string | null;
-    link_x?: string | null;
-  }>>([]);
-
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const { supabase } = await import('@/integrations/supabase/client');
-        const { data } = await supabase
-          .from('testimonials')
-          .select('*')
-          .eq('enabled', true)
-          .order('display_order', { ascending: true })
-          .order('created_at', { ascending: false });
-        if (mounted) {
-          setItems((data || []) as any);
-        }
-      } catch {}
-    })();
-    return () => { mounted = false; };
-  }, []);
-
-  const testimonials = items.length > 0 ? items.map((t) => ({
-    id: t.id,
-    businessName: t.business_name,
-    image: t.image_url,
-    socialLinks: [
-      ...(t.link_instagram ? [{ icon: Instagram, url: t.link_instagram, label: 'Instagram' as const }] : []),
-      ...(t.link_x ? [{ icon: Twitter, url: t.link_x, label: 'Twitter' as const }] : []),
-      ...(t.link_facebook ? [{ icon: Facebook, url: t.link_facebook, label: 'Facebook' as const }] : []),
-    ],
-    category: t.category,
-  })) : [
-    {
-      id: '1',
-      businessName: 'טעמים לאירועים',
-      image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?auto=format&fit=crop&w=800&q=80',
-      socialLinks: [ { icon: Instagram, url: 'https://instagram.com/tamim-events', label: 'Instagram' as const } ],
-      category: 'ספקי מזון',
-    },
-    {
-      id: '2',
-      businessName: 'דג הזהב',
-      image: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=800&q=80',
-      socialLinks: [ { icon: Twitter, url: 'https://twitter.com/golden-fish', label: 'Twitter' as const } ],
-      category: 'מסעדות',
-    },
-    {
-      id: '3',
-      businessName: 'בורגר פלאש',
-      image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=800&q=80',
-      socialLinks: [ { icon: Instagram, url: 'https://instagram.com/burger-flash', label: 'Instagram' as const } ],
-      category: 'אוכל מהיר',
-    },
-    {
-      id: '4',
-      businessName: 'חלות של שבת',
-      image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80',
-      socialLinks: [ { icon: Facebook, url: 'https://facebook.com/challot-shabbat', label: 'Facebook' as const } ],
-      category: 'מאפיות',
-    },
-  ];
+  const testimonials = mockTestimonials;
 
   return (
-    <section ref={ref} className="py-20 bg-gradient-subtle">
+    <section className="py-20 bg-gradient-subtle">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
-          animate={isIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
@@ -91,71 +49,45 @@ const TestimonialsSection = () => {
             הלקוחות שלנו
           </h2>
           <p className="text-xl text-muted-foreground font-open-sans max-w-2xl mx-auto">
-            עסקים שהבינו את העתיד = כבר חוסכים אלפי שקלים בכל חודש
+            לקוחות מרוצים שחוסכים זמן וכסף עם Food Vision
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {testimonials.map((testimonial, index) => (
             <motion.div
               key={testimonial.id}
-              initial={{ opacity: 0, y: 50 }}
-              animate={isIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-              transition={{ duration: 0.6, delay: index * 0.2 }}
-              className="group cursor-pointer"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: index * 0.1 }}
             >
-              <div className="relative overflow-hidden rounded-2xl shadow-elegant hover:shadow-warm transition-all duration-500 group-hover:scale-105">
-                <div className="aspect-square relative">
-                  <OptimizedImage
-                    src={testimonial.image}
-                    alt={testimonial.businessName}
-                    aspectRatio="square"
-                    quality={75}
-                    width={600}
-                    className="transition-transform duration-500 group-hover:scale-110"
-                    priority={index < 4} // First row loads with priority
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  
-                  <div className="absolute bottom-6 left-6 right-6 text-white">
-                    <h3 className="text-xl font-assistant font-bold mb-2">
-                      {testimonial.businessName}
-                    </h3>
-                    <p className="text-white/80 font-open-sans text-sm mb-4">
-                      {testimonial.category}
-                    </p>
-                    
-                    <div className="flex gap-3">
-                      {testimonial.socialLinks.map((social, socialIndex) => {
-                        const IconComponent = social.icon;
-                        return (
-                          <a
-                            key={socialIndex}
-                            href={social.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-secondary transition-colors duration-300 group/icon"
-                            aria-label={`${testimonial.businessName} ${social.label}`}
-                          >
-                            <IconComponent className="w-4 h-4 text-white group-hover/icon:scale-110 transition-transform duration-300" />
-                          </a>
-                        );
-                      })}
-                      <a
-                        href="#"
-                        className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-primary transition-colors duration-300 group/icon"
-                        aria-label="צפה בפרויקט"
-                      >
-                        <ExternalLink className="w-4 h-4 text-white group-hover/icon:scale-110 transition-transform duration-300" />
-                      </a>
-                    </div>
+              <Card className="h-full bg-card/50 border-border/50">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-1 mb-4">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-primary text-primary" />
+                    ))}
                   </div>
-                </div>
-              </div>
+                  
+                  <blockquote className="text-foreground/90 mb-4 text-sm leading-relaxed">
+                    "{testimonial.content}"
+                  </blockquote>
+                  
+                  <div className="border-t border-border/50 pt-4">
+                    <div className="font-semibold text-foreground text-sm">
+                      {testimonial.client_name}
+                    </div>
+                    {testimonial.client_business && (
+                      <div className="text-muted-foreground text-xs">
+                        {testimonial.client_business}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             </motion.div>
           ))}
         </div>
-
       </div>
     </section>
   );

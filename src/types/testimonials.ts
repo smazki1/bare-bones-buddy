@@ -1,13 +1,11 @@
 export interface Testimonial {
   id: string;
-  business_name: string;
-  category: string;
-  image_url: string;
-  link_instagram?: string | null;
-  link_facebook?: string | null;
-  link_x?: string | null;
-  enabled: boolean;
-  display_order: number;
+  client_name: string;
+  client_business?: string;
+  content: string;
+  rating: number;
+  is_featured: boolean;
+  order_index: number;
   created_at: string;
   updated_at: string;
 }
