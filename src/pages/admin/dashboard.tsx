@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
-import { Image, Tag, MessageSquare, HelpCircle, Users, FileText, Settings } from 'lucide-react';
+import { Image, Tag, MessageSquare, HelpCircle, Users, FileText } from 'lucide-react';
 
 interface DashboardStats {
   projects: number;
@@ -57,10 +57,10 @@ export default function AdminDashboard() {
   const statCards = [
     { title: 'פרויקטים', value: stats.projects, icon: Image, href: '/admin/projects' },
     { title: 'קטגוריות', value: stats.categories, icon: Tag, href: '/admin/categories' },
-    { title: 'שירותים', value: stats.services, icon: Settings, href: '/admin/services' },
     { title: 'המלצות לקוחות', value: stats.testimonials, icon: MessageSquare, href: '/admin/testimonials' },
     { title: 'שאלות ותשובות', value: stats.faq, icon: HelpCircle, href: '/admin/faq' },
     { title: 'לקוחות', value: stats.clients, icon: Users, href: '/admin/clients' },
+    { title: 'שירותים', value: stats.services, icon: FileText, href: '/admin/services' }
   ];
 
   return (
