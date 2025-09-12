@@ -69,10 +69,9 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
             width={targetW}
             quality={78}
             priority={index < 6} 
-            className="sm:group-hover:scale-105 transition-transform duration-200"
+            className="w-full h-full object-cover sm:group-hover:scale-105 transition-transform duration-200"
             blur={true}
             showSkeleton={false}
-            objectFit="contain"
           />
 
           {/* Before/After badge */}
