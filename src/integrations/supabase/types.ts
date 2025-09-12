@@ -98,6 +98,42 @@ export type Database = {
         }
         Relationships: []
       }
+      categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon_url: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          order_index: number | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          order_index?: number | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          order_index?: number | null
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_images: {
         Row: {
           category: string
@@ -235,6 +271,39 @@ export type Database = {
         }
         Relationships: []
       }
+      faq: {
+        Row: {
+          answer: string
+          category: string | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          order_index: number | null
+          question: string
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          category?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          order_index?: number | null
+          question: string
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          category?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          order_index?: number | null
+          question?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       landing_texts: {
         Row: {
           id: string
@@ -301,6 +370,45 @@ export type Database = {
         }
         Relationships: []
       }
+      services: {
+        Row: {
+          created_at: string
+          cta_link: string | null
+          cta_text: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          name: string
+          order_index: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          cta_link?: string | null
+          cta_text?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name: string
+          order_index?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          cta_link?: string | null
+          cta_text?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name?: string
+          order_index?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       site_configs: {
         Row: {
           content: Json
@@ -319,45 +427,66 @@ export type Database = {
         }
         Relationships: []
       }
-      testimonials: {
+      site_content: {
         Row: {
-          business_name: string
-          category: string
-          created_at: string | null
-          display_order: number
-          enabled: boolean
+          created_at: string
+          description: string | null
           id: string
-          image_url: string
-          link_facebook: string | null
-          link_instagram: string | null
-          link_x: string | null
-          updated_at: string | null
+          key: string
+          updated_at: string
+          value: string
         }
         Insert: {
-          business_name: string
-          category: string
-          created_at?: string | null
-          display_order?: number
-          enabled?: boolean
+          created_at?: string
+          description?: string | null
           id?: string
-          image_url: string
-          link_facebook?: string | null
-          link_instagram?: string | null
-          link_x?: string | null
-          updated_at?: string | null
+          key: string
+          updated_at?: string
+          value: string
         }
         Update: {
-          business_name?: string
-          category?: string
-          created_at?: string | null
-          display_order?: number
-          enabled?: boolean
+          created_at?: string
+          description?: string | null
           id?: string
-          image_url?: string
-          link_facebook?: string | null
-          link_instagram?: string | null
-          link_x?: string | null
-          updated_at?: string | null
+          key?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
+      testimonials: {
+        Row: {
+          client_business: string | null
+          client_name: string
+          content: string
+          created_at: string
+          id: string
+          is_featured: boolean | null
+          order_index: number | null
+          rating: number | null
+          updated_at: string
+        }
+        Insert: {
+          client_business?: string | null
+          client_name: string
+          content: string
+          created_at?: string
+          id?: string
+          is_featured?: boolean | null
+          order_index?: number | null
+          rating?: number | null
+          updated_at?: string
+        }
+        Update: {
+          client_business?: string | null
+          client_name?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_featured?: boolean | null
+          order_index?: number | null
+          rating?: number | null
+          updated_at?: string
         }
         Relationships: []
       }
