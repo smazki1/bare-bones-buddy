@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { uploadSingleImage } from '@/utils/imageProcessing';
 
 interface ImageUploadProps {
   onImageUploaded: (url: string) => void;
@@ -9,6 +10,8 @@ interface ImageUploadProps {
   accept?: string;
   uploadFunction?: (file: File) => Promise<string>;
   className?: string;
+  bucket?: string;
+  folder?: string;
 }
 
 export function ImageUpload({ 
@@ -17,7 +20,9 @@ export function ImageUpload({
   label, 
   accept = "image/*",
   uploadFunction,
-  className = ""
+  className = "",
+  bucket = 'service-images',
+  folder = 'services'
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(currentImageUrl);
@@ -39,7 +44,8 @@ export function ImageUpload({
       if (uploadFunction) {
         uploadedUrl = await uploadFunction(file);
       } else {
-        throw new Error('No upload function provided');
+        // Use default image processing
+        uploadedUrl = await uploadSingleImage(file, bucket, folder);
       }
       
       // Clean up preview URL
