@@ -19,20 +19,44 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
-      if (error) throw error;
-      navigate('/admin');
+      if (error) {
+        console.error('Login error:', error);
+        let errorMessage = 'אנא נסה שנית';
+        
+        if (error.message.includes('Invalid login credentials')) {
+          errorMessage = 'אימייל או סיסמה שגויים';
+        } else if (error.message.includes('Email not confirmed')) {
+          errorMessage = 'יש לאמת את האימייל';
+        } else if (error.message.includes('Too many requests')) {
+          errorMessage = 'יותר מדי ניסיונות התחברות. נסה שוב מאוחר יותר';
+        }
+        
+        toast({
+          title: 'שגיאה בהתחברות',
+          description: errorMessage,
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      if (data.user) {
+        // Wait a moment for the auth state to update
+        setTimeout(() => {
+          navigate('/admin/dashboard');
+        }, 1000);
+      }
     } catch (error: any) {
+      console.error('Login error:', error);
       toast({
         title: 'שגיאה בהתחברות',
-        description: error.message || 'אנא נסה שנית',
+        description: 'בעיה ברשת או בשרת. אנא נסה שנית',
         variant: 'destructive'
       });
-      console.error('Login error:', error);
     } finally {
       setLoading(false);
     }

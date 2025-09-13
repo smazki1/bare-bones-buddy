@@ -58,8 +58,15 @@ export const useSupabaseAuth = () => {
         .rpc('get_admin_user', { user_id_param: userId })
         .maybeSingle();
 
-      if (error) throw error;
-      setIsAdmin(!!data && (data as any).user_id === userId);
+      if (error) {
+        console.error('Admin status check error:', error);
+        setIsAdmin(false);
+        return;
+      }
+      
+      const isAdminUser = !!data && (data as any).user_id === userId;
+      console.log('Admin status for user', userId, ':', isAdminUser);
+      setIsAdmin(isAdminUser);
     } catch (error) {
       console.error('Error checking admin status:', error);
       setIsAdmin(false);
