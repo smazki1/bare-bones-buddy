@@ -20,6 +20,8 @@ export default function AdminLogin() {
     const adminPassword = 'FoodVision2025!';
 
     try {
+      console.log('Attempting to sign up with:', adminEmail);
+      
       const { data, error } = await supabase.auth.signUp({
         email: adminEmail,
         password: adminPassword,
@@ -28,30 +30,43 @@ export default function AdminLogin() {
         }
       });
 
+      console.log('Signup response:', { data, error });
+
       if (error) {
         console.error('Signup error:', error);
+        
+        // Handle specific error cases
+        let errorMessage = error.message;
+        if (error.message.includes('User already registered')) {
+          errorMessage = 'Admin account already exists! Try logging in directly.';
+          setEmail(adminEmail);
+          setPassword(adminPassword);
+        }
+        
         toast({
-          title: 'שגיאה בהרשמה',
-          description: error.message,
-          variant: 'destructive'
+          title: 'Sign-up Status',
+          description: errorMessage,
+          variant: error.message.includes('User already registered') ? 'default' : 'destructive'
         });
         return;
       }
 
-      toast({
-        title: 'נרשמת בהצלחה!',
-        description: 'עכשיו תוכל להיכנס עם הפרטים',
-      });
-      
-      // Auto-fill the form
-      setEmail(adminEmail);
-      setPassword(adminPassword);
+      if (data.user) {
+        toast({
+          title: 'Account Created Successfully!',
+          description: 'You can now login with the credentials below.',
+        });
+        
+        // Auto-fill the form
+        setEmail(adminEmail);
+        setPassword(adminPassword);
+      }
       
     } catch (error: any) {
       console.error('Signup error:', error);
       toast({
-        title: 'שגיאה בהרשמה',
-        description: 'אנא נסה שנית',
+        title: 'Sign-up Error',
+        description: 'Network or server issue. Please try again.',
         variant: 'destructive'
       });
     } finally {
