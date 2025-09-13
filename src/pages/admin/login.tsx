@@ -24,6 +24,16 @@ export default function AdminLogin() {
   }, [user, isAdmin, isLoading, navigate]);
 
   const handleSignUp = async () => {
+    // Prevent signup if user is already authenticated
+    if (user && isAdmin) {
+      toast({
+        title: 'Already Logged In',
+        description: 'Redirecting to dashboard...',
+      });
+      navigate('/admin/dashboard');
+      return;
+    }
+
     setLoading(true);
     const adminEmail = 'admin@foodvision.com';
     const adminPassword = 'FoodVision2025!';
