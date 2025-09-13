@@ -9,14 +9,17 @@ export const useSupabaseAuth = () => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    let adminCheckInProgress = false;
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Check admin status when session changes
-        if (session?.user) {
+        // Check admin status when session changes (avoid duplicate calls)
+        if (session?.user && !adminCheckInProgress) {
+          adminCheckInProgress = true;
           setTimeout(async () => {
             await checkAdminStatus(session.user.id);
             // Link admin account by calling function
@@ -25,9 +28,11 @@ export const useSupabaseAuth = () => {
             } catch (e) {
               console.warn('Admin linking failed:', e);
             }
+            adminCheckInProgress = false;
           }, 0);
-        } else {
+        } else if (!session?.user) {
           setIsAdmin(false);
+          adminCheckInProgress = false;
         }
         
         setIsLoading(false);
@@ -39,9 +44,11 @@ export const useSupabaseAuth = () => {
       setSession(session);
       setUser(session?.user ?? null);
       
-      if (session?.user) {
-        setTimeout(() => {
-          checkAdminStatus(session.user.id);
+      if (session?.user && !adminCheckInProgress) {
+        adminCheckInProgress = true;
+        setTimeout(async () => {
+          await checkAdminStatus(session.user.id);
+          adminCheckInProgress = false;
         }, 0);
       }
       
