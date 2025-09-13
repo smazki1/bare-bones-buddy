@@ -14,6 +14,51 @@ export default function AdminLogin() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const handleSignUp = async () => {
+    setLoading(true);
+    const adminEmail = 'admin@foodvision.com';
+    const adminPassword = 'FoodVision2025!';
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: adminEmail,
+        password: adminPassword,
+        options: {
+          emailRedirectTo: `${window.location.origin}/admin/dashboard`
+        }
+      });
+
+      if (error) {
+        console.error('Signup error:', error);
+        toast({
+          title: 'שגיאה בהרשמה',
+          description: error.message,
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      toast({
+        title: 'נרשמת בהצלחה!',
+        description: 'עכשיו תוכל להיכנס עם הפרטים',
+      });
+      
+      // Auto-fill the form
+      setEmail(adminEmail);
+      setPassword(adminPassword);
+      
+    } catch (error: any) {
+      console.error('Signup error:', error);
+      toast({
+        title: 'שגיאה בהרשמה',
+        description: 'אנא נסה שנית',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -116,10 +161,23 @@ export default function AdminLogin() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-secondary hover:bg-secondary/90 font-assistant"
+                className="w-full bg-secondary hover:bg-secondary/90 font-assistant mb-4"
               >
                 {loading ? 'מתחבר...' : 'התחבר'}
               </Button>
+              
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground mb-2">אין לך חשבון אדמין?</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleSignUp}
+                  disabled={loading}
+                  className="w-full font-assistant"
+                >
+                  צור חשבון אדמין חדש
+                </Button>
+              </div>
             </form>
           </CardContent>
         </Card>
