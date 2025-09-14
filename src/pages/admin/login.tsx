@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,99 +8,50 @@ import { useToast } from '@/hooks/use-toast';
 import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 
 export default function AdminLogin() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('admin@foodvision.com');
+  const [password, setPassword] = useState('FoodVision2025!');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, isAdmin, isLoading } = useSupabaseAuth();
+  const { user, isAdmin, isLoading, signIn, signUp } = useSupabaseAuth();
 
-  // Redirect if already authenticated
+  // Single redirect effect - only runs when auth state is determined
   useEffect(() => {
     if (!isLoading && user && isAdmin) {
-      navigate('/admin/dashboard');
+      navigate('/admin/dashboard', { replace: true });
     }
   }, [user, isAdmin, isLoading, navigate]);
 
-  const handleSignUp = async () => {
-    // Prevent signup if user is already authenticated
-    if (user && isAdmin) {
-      toast({
-        title: 'Already Logged In',
-        description: 'Redirecting to dashboard...',
-      });
-      navigate('/admin/dashboard');
-      return;
-    }
+  // Show loading while auth is being determined
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground font-open-sans">בודק הרשאות...</p>
+        </div>
+      </div>
+    );
+  }
 
-    setLoading(true);
-    const adminEmail = 'admin@foodvision.com';
-    const adminPassword = 'FoodVision2025!';
-
-    try {
-      console.log('Attempting to sign up with:', adminEmail);
-      
-      const { data, error } = await supabase.auth.signUp({
-        email: adminEmail,
-        password: adminPassword,
-        options: {
-          emailRedirectTo: `${window.location.origin}/admin/dashboard`
-        }
-      });
-
-      console.log('Signup response:', { data, error });
-
-      if (error) {
-        console.error('Signup error:', error);
-        
-        // Handle specific error cases
-        let errorMessage = error.message;
-        if (error.message.includes('User already registered')) {
-          errorMessage = 'Admin account already exists! Try logging in directly.';
-          setEmail(adminEmail);
-          setPassword(adminPassword);
-        }
-        
-        toast({
-          title: 'Sign-up Status',
-          description: errorMessage,
-          variant: error.message.includes('User already registered') ? 'default' : 'destructive'
-        });
-        return;
-      }
-
-      if (data.user) {
-        toast({
-          title: 'Account Created Successfully!',
-          description: 'You can now login with the credentials below.',
-        });
-        
-        // Auto-fill the form
-        setEmail(adminEmail);
-        setPassword(adminPassword);
-      }
-      
-    } catch (error: any) {
-      console.error('Signup error:', error);
-      toast({
-        title: 'Sign-up Error',
-        description: 'Network or server issue. Please try again.',
-        variant: 'destructive'
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  // If already authenticated, don't show the form
+  if (user && isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground font-open-sans">מעביר לדשבורד...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
+      const { error } = await signIn(email, password);
 
       if (error) {
         console.error('Login error:', error);
@@ -120,19 +70,48 @@ export default function AdminLogin() {
           description: errorMessage,
           variant: 'destructive'
         });
-        return;
-      }
-
-      if (data.user) {
-        // Wait a moment for the auth state to update
-        setTimeout(() => {
-          navigate('/admin/dashboard');
-        }, 1000);
       }
     } catch (error: any) {
       console.error('Login error:', error);
       toast({
         title: 'שגיאה בהתחברות',
+        description: 'בעיה ברשת או בשרת. אנא נסה שנית',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignUp = async () => {
+    setLoading(true);
+
+    try {
+      const { error } = await signUp(email, password);
+
+      if (error) {
+        console.error('Signup error:', error);
+        
+        let errorMessage = error.message;
+        if (error.message.includes('User already registered')) {
+          errorMessage = 'החשבון כבר קיים! נסה להתחבר.';
+        }
+        
+        toast({
+          title: 'הודעת הרשמה',
+          description: errorMessage,
+          variant: error.message.includes('User already registered') ? 'default' : 'destructive'
+        });
+      } else {
+        toast({
+          title: 'החשבון נוצר בהצלחה!',
+          description: 'כעת תוכל להתחבר עם הפרטים למטה.',
+        });
+      }
+    } catch (error: any) {
+      console.error('Signup error:', error);
+      toast({
+        title: 'שגיאה בהרשמה',
         description: 'בעיה ברשת או בשרת. אנא נסה שנית',
         variant: 'destructive'
       });

@@ -8,10 +8,10 @@ export default function AdminIndex() {
 
   useEffect(() => {
     if (!isLoading) {
-      if (!user || !isAdmin) {
-        navigate('/admin/login');
+      if (user && isAdmin) {
+        navigate('/admin/dashboard', { replace: true });
       } else {
-        navigate('/admin/dashboard');
+        navigate('/admin/login', { replace: true });
       }
     }
   }, [user, isAdmin, isLoading, navigate]);
