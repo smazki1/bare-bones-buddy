@@ -46,6 +46,13 @@ export const useSupabaseAuth = () => {
     return await checkAdminStatus(userId);
   };
 
+  const isEmailAllowlisted = (email?: string | null): boolean => {
+    if (!email) return false;
+    const csv = (import.meta as any)?.env?.VITE_ADMIN_ALLOW_EMAILS as string | undefined;
+    if (!csv || typeof csv !== 'string') return false;
+    return csv.split(',').map(s => s.trim().toLowerCase()).includes(email.toLowerCase());
+  };
+
   useEffect(() => {
     let mounted = true;
 
@@ -68,6 +75,9 @@ export const useSupabaseAuth = () => {
             const allowed = ['admin@foodvision.com'];
             if (isLocal && email && allowed.includes(email)) {
               console.warn('[Auth] Local admin bootstrap override enabled for', email);
+              setIsAdmin(true);
+            } else if (isEmailAllowlisted(email)) {
+              console.warn('[Auth] Admin allowlist override enabled for', email);
               setIsAdmin(true);
             }
           }
@@ -99,6 +109,9 @@ export const useSupabaseAuth = () => {
             const allowed = ['admin@foodvision.com'];
             if (isLocal && email && allowed.includes(email)) {
               console.warn('[Auth] Local admin bootstrap override enabled for', email);
+              setIsAdmin(true);
+            } else if (isEmailAllowlisted(email)) {
+              console.warn('[Auth] Admin allowlist override enabled for', email);
               setIsAdmin(true);
             }
           }
