@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { Users, MessageSquare, HelpCircle, FileText } from 'lucide-react';
+import { Users, MessageSquare, HelpCircle, FileText, Plus, Settings, BarChart3 } from 'lucide-react';
 
 interface DashboardStats {
   testimonials: number;
   clients: number;
   faq: number;
   services: number;
+  loading: boolean;
+  error: string | null;
 }
 
 export default function AdminDashboard() {
@@ -16,9 +20,10 @@ export default function AdminDashboard() {
     testimonials: 0,
     clients: 0,
     faq: 0,
-    services: 0
+    services: 0,
+    loading: true,
+    error: null
   });
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchStats();
@@ -26,6 +31,8 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
+      setStats(prev => ({ ...prev, loading: true, error: null }));
+      
       const [testimonials, clients, faq, services] = await Promise.all([
         supabase.from('testimonials').select('*', { count: 'exact', head: true }),
         supabase.from('clients').select('*', { count: 'exact', head: true }),
@@ -33,69 +40,203 @@ export default function AdminDashboard() {
         supabase.from('services').select('*', { count: 'exact', head: true })
       ]);
 
+      // Check for errors in any of the queries
+      const errors = [testimonials.error, clients.error, faq.error, services.error].filter(Boolean);
+      if (errors.length > 0) {
+        throw new Error(`Failed to fetch stats: ${errors[0]?.message}`);
+      }
+
       setStats({
         testimonials: testimonials.count || 0,
         clients: clients.count || 0,
         faq: faq.count || 0,
-        services: services.count || 0
+        services: services.count || 0,
+        loading: false,
+        error: null
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching stats:', error);
-    } finally {
-      setLoading(false);
+      setStats(prev => ({
+        ...prev,
+        loading: false,
+        error: error.message || 'שגיאה בטעינת הנתונים'
+      }));
     }
   };
 
   const statCards = [
-    { title: 'לקוחות', value: stats.clients, icon: Users },
-    { title: 'המלצות', value: stats.testimonials, icon: MessageSquare },
-    { title: 'שאלות ותשובות', value: stats.faq, icon: HelpCircle },
-    { title: 'שירותים', value: stats.services, icon: FileText }
+    { 
+      title: 'לקוחות', 
+      value: stats.clients, 
+      icon: Users, 
+      href: '/admin/clients',
+      description: 'סה"כ לקוחות רשומים'
+    },
+    { 
+      title: 'המלצות', 
+      value: stats.testimonials, 
+      icon: MessageSquare, 
+      href: '/admin/testimonials',
+      description: 'המלצות פעילות'
+    },
+    { 
+      title: 'שאלות ותשובות', 
+      value: stats.faq, 
+      icon: HelpCircle, 
+      href: '/admin/faq',
+      description: 'שאלות נפוצות'
+    },
+    { 
+      title: 'שירותים', 
+      value: stats.services, 
+      icon: FileText, 
+      href: '/admin/settings',
+      description: 'שירותים זמינים'
+    }
   ];
+
+  const quickLinks = [
+    {
+      title: 'הוסף לקוח חדש',
+      description: 'רישום לקוח חדש במערכת',
+      href: '/admin/clients',
+      icon: Plus
+    },
+    {
+      title: 'נהל המלצות',
+      description: 'הוסף והסר המלצות לקוחות',
+      href: '/admin/testimonials',
+      icon: MessageSquare
+    },
+    {
+      title: 'עדכן שאלות נפוצות',
+      description: 'ערוך וסדר שאלות ותשובות',
+      href: '/admin/faq',
+      icon: HelpCircle
+    },
+    {
+      title: 'הגדרות מערכת',
+      description: 'הגדרות כלליות ותצורה',
+      href: '/admin/settings',
+      icon: Settings
+    }
+  ];
+
+  if (stats.error) {
+    return (
+      <AdminLayout title="לוח בקרה">
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <BarChart3 className="w-12 h-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold mb-2">שגיאה בטעינת הנתונים</h3>
+            <p className="text-muted-foreground text-center mb-4">{stats.error}</p>
+            <Button onClick={fetchStats} variant="outline">
+              נסה שוב
+            </Button>
+          </CardContent>
+        </Card>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout title="לוח בקרה">
       <div className="space-y-6">
+        {/* Header */}
         <div>
-          <h2 className="text-xl font-semibold text-foreground font-assistant">סקירה כללית</h2>
+          <h2 className="text-2xl font-bold text-foreground font-assistant">סקירה כללית</h2>
           <p className="text-muted-foreground font-open-sans">
-            סטטיסטיקות מערכת הניהול
+            סטטיסטיקות ופעולות מהירות במערכת הניהול
           </p>
         </div>
 
+        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {statCards.map((card) => {
             const IconComponent = card.icon;
             return (
-              <Card key={card.title}>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium font-open-sans flex items-center gap-2">
-                    <IconComponent className="h-4 w-4 text-primary" />
-                    {card.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold font-assistant">
-                    {loading ? '...' : card.value}
-                  </div>
-                </CardContent>
-              </Card>
+              <Link key={card.title} to={card.href}>
+                <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium font-open-sans flex items-center gap-2">
+                      <IconComponent className="h-4 w-4 text-primary" />
+                      {card.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold font-assistant mb-1">
+                      {stats.loading ? (
+                        <div className="animate-pulse bg-muted h-8 w-12 rounded"></div>
+                      ) : (
+                        card.value
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground font-open-sans">
+                      {card.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
             );
           })}
         </div>
 
+        {/* Quick Actions */}
         <Card>
           <CardHeader>
-            <CardTitle className="font-assistant">ברוכים הבאים למערכת הניהול</CardTitle>
+            <CardTitle className="font-assistant flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              פעולות מהירות
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-muted-foreground font-open-sans">
-              <p>השתמשו בתפריט הצד כדי לנווט בין חלקי המערכת השונים:</p>
-              <ul className="list-disc list-inside mt-2 space-y-1">
-                <li>ניהול לקוחות - הוספה ועריכה של פרטי לקוחות</li>
-                <li>ניהול המלצות - הוספה ועריכה של המלצות לקוחות</li>
-                <li>הגדרות - הגדרות כלליות של המערכת</li>
-              </ul>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {quickLinks.map((link) => {
+                const IconComponent = link.icon;
+                return (
+                  <Link key={link.title} to={link.href}>
+                    <div className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
+                      <div className="flex items-center gap-3 mb-2">
+                        <IconComponent className="h-5 w-5 text-primary" />
+                        <h4 className="font-medium font-assistant">{link.title}</h4>
+                      </div>
+                      <p className="text-sm text-muted-foreground font-open-sans">
+                        {link.description}
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Welcome Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-assistant">ברוכים הבאים למערכת הניהול של Food Vision</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-muted-foreground font-open-sans space-y-2">
+              <p>מערכת ניהול מתקדמת לניהול לקוחות ותוכן האתר.</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div>
+                  <h5 className="font-medium text-foreground mb-2">ניהול לקוחות</h5>
+                  <ul className="text-sm space-y-1">
+                    <li>• הוספה ועריכה של פרטי לקוחות</li>
+                    <li>• מעקב אחר סטטוס לקוחות</li>
+                    <li>• ניהול פרטי התקשרות</li>
+                  </ul>
+                </div>
+                <div>
+                  <h5 className="font-medium text-foreground mb-2">ניהול תוכן</h5>
+                  <ul className="text-sm space-y-1">
+                    <li>• ניהול המלצות לקוחות</li>
+                    <li>• עדכון שאלות ותשובות</li>
+                    <li>• הגדרות מערכת כלליות</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
