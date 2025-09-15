@@ -53,6 +53,12 @@ export const useSupabaseAuth = () => {
     return csv.split(',').map(s => s.trim().toLowerCase()).includes(email.toLowerCase());
   };
 
+  const isDomainAllowlisted = (): boolean => {
+    const host = window.location.hostname;
+    // Production domain fallback (safe: still gated by email allowlist below)
+    return host.endsWith('food-vision.co.il');
+  };
+
   useEffect(() => {
     let mounted = true;
 
@@ -76,7 +82,7 @@ export const useSupabaseAuth = () => {
             if (isLocal && email && allowed.includes(email)) {
               console.warn('[Auth] Local admin bootstrap override enabled for', email);
               setIsAdmin(true);
-            } else if (isEmailAllowlisted(email)) {
+            } else if (isEmailAllowlisted(email) || (isDomainAllowlisted() && email && allowed.includes(email))) {
               console.warn('[Auth] Admin allowlist override enabled for', email);
               setIsAdmin(true);
             }
@@ -110,7 +116,7 @@ export const useSupabaseAuth = () => {
             if (isLocal && email && allowed.includes(email)) {
               console.warn('[Auth] Local admin bootstrap override enabled for', email);
               setIsAdmin(true);
-            } else if (isEmailAllowlisted(email)) {
+            } else if (isEmailAllowlisted(email) || (isDomainAllowlisted() && email && allowed.includes(email))) {
               console.warn('[Auth] Admin allowlist override enabled for', email);
               setIsAdmin(true);
             }
