@@ -9,7 +9,8 @@ import {
   Settings, 
   LogOut, 
   HelpCircle,
-  Menu
+  Menu,
+  Image
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
@@ -30,6 +31,7 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
 
   const navigationItems = [
     { name: 'סקירה כללית', href: '/admin/dashboard', icon: Home },
+    { name: 'פרויקטים', href: '/admin/projects', icon: Image },
     { name: 'לקוחות', href: '/admin/clients', icon: Users },
     { name: 'המלצות', href: '/admin/testimonials', icon: MessageSquare },
     { name: 'שאלות ותשובות', href: '/admin/faq', icon: HelpCircle },

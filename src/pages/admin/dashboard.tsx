@@ -4,13 +4,14 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { Users, MessageSquare, HelpCircle, FileText, Plus, Settings, BarChart3 } from 'lucide-react';
+import { Users, MessageSquare, HelpCircle, FileText, Plus, Settings, BarChart3, Image } from 'lucide-react';
 
 interface DashboardStats {
   testimonials: number;
   clients: number;
   faq: number;
   services: number;
+  projects: number;
   loading: boolean;
   error: string | null;
 }
@@ -21,6 +22,7 @@ export default function AdminDashboard() {
     clients: 0,
     faq: 0,
     services: 0,
+    projects: 0,
     loading: true,
     error: null
   });
@@ -33,15 +35,16 @@ export default function AdminDashboard() {
     try {
       setStats(prev => ({ ...prev, loading: true, error: null }));
       
-      const [testimonials, clients, faq, services] = await Promise.all([
+      const [testimonials, clients, faq, services, projects] = await Promise.all([
         supabase.from('testimonials').select('*', { count: 'exact', head: true }),
         supabase.from('clients').select('*', { count: 'exact', head: true }),
         supabase.from('faq').select('*', { count: 'exact', head: true }),
-        supabase.from('services').select('*', { count: 'exact', head: true })
+        supabase.from('services').select('*', { count: 'exact', head: true }),
+        supabase.from('projects').select('*', { count: 'exact', head: true })
       ]);
 
       // Check for errors in any of the queries
-      const errors = [testimonials.error, clients.error, faq.error, services.error].filter(Boolean);
+      const errors = [testimonials.error, clients.error, faq.error, services.error, projects.error].filter(Boolean);
       if (errors.length > 0) {
         throw new Error(`Failed to fetch stats: ${errors[0]?.message}`);
       }
@@ -51,6 +54,7 @@ export default function AdminDashboard() {
         clients: clients.count || 0,
         faq: faq.count || 0,
         services: services.count || 0,
+        projects: projects.count || 0,
         loading: false,
         error: null
       });
@@ -65,6 +69,13 @@ export default function AdminDashboard() {
   };
 
   const statCards = [
+    { 
+      title: 'פרויקטים',
+      value: stats.projects,
+      icon: Image, 
+      href: '/admin/projects',
+      description: 'פרויקטים לפני ואחרי'
+    },
     { 
       title: 'לקוחות', 
       value: stats.clients, 
@@ -85,21 +96,14 @@ export default function AdminDashboard() {
       icon: HelpCircle, 
       href: '/admin/faq',
       description: 'שאלות נפוצות'
-    },
-    { 
-      title: 'שירותים', 
-      value: stats.services, 
-      icon: FileText, 
-      href: '/admin/settings',
-      description: 'שירותים זמינים'
     }
   ];
 
   const quickLinks = [
     {
-      title: 'הוסף לקוח חדש',
-      description: 'רישום לקוח חדש במערכת',
-      href: '/admin/clients',
+      title: 'הוסף פרויקט חדש',
+      description: 'העלה תמונות לפני ואחרי חדשות',
+      href: '/admin/projects',
       icon: Plus
     },
     {
@@ -153,13 +157,13 @@ export default function AdminDashboard() {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {statCards.map((card) => {
-            const IconComponent = card.icon;
+            const Icon = card.icon;
             return (
               <Link key={card.title} to={card.href}>
                 <Card className="hover:shadow-md transition-shadow cursor-pointer">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm font-medium font-open-sans flex items-center gap-2">
-                      <IconComponent className="h-4 w-4 text-primary" />
+                      <Icon className="h-4 w-4 text-primary" />
                       {card.title}
                     </CardTitle>
                   </CardHeader>
