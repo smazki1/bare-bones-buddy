@@ -17,6 +17,9 @@ import AdminTestimonials from "./pages/admin/testimonials";
 import AdminSettings from "./pages/admin/settings";
 import AdminFAQ from "./pages/admin/faq";
 import AdminProjects from "./pages/admin/projects";
+import AdminCategories from "./pages/admin/categories";
+import AdminServices from "./pages/admin/services";
+import AdminContent from "./pages/admin/content";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import { RequireAdmin } from "@/components/admin/RequireAdmin";
@@ -43,9 +46,12 @@ const App = () => (
           <Route element={<RequireAdmin />}> 
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/projects" element={<AdminProjects />} />
+            <Route path="/admin/categories" element={<AdminCategories />} />
+            <Route path="/admin/services" element={<AdminServices />} />
             <Route path="/admin/clients" element={<AdminClients />} />
             <Route path="/admin/testimonials" element={<AdminTestimonials />} />
             <Route path="/admin/faq" element={<AdminFAQ />} />
+            <Route path="/admin/content" element={<AdminContent />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
           </Route>
 
