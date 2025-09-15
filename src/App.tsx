@@ -13,6 +13,7 @@ import AdminIndex from "./pages/admin/index";
 import AdminLogin from "./pages/admin/login";
 import AdminDashboard from "./pages/admin/dashboard";
 
+import AdminCategories from "./pages/admin/categories";
 import AdminSolutions from "./pages/admin/solutions";
 import AdminVisualSolutions from "./pages/admin/visualSolutions";
 import AdminMarkets from "./pages/admin/markets";
@@ -43,8 +44,9 @@ const App = () => (
 
           <Route element={<RequireAdmin />}> 
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/categories" element={<AdminCategories />} />
             <Route path="/admin/solutions" element={<AdminSolutions />} />
-            <Route path="/admin/visualSolutions" element={<AdminVisualSolutions />} />
+            <Route path="/admin/visual-solutions" element={<AdminVisualSolutions />} />
             <Route path="/admin/markets" element={<AdminMarkets />} />
             <Route path="/admin/clients" element={<AdminClients />} />
             <Route path="/admin/testimonials" element={<AdminTestimonials />} />

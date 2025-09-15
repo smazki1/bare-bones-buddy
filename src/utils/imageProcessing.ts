@@ -71,6 +71,34 @@ export async function uploadAndProcessImage(
   }
 }
 
+// Specialized function for project images (before/after)
+export async function uploadProjectImages(
+  beforeImage: File,
+  afterImage: File
+): Promise<{
+  beforeUrl: string;
+  afterUrl: string;
+  afterThumbUrl: string;
+}> {
+  console.log('Uploading project images (before/after)');
+
+  const beforeResult = await uploadAndProcessImage(beforeImage, 'project-images', 'before');
+  const afterResult = await uploadAndProcessImage(afterImage, 'project-images', 'after');
+
+  return {
+    beforeUrl: beforeResult.original,
+    afterUrl: afterResult.large,
+    afterThumbUrl: afterResult.thumbnail
+  };
+}
+
+// Function for category icons
+export async function uploadCategoryIcon(file: File): Promise<string> {
+  console.log('Uploading category icon');
+  const result = await uploadAndProcessImage(file, 'category-icons', 'icons');
+  return result.thumbnail; // Use thumbnail size for icons
+}
+
 // Function for service images
 export async function uploadServiceImage(file: File): Promise<string> {
   console.log('Uploading service image');

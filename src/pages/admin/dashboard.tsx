@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
-import { Image, Tag, MessageSquare, HelpCircle, Users, FileText, Settings } from 'lucide-react';
+import { Image, Tag, MessageSquare, HelpCircle, Users, FileText } from 'lucide-react';
 
 interface DashboardStats {
   projects: number;
@@ -30,17 +30,21 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const [testimonials, clients] = await Promise.all([
+      const [projects, categories, services, testimonials, faq, clients] = await Promise.all([
+        supabase.from('projects').select('*', { count: 'exact', head: true }),
+        supabase.from('categories').select('*', { count: 'exact', head: true }),
+        supabase.from('services').select('*', { count: 'exact', head: true }),
         supabase.from('testimonials').select('*', { count: 'exact', head: true }),
+        supabase.from('faq').select('*', { count: 'exact', head: true }),
         supabase.from('clients').select('*', { count: 'exact', head: true })
       ]);
 
       setStats({
-        projects: 0,
-        categories: 0,
-        services: 0,
+        projects: projects.count || 0,
+        categories: categories.count || 0,
+        services: services.count || 0,
         testimonials: testimonials.count || 0,
-        faq: 0,
+        faq: faq.count || 0,
         clients: clients.count || 0
       });
     } catch (error) {
@@ -51,11 +55,12 @@ export default function AdminDashboard() {
   };
 
   const statCards = [
-    { title: 'פתרונות עסקיים', value: 0, icon: Settings, href: '/admin/solutions' },
-    { title: 'פתרונות ויזואליים', value: 0, icon: Image, href: '/admin/visualSolutions' },
-    { title: 'שווקי מזון', value: 0, icon: Tag, href: '/admin/markets' },
+    { title: 'פרויקטים', value: stats.projects, icon: Image, href: '/admin/projects' },
+    { title: 'קטגוריות', value: stats.categories, icon: Tag, href: '/admin/categories' },
     { title: 'המלצות לקוחות', value: stats.testimonials, icon: MessageSquare, href: '/admin/testimonials' },
-    { title: 'לקוחות', value: stats.clients, icon: Users, href: '/admin/clients' }
+    { title: 'שאלות ותשובות', value: stats.faq, icon: HelpCircle, href: '/admin/faq' },
+    { title: 'לקוחות', value: stats.clients, icon: Users, href: '/admin/clients' },
+    { title: 'שירותים', value: stats.services, icon: FileText, href: '/admin/services' }
   ];
 
   return (

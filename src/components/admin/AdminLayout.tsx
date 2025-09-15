@@ -43,11 +43,13 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
 
   const navigation = [
     { name: 'סקירה כללית', href: '/admin/dashboard', icon: Home },
-    { name: 'פתרונות עסקיים', href: '/admin/solutions', icon: Settings },
-    { name: 'פתרונות ויזואליים', href: '/admin/visualSolutions', icon: Image },
-    { name: 'שווקי מזון', href: '/admin/markets', icon: Tag },
+    { name: 'ניהול פרויקטים', href: '/admin/projects', icon: Image },
+    { name: 'ניהול קטגוריות', href: '/admin/categories', icon: Tag },
+    { name: 'ניהול שירותים', href: '/admin/services', icon: Settings },
     { name: 'המלצות לקוחות', href: '/admin/testimonials', icon: MessageSquare },
+    { name: 'שאלות ותשובות', href: '/admin/faq', icon: HelpCircle },
     { name: 'ניהול לקוחות', href: '/admin/clients', icon: Users },
+    { name: 'עריכת תכנים', href: '/admin/content', icon: FileText },
   ];
 
   if (isLoading) {
