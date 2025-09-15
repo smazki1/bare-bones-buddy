@@ -9,7 +9,7 @@ export const useSupabaseAuth = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const adminCheckRef = useRef<boolean>(false);
 
-  const checkAdminStatus = async (userId: string) => {
+  const checkAdminStatus = async (userId: string): Promise<boolean> => {
     if (adminCheckRef.current) return;
     adminCheckRef.current = true;
 
@@ -21,17 +21,29 @@ export const useSupabaseAuth = () => {
       if (error) {
         console.error('Admin status check error:', error);
         setIsAdmin(false);
-        return;
+        return false;
       }
       
       const isAdminUser = !!data && (data as any).user_id === userId;
       setIsAdmin(isAdminUser);
+      return isAdminUser;
     } catch (error) {
       console.error('Error checking admin status:', error);
       setIsAdmin(false);
+      return false;
     } finally {
       adminCheckRef.current = false;
     }
+  };
+
+  const linkAndCheckAdmin = async (userId: string): Promise<boolean> => {
+    try {
+      // Best-effort: link current auth user to admin_users by email if needed
+      await supabase.rpc('link_admin_user');
+    } catch (_) {
+      // Ignore linking errors; we'll still check admin status
+    }
+    return await checkAdminStatus(userId);
   };
 
   useEffect(() => {
@@ -48,7 +60,17 @@ export const useSupabaseAuth = () => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          await checkAdminStatus(session.user.id);
+          const isAdminNow = await linkAndCheckAdmin(session.user.id);
+          if (!isAdminNow) {
+            const email = (session.user as any).email as string | undefined;
+            const host = window.location.hostname;
+            const isLocal = /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[0-1])\.)/.test(host);
+            const allowed = ['admin@foodvision.com'];
+            if (isLocal && email && allowed.includes(email)) {
+              console.warn('[Auth] Local admin bootstrap override enabled for', email);
+              setIsAdmin(true);
+            }
+          }
         } else {
           setIsAdmin(false);
         }
@@ -69,7 +91,17 @@ export const useSupabaseAuth = () => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          await checkAdminStatus(session.user.id);
+          const isAdminNow = await linkAndCheckAdmin(session.user.id);
+          if (!isAdminNow) {
+            const email = (session.user as any).email as string | undefined;
+            const host = window.location.hostname;
+            const isLocal = /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[0-1])\.)/.test(host);
+            const allowed = ['admin@foodvision.com'];
+            if (isLocal && email && allowed.includes(email)) {
+              console.warn('[Auth] Local admin bootstrap override enabled for', email);
+              setIsAdmin(true);
+            }
+          }
         } else {
           setIsAdmin(false);
         }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,15 +12,22 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('FoodVision2025!');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { user, isAdmin, isLoading, signIn, signUp } = useSupabaseAuth();
 
   // Single redirect effect - only runs when auth state is determined
   useEffect(() => {
     if (!isLoading && user && isAdmin) {
-      navigate('/admin/dashboard', { replace: true });
+      const dest = (location.state as any)?.from || '/admin/dashboard';
+      navigate(dest, { replace: true });
     }
-  }, [user, isAdmin, isLoading, navigate]);
+  }, [user, isAdmin, isLoading, navigate, location.state]);
+
+  // If already authenticated, don't show the form (avoid double navigation loops)
+  if (!isLoading && user && isAdmin) {
+    return null;
+  }
 
   // Show loading while auth is being determined
   if (isLoading) {

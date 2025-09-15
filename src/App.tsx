@@ -21,6 +21,7 @@ import AdminClients from "./pages/admin/clients";
 import AdminTestimonials from "./pages/admin/testimonials";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import { RequireAdmin } from "@/components/admin/RequireAdmin";
 
 const queryClient = new QueryClient();
 
@@ -40,14 +41,17 @@ const App = () => (
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/admin" element={<AdminIndex />} />
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          
-          <Route path="/admin/categories" element={<AdminCategories />} />
-          <Route path="/admin/solutions" element={<AdminSolutions />} />
-          <Route path="/admin/visual-solutions" element={<AdminVisualSolutions />} />
-          <Route path="/admin/markets" element={<AdminMarkets />} />
-          <Route path="/admin/clients" element={<AdminClients />} />
-          <Route path="/admin/testimonials" element={<AdminTestimonials />} />
+
+          <Route element={<RequireAdmin />}> 
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/categories" element={<AdminCategories />} />
+            <Route path="/admin/solutions" element={<AdminSolutions />} />
+            <Route path="/admin/visual-solutions" element={<AdminVisualSolutions />} />
+            <Route path="/admin/markets" element={<AdminMarkets />} />
+            <Route path="/admin/clients" element={<AdminClients />} />
+            <Route path="/admin/testimonials" element={<AdminTestimonials />} />
+          </Route>
+
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

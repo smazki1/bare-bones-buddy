@@ -29,9 +29,12 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
 
   useEffect(() => {
     if (!isLoading && (!user || !isAdmin)) {
-      navigate('/admin/login');
+      // Prevent redirect loops: only redirect if not already on login
+      if (location.pathname !== '/admin/login') {
+        navigate('/admin/login', { replace: true });
+      }
     }
-  }, [user, isAdmin, isLoading, navigate]);
+  }, [user, isAdmin, isLoading, navigate, location.pathname]);
 
   const handleLogout = async () => {
     await signOut();

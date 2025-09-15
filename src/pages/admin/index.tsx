@@ -7,12 +7,14 @@ export default function AdminIndex() {
   const { user, isAdmin, isLoading } = useSupabaseAuth();
 
   useEffect(() => {
-    if (!isLoading) {
-      if (user && isAdmin) {
-        navigate('/admin/dashboard', { replace: true });
-      } else {
-        navigate('/admin/login', { replace: true });
-      }
+    if (isLoading) return;
+    if (user && isAdmin) {
+      navigate('/admin/dashboard', { replace: true });
+      return;
+    }
+    // Prevent loop by not pushing login if already there
+    if (window.location.pathname !== '/admin/login') {
+      navigate('/admin/login', { replace: true });
     }
   }, [user, isAdmin, isLoading, navigate]);
 

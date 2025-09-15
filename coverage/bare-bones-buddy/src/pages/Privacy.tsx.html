@@ -1,0 +1,289 @@
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Code coverage report for bare-bones-buddy/src/pages/Privacy.tsx</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../../prettify.css" />
+    <link rel="stylesheet" href="../../../base.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="../../../favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+    
+<body>
+<div class='wrapper'>
+    <div class='pad1'>
+        <h1><a href="../../../index.html">All files</a> / <a href="index.html">bare-bones-buddy/src/pages</a> Privacy.tsx</h1>
+        <div class='clearfix'>
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">0% </span>
+                <span class="quiet">Statements</span>
+                <span class='fraction'>0/46</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">0% </span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>0/1</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">0% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>0/1</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">0% </span>
+                <span class="quiet">Lines</span>
+                <span class='fraction'>0/46</span>
+            </div>
+        
+            
+        </div>
+        <p class="quiet">
+            Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+        </p>
+        <template id="filterTemplate">
+            <div class="quiet">
+                Filter:
+                <input type="search" id="fileSearch">
+            </div>
+        </template>
+    </div>
+    <div class='status-line low'></div>
+    <pre><table class="coverage">
+<tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
+<a name='L2'></a><a href='#L2'>2</a>
+<a name='L3'></a><a href='#L3'>3</a>
+<a name='L4'></a><a href='#L4'>4</a>
+<a name='L5'></a><a href='#L5'>5</a>
+<a name='L6'></a><a href='#L6'>6</a>
+<a name='L7'></a><a href='#L7'>7</a>
+<a name='L8'></a><a href='#L8'>8</a>
+<a name='L9'></a><a href='#L9'>9</a>
+<a name='L10'></a><a href='#L10'>10</a>
+<a name='L11'></a><a href='#L11'>11</a>
+<a name='L12'></a><a href='#L12'>12</a>
+<a name='L13'></a><a href='#L13'>13</a>
+<a name='L14'></a><a href='#L14'>14</a>
+<a name='L15'></a><a href='#L15'>15</a>
+<a name='L16'></a><a href='#L16'>16</a>
+<a name='L17'></a><a href='#L17'>17</a>
+<a name='L18'></a><a href='#L18'>18</a>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a>
+<a name='L40'></a><a href='#L40'>40</a>
+<a name='L41'></a><a href='#L41'>41</a>
+<a name='L42'></a><a href='#L42'>42</a>
+<a name='L43'></a><a href='#L43'>43</a>
+<a name='L44'></a><a href='#L44'>44</a>
+<a name='L45'></a><a href='#L45'>45</a>
+<a name='L46'></a><a href='#L46'>46</a>
+<a name='L47'></a><a href='#L47'>47</a>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >import Navigation from '@/components/Navigation';<span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ></span></span></span>
+<span class="cstat-no" title="statement not covered" >import Footer from '@/components/Footer';</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >const Privacy = () =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  return (</span>
+<span class="cstat-no" title="statement not covered" >    &lt;div className="min-h-screen bg-background text-foreground" dir="rtl"&gt;</span>
+<span class="cstat-no" title="statement not covered" >      &lt;Navigation theme="light" /&gt;</span>
+<span class="cstat-no" title="statement not covered" >      &lt;main className="container mx-auto px-4 pt-24 pb-16 max-w-4xl"&gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;h1 className="text-3xl md:text-4xl font-assistant font-bold text-primary mb-2"&gt;מדיניות פרטיות&lt;/h1&gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;p className="text-sm text-muted-foreground mb-6"&gt;עודכן לאחרונה: 3 באוגוסט 2025&lt;/p&gt;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        &lt;section className="space-y-4 font-open-sans leading-8"&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;p&gt;ברוכים הבאים לאתר Food Vision (להלן: "האתר"). האתר מופעל ומנוהל על-ידי AI Master (להלן: "הבעלים"/"המפעיל").&lt;/p&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;p&gt;שמירה על פרטיות המשתמשים הינה ערך מרכזי בפעילות האתר, והאתר מתחייב לעמוד בדרישות חוק הגנת הפרטיות, תשמ"א–1981, תקנות הגנת הפרטיות (אבטחת מידע), תשע"ז–2017, ותיקון 13 לחוק.&lt;/p&gt;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >          &lt;h2 className="text-2xl font-assistant font-semibold mt-8"&gt;1. איזה מידע נאסף באתר?&lt;/h2&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;ul className="list-disc pr-6 space-y-1"&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;li&gt;פרטי יצירת קשר: שם מלא, כתובת דוא"ל, טלפון, וכל פרט נוסף שתבחר למסור בטפסי יצירת הקשר.&lt;/li&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;li&gt;פרטי רכישה: פרטי הזמנה, פרטי התקשרות, ונתוני אמצעי תשלום (המעובדים ישירות על-ידי ספק סליקה מאובטח, ואינם נשמרים באתר).&lt;/li&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;li&gt;פרטי הרשמה לרשימת דיוור: שם ודוא"ל.&lt;/li&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;li&gt;מידע טכני: כתובת IP, סוג דפדפן, מערכת הפעלה, עוגיות ("Cookies"), פרטי גלישה ושימוש באתר.&lt;/li&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;li&gt;נתונים הנמסרים או נאספים דרך אינטגרציה עם רשתות חברתיות.&lt;/li&gt;</span>
+          &lt;/ul&gt;
+&nbsp;
+<span class="cstat-no" title="statement not covered" >          &lt;h2 className="text-2xl font-assistant font-semibold mt-8"&gt;2. מטרות השימוש במידע&lt;/h2&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;ul className="list-disc pr-6 space-y-1"&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;li&gt;מתן שירותי האתר, טיפול בפניות, ניהול וביצוע רכישות.&lt;/li&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;li&gt;משלוח עדכונים, הצעות שיווקיות, דיוור ישיר ומידע מקצועי (בכפוף להסכמת המשתמש).&lt;/li&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;li&gt;שיפור חוויית המשתמש, ניתוח סטטיסטי, ואבטחת המידע.&lt;/li&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;li&gt;עמידה בדרישות כל דין.&lt;/li&gt;</span>
+          &lt;/ul&gt;
+&nbsp;
+<span class="cstat-no" title="statement not covered" >          &lt;h2 className="text-2xl font-assistant font-semibold mt-8"&gt;3. מסירת מידע לצדדים שלישיים&lt;/h2&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;p&gt;מידע אישי מועבר לצדדים שלישיים רק לצורך מתן השירותים (כגון: ספקי סליקה, חברת דיוור, חברות אחסון/אבטחה) – כולם מחויבים לעמוד בדרישות החוק והתקנות. לא יימסר מידע לצדדים שלישיים למטרות שיווק/פרסום ללא הסכמה מפורשת. המידע אינו מועבר לצדדים מחוץ לישראל אלא בהתאם להוראות החוק.&lt;/p&gt;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >          &lt;h2 className="text-2xl font-assistant font-semibold mt-8"&gt;4. אבטחת מידע&lt;/h2&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;p&gt;האתר נוקט באמצעי אבטחה מתקדמים, לרבות הצפנת מידע (SSL), גיבויים תקופתיים, ניהול הרשאות ובקרות גישה. למרות המאמצים, אין אפשרות להבטיח אבטחה מוחלטת של המידע.&lt;/p&gt;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >          &lt;h2 className="text-2xl font-assistant font-semibold mt-8"&gt;5. עוגיות ("Cookies")&lt;/h2&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;p&gt;האתר עושה שימוש בקבצי עוגיות לאיסוף נתונים סטטיסטיים, התאמה אישית של חוויית המשתמש, ולשיפור השירות. המשתמש יכול לבחור לחסום/למחוק עוגיות דרך הגדרות הדפדפן, אך ייתכן שחלק מהשירותים לא יהיו זמינים.&lt;/p&gt;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >          &lt;h2 className="text-2xl font-assistant font-semibold mt-8"&gt;6. דיוור ישיר ועדכון משתמשים&lt;/h2&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;p&gt;שליחת הודעות דיוור ישיר/שיווקי תתבצע רק לאחר קבלת הסכמת המשתמש (opt-in). ניתן לבטל הרשמה בלחיצה אחת בכל דוא"ל שיווקי, או באמצעות פנייה ישירה.&lt;/p&gt;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >          &lt;h2 className="text-2xl font-assistant font-semibold mt-8"&gt;7. זכויות המשתמש&lt;/h2&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;p&gt;כל משתמש זכאי לעיין, לתקן, לעדכן או לבקש מחיקת המידע שמוחזק אודותיו – על-פי הוראות חוק הגנת הפרטיות. בקשות בעניין זה יש להפנות לדוא"ל: info@food-vision.co.il או באמצעות טופס יצירת קשר באתר.&lt;/p&gt;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >          &lt;h2 className="text-2xl font-assistant font-semibold mt-8"&gt;8. שמירת מידע והעברה לחו"ל&lt;/h2&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;p&gt;הנתונים נשמרים בשרתים מאובטחים בישראל או במדינות בעלות הגנת מידע הולמת בלבד. העברת מידע מחוץ לישראל תיעשה רק בהתאם לחוק.&lt;/p&gt;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >          &lt;h2 className="text-2xl font-assistant font-semibold mt-8"&gt;9. שינויים במדיניות הפרטיות&lt;/h2&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;p&gt;האתר רשאי לעדכן מדיניות זו מעת לעת. עדכון מהותי יפורסם ויובלט בעמוד הראשי של האתר. תאריך העדכון האחרון מופיע בראש המסמך.&lt;/p&gt;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >          &lt;h2 className="text-2xl font-assistant font-semibold mt-8"&gt;10. יצירת קשר&lt;/h2&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;p&gt;לשאלות, בקשות, או הערות בעניין פרטיות ואבטחת מידע – ניתן ליצור קשר בדוא"ל: info@food-vision.co.il או בטלפון: +972-52-777-28-07.&lt;/p&gt;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >          &lt;h2 className="text-2xl font-assistant font-semibold mt-8"&gt;אישור המשתמש&lt;/h2&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;p&gt;בשימוש באתר, הנך מאשר כי קראת והבנת את מדיניות הפרטיות ואתה מסכים לתנאיה.&lt;/p&gt;</span>
+        &lt;/section&gt;
+      &lt;/main&gt;
+<span class="cstat-no" title="statement not covered" >      &lt;Footer /&gt;</span>
+    &lt;/div&gt;
+  );
+<span class="cstat-no" title="statement not covered" >};</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >export default Privacy;</span>
+&nbsp;
+&nbsp;
+&nbsp;</pre></td></tr></table></pre>
+
+                <div class='push'></div><!-- for sticky footer -->
+            </div><!-- /wrapper -->
+            <div class='footer quiet pad2 space-top1 center small'>
+                Code coverage generated by
+                <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+                at 2025-09-15T04:45:47.160Z
+            </div>
+        <script src="../../../prettify.js"></script>
+        <script>
+            window.onload = function () {
+                prettyPrint();
+            };
+        </script>
+        <script src="../../../sorter.js"></script>
+        <script src="../../../block-navigation.js"></script>
+    </body>
+</html>
+    
