@@ -330,21 +330,32 @@ function ProjectForm({
   }, [project]);
 
   const uploadImage = async (file: File, prefix: string): Promise<string> => {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${prefix}_${Date.now()}.${fileExt}`;
-    const filePath = `projects/${fileName}`;
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${prefix}_${Date.now()}.${fileExt}`;
+      const filePath = `projects/${fileName}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from('project-images')
-      .upload(filePath, file);
+      console.log(`Uploading ${prefix} image:`, fileName);
 
-    if (uploadError) throw uploadError;
+      const { error: uploadError } = await supabase.storage
+        .from('project-images')
+        .upload(filePath, file);
 
-    const { data } = supabase.storage
-      .from('project-images')
-      .getPublicUrl(filePath);
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
 
-    return data.publicUrl;
+      const { data } = supabase.storage
+        .from('project-images')
+        .getPublicUrl(filePath);
+
+      console.log('Upload successful:', data.publicUrl);
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw error;
+    }
   };
 
   const handleCategoryToggle = (categoryId: string) => {
@@ -371,7 +382,7 @@ function ProjectForm({
     if (!project && (!beforeImage || !afterImage)) {
       toast({
         title: 'שגיאה',
-        description: 'יש להעלות תמונות לפני ואחרי',
+        description: 'יש להעלות תמונות לפני ואחרי לפרויקט חדש',
         variant: 'destructive'
       });
       return;
@@ -388,9 +399,11 @@ function ProjectForm({
 
       // Upload new images if selected
       if (beforeImage) {
+        console.log('Uploading before image...');
         imageUrls.beforeUrl = await uploadImage(beforeImage, 'before');
       }
       if (afterImage) {
+        console.log('Uploading after image...');
         imageUrls.afterUrl = await uploadImage(afterImage, 'after');
         imageUrls.afterThumbUrl = imageUrls.afterUrl; // Use same URL for thumb
       }
@@ -434,7 +447,7 @@ function ProjectForm({
       console.error('Error saving project:', error);
       toast({
         title: 'שגיאה',
-        description: error.message || 'שגיאה בשמירת הפרויקט',
+        description: `שגיאה בשמירת הפרויקט: ${error.message || 'שגיאה לא מזוהה'}`,
         variant: 'destructive'
       });
     } finally {
