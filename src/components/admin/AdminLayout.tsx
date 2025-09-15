@@ -1,176 +1,134 @@
-import { useState, useEffect, ReactNode } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { ReactNode } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 import { Button } from '@/components/ui/button';
-import { 
-  Home, 
-  Image, 
-  Tag, 
-  Settings, 
-  MessageSquare, 
-  HelpCircle,
-  LogOut,
-  Menu,
-  X,
-  Users,
-  FileText
-} from 'lucide-react';
+import { Home, Users, MessageSquare, Settings, LogOut, Menu } from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 interface AdminLayoutProps {
   children: ReactNode;
-  title: string;
+  title?: string;
 }
 
 export function AdminLayout({ children, title }: AdminLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user, isAdmin, isLoading, signOut } = useSupabaseAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { signOut } = useSupabaseAuth();
 
-  useEffect(() => {
-    if (!isLoading && (!user || !isAdmin)) {
-      // Prevent redirect loops: only redirect if not already on login
-      if (location.pathname !== '/admin/login') {
-        navigate('/admin/login', { replace: true });
-      }
-    }
-  }, [user, isAdmin, isLoading, navigate, location.pathname]);
-
-  const handleLogout = async () => {
+  const handleSignOut = async () => {
     await signOut();
     navigate('/admin/login');
   };
 
-  const navigation = [
+  const navigationItems = [
     { name: 'סקירה כללית', href: '/admin/dashboard', icon: Home },
-    { name: 'ניהול פרויקטים', href: '/admin/projects', icon: Image },
-    { name: 'ניהול קטגוריות', href: '/admin/categories', icon: Tag },
-    { name: 'ניהול שירותים', href: '/admin/services', icon: Settings },
-    { name: 'המלצות לקוחות', href: '/admin/testimonials', icon: MessageSquare },
-    { name: 'שאלות ותשובות', href: '/admin/faq', icon: HelpCircle },
-    { name: 'ניהול לקוחות', href: '/admin/clients', icon: Users },
-    { name: 'עריכת תכנים', href: '/admin/content', icon: FileText },
+    { name: 'לקוחות', href: '/admin/clients', icon: Users },
+    { name: 'המלצות', href: '/admin/testimonials', icon: MessageSquare },
+    { name: 'הגדרות', href: '/admin/settings', icon: Settings },
   ];
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground font-open-sans">טוען...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user || !isAdmin) {
-    return null;
-  }
-
-  return (
-    <div className="min-h-screen bg-muted/30 flex" dir="rtl">
-      {/* Mobile sidebar */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-50" 
-            onClick={() => setSidebarOpen(false)} 
-          />
-          <div className="fixed right-0 top-0 h-full w-64 bg-background shadow-lg">
-            <SidebarContent 
-              navigation={navigation} 
-              onLogout={handleLogout}
-              currentPath={location.pathname}
-              onClose={() => setSidebarOpen(false)}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Desktop sidebar */}
-      <div className="hidden lg:flex lg:w-64 lg:flex-col">
-        <SidebarContent 
-          navigation={navigation} 
-          onLogout={handleLogout}
-          currentPath={location.pathname}
-        />
-      </div>
-
-      {/* Main content */}
-      <div className="flex-1 flex flex-col">
-        <header className="bg-background shadow-sm border-b border-border">
-          <div className="flex justify-between items-center px-4 py-3">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-md text-muted-foreground hover:text-foreground"
-            >
-              <Menu size={24} />
-            </button>
-            <h1 className="text-xl font-semibold text-foreground font-assistant">{title}</h1>
-            <div className="w-10" /> {/* Spacer */}
-          </div>
-        </header>
-
-        <main className="flex-1 p-6">
-          {children}
-        </main>
-      </div>
-    </div>
-  );
-}
-
-interface SidebarContentProps {
-  navigation: any[];
-  onLogout: () => void;
-  currentPath: string;
-  onClose?: () => void;
-}
-
-function SidebarContent({ navigation, onLogout, currentPath, onClose }: SidebarContentProps) {
-  return (
-    <div className="flex flex-col h-full bg-background border-l border-border">
-      <div className="flex items-center justify-between h-16 px-4 border-b border-border">
-        <h2 className="text-lg font-semibold text-foreground font-assistant">Food Vision Admin</h2>
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="lg:hidden p-2 rounded-md text-muted-foreground hover:text-foreground"
+  const NavigationItems = () => (
+    <>
+      {navigationItems.map((item) => {
+        const IconComponent = item.icon;
+        const isActive = location.pathname === item.href;
+        
+        return (
+          <Link
+            key={item.name}
+            to={item.href}
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              isActive
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+            }`}
           >
-            <X size={20} />
-          </button>
-        )}
-      </div>
+            <IconComponent className="h-4 w-4" />
+            {item.name}
+          </Link>
+        );
+      })}
+    </>
+  );
 
-      <nav className="flex-1 px-2 py-4 space-y-1">
-        {navigation.map((item) => {
-          const isActive = currentPath === item.href;
-          return (
-            <Link
-              key={item.name}
-              to={item.href}
-              onClick={onClose}
-              className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${
-                isActive 
-                  ? 'bg-primary/10 text-primary' 
-                  : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-              }`}
-            >
-              <item.icon className="ml-3 h-5 w-5" />
-              {item.name}
-            </Link>
-          );
-        })}
-      </nav>
+  return (
+    <div className="min-h-screen bg-background" dir="rtl">
+      <div className="flex">
+        {/* Desktop Sidebar */}
+        <div className="hidden md:flex md:w-64 md:flex-col">
+          <div className="flex flex-col flex-grow pt-5 pb-4 overflow-y-auto bg-card border-l">
+            <div className="flex items-center flex-shrink-0 px-4">
+              <h2 className="text-lg font-semibold text-foreground font-assistant">
+                Food Vision Admin
+              </h2>
+            </div>
+            <div className="mt-5 flex-1 flex flex-col">
+              <nav className="flex-1 px-2 pb-4 space-y-1">
+                <NavigationItems />
+              </nav>
+              <div className="px-2">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-muted-foreground hover:text-foreground"
+                  onClick={handleSignOut}
+                >
+                  <LogOut className="h-4 w-4 ml-3" />
+                  יציאה
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      <div className="border-t border-border p-4">
-        <Button
-          onClick={onLogout}
-          variant="ghost"
-          className="w-full justify-start font-assistant"
-        >
-          <LogOut className="ml-3 h-5 w-5" />
-          התנתק
-        </Button>
+        {/* Main Content */}
+        <div className="flex flex-col flex-1 min-w-0">
+          {/* Mobile Header */}
+          <div className="md:hidden bg-card border-b px-4 py-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold font-assistant">Food Vision Admin</h2>
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-64">
+                  <div className="mt-5 flex flex-1 flex-col">
+                    <nav className="flex-1 space-y-1">
+                      <NavigationItems />
+                    </nav>
+                    <div className="pt-4">
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-muted-foreground hover:text-foreground"
+                        onClick={handleSignOut}
+                      >
+                        <LogOut className="h-4 w-4 ml-3" />
+                        יציאה
+                      </Button>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+          </div>
+
+          {/* Page Content */}
+          <main className="flex-1 relative overflow-y-auto focus:outline-none">
+            <div className="py-6">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+                {title && (
+                  <div className="mb-6">
+                    <h1 className="text-2xl font-bold text-foreground font-assistant">
+                      {title}
+                    </h1>
+                  </div>
+                )}
+                {children}
+              </div>
+            </div>
+          </main>
+        </div>
       </div>
     </div>
   );

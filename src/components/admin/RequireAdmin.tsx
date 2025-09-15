@@ -17,13 +17,8 @@ export function RequireAdmin() {
   }
 
   if (!user || !isAdmin) {
-    // Redirect to login, preserving the attempted path to avoid loops and allow post-login return
-    if (location.pathname !== '/admin/login') {
-      return <Navigate to="/admin/login" replace state={{ from: location.pathname }} />;
-    }
+    return <Navigate to="/admin/login" replace state={{ from: location.pathname }} />;
   }
 
   return <Outlet />;
 }
-
-

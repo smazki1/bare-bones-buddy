@@ -12,13 +12,9 @@ import NotFound from "./pages/NotFound";
 import AdminIndex from "./pages/admin/index";
 import AdminLogin from "./pages/admin/login";
 import AdminDashboard from "./pages/admin/dashboard";
-
-import AdminCategories from "./pages/admin/categories";
-import AdminSolutions from "./pages/admin/solutions";
-import AdminVisualSolutions from "./pages/admin/visualSolutions";
-import AdminMarkets from "./pages/admin/markets";
 import AdminClients from "./pages/admin/clients";
 import AdminTestimonials from "./pages/admin/testimonials";
+import AdminSettings from "./pages/admin/settings";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import { RequireAdmin } from "@/components/admin/RequireAdmin";
@@ -44,12 +40,9 @@ const App = () => (
 
           <Route element={<RequireAdmin />}> 
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/categories" element={<AdminCategories />} />
-            <Route path="/admin/solutions" element={<AdminSolutions />} />
-            <Route path="/admin/visual-solutions" element={<AdminVisualSolutions />} />
-            <Route path="/admin/markets" element={<AdminMarkets />} />
             <Route path="/admin/clients" element={<AdminClients />} />
             <Route path="/admin/testimonials" element={<AdminTestimonials />} />
+            <Route path="/admin/settings" element={<AdminSettings />} />
           </Route>
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
