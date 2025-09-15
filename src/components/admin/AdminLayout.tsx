@@ -1,8 +1,16 @@
 import { ReactNode } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 import { Button } from '@/components/ui/button';
-import { Home, Users, MessageSquare, Settings, LogOut, Menu } from 'lucide-react';
+import { 
+  Home, 
+  Users, 
+  MessageSquare, 
+  Settings, 
+  LogOut, 
+  HelpCircle,
+  Menu
+} from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 interface AdminLayoutProps {
@@ -24,6 +32,7 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
     { name: 'סקירה כללית', href: '/admin/dashboard', icon: Home },
     { name: 'לקוחות', href: '/admin/clients', icon: Users },
     { name: 'המלצות', href: '/admin/testimonials', icon: MessageSquare },
+    { name: 'שאלות ותשובות', href: '/admin/faq', icon: HelpCircle },
     { name: 'הגדרות', href: '/admin/settings', icon: Settings },
   ];
 
@@ -34,7 +43,7 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
         const isActive = location.pathname === item.href;
         
         return (
-          <Link
+          <NavLink
             key={item.name}
             to={item.href}
             className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -45,7 +54,7 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
           >
             <IconComponent className="h-4 w-4" />
             {item.name}
-          </Link>
+          </NavLink>
         );
       })}
     </>

@@ -15,6 +15,7 @@ import AdminDashboard from "./pages/admin/dashboard";
 import AdminClients from "./pages/admin/clients";
 import AdminTestimonials from "./pages/admin/testimonials";
 import AdminSettings from "./pages/admin/settings";
+import AdminFAQ from "./pages/admin/faq";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import { RequireAdmin } from "@/components/admin/RequireAdmin";
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/clients" element={<AdminClients />} />
             <Route path="/admin/testimonials" element={<AdminTestimonials />} />
+            <Route path="/admin/faq" element={<AdminFAQ />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
           </Route>
 
