@@ -71,3 +71,18 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## Deployment environment variables
+
+Set this env variable on your hosting provider before building (Netlify/Vercel/Cloudflare Pages/GitHub Actions):
+
+```
+VITE_ADMIN_ALLOW_EMAILS=admin@foodvision.com
+```
+
+- Netlify: Site settings → Build & deploy → Environment → Add variable
+- Vercel: Project → Settings → Environment Variables
+- Cloudflare Pages: Project → Settings → Environment Variables
+- GitHub Actions/Pages: Add to workflow env or Pages build settings
+
+You can list multiple emails separated by commas.
