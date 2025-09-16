@@ -23,11 +23,21 @@ export function StaticImage({
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
 
+  // Check if src is valid
+  if (!src || src.trim() === '') {
+    return (
+      <div className={`bg-muted flex items-center justify-center ${className}`}>
+        <span className="text-muted-foreground text-sm">אין תמונה זמינה</span>
+      </div>
+    );
+  }
+
   const handleLoad = () => {
     setIsLoaded(true);
   };
 
   const handleError = () => {
+    console.error('Failed to load image:', src);
     setHasError(true);
     setIsLoaded(true);
   };

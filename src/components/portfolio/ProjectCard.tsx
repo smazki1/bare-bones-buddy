@@ -93,7 +93,7 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
             transition={{ duration: 0.2, delay: 0.05 }}
           >
             <h3 className="text-base sm:text-lg font-assistant font-semibold mb-1 text-shadow-sm leading-tight">
-              {project.businessName}
+              {project.businessName || 'פרויקט ללא שם'}
             </h3>
           </motion.div>
         </figcaption>
