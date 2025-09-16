@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,11 +13,8 @@ import {
   Plus, 
   Edit, 
   Trash2, 
-  Star, 
   Upload, 
-  Image as ImageIcon,
-  Eye,
-  EyeOff 
+  Image as ImageIcon
 } from 'lucide-react';
 
 interface Project {
@@ -112,30 +108,6 @@ export default function AdminProjects() {
     }
   };
 
-  const toggleFeatured = async (id: string, currentStatus: boolean) => {
-    try {
-      const { error } = await supabase
-        .from('projects')
-        .update({ is_featured: !currentStatus })
-        .eq('id', id);
-
-      if (error) throw error;
-
-      toast({
-        title: 'הצלחה',
-        description: currentStatus ? 'הפרויקט הוסר מהמומלצים' : 'הפרויקט הוגדר כמומלץ'
-      });
-
-      fetchData();
-    } catch (error: any) {
-      console.error('Error updating project:', error);
-      toast({
-        title: 'שגיאה',
-        description: 'שגיאה בעדכון הפרויקט',
-        variant: 'destructive'
-      });
-    }
-  };
 
   const getCategoryNames = (categoryIds: string[]) => {
     return categoryIds
@@ -200,12 +172,6 @@ export default function AdminProjects() {
                       target.src = project.image_after_url;
                     }}
                   />
-                  {project.is_featured && (
-                    <div className="absolute top-2 right-2 bg-primary text-primary-foreground px-2 py-1 rounded text-xs flex items-center gap-1">
-                      <Star className="w-3 h-3 fill-current" />
-                      מומלץ
-                    </div>
-                  )}
                 </div>
                 
                 <CardContent className="p-4">
@@ -242,24 +208,6 @@ export default function AdminProjects() {
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
-                    
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => toggleFeatured(project.id, project.is_featured)}
-                    >
-                      {project.is_featured ? (
-                        <>
-                          <EyeOff className="w-4 h-4 ml-1" />
-                          הסר מומלץ
-                        </>
-                      ) : (
-                        <>
-                          <Eye className="w-4 h-4 ml-1" />
-                          הגדר כמומלץ
-                        </>
-                      )}
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -306,7 +254,6 @@ function ProjectForm({
     image_after_url: '',
     image_after_thumb_url: '',
     category_ids: [] as string[],
-    is_featured: false,
     order_index: 0
   });
   const [loading, setLoading] = useState(false);
@@ -323,7 +270,6 @@ function ProjectForm({
         image_after_url: project.image_after_url,
         image_after_thumb_url: project.image_after_thumb_url,
         category_ids: project.category_ids,
-        is_featured: project.is_featured,
         order_index: project.order_index
       });
     }
@@ -415,7 +361,6 @@ function ProjectForm({
         image_after_url: imageUrls.afterUrl,
         image_after_thumb_url: imageUrls.afterThumbUrl,
         category_ids: formData.category_ids,
-        is_featured: formData.is_featured,
         order_index: formData.order_index
       };
 
@@ -543,14 +488,6 @@ function ProjectForm({
             </div>
           )}
 
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <Switch
-              id="is_featured"
-              checked={formData.is_featured}
-              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_featured: checked }))}
-            />
-            <Label htmlFor="is_featured">הצג בדף הבית (מומלץ)</Label>
-          </div>
 
           <div className="flex justify-end gap-3 pt-6 border-t">
             <Button type="button" variant="outline" onClick={onClose}>
