@@ -2,17 +2,17 @@ import { create } from 'zustand'
 import { supabase } from '@/integrations/supabase/client'
 
 export interface Project {
-  id: string
-  title: string
-  description: string | null
-  image_before_url: string
-  image_after_url: string
-  image_after_thumb_url: string
-  category_ids: string[]
-  is_featured: boolean
-  order_index: number
-  created_at: string
-  updated_at: string
+  id: string;
+  businessName: string;
+  businessType?: string;
+  serviceType: 'תמונות' | 'סרטונים';
+  imageAfter: string;
+  imageBefore?: string;
+  size: 'small' | 'medium' | 'large';
+  category: string;
+  tags?: string[];
+  pinned?: boolean;
+  createdAt?: string;
 }
 
 interface PortfolioStore {
@@ -23,6 +23,18 @@ interface PortfolioStore {
   fetchProjects: () => Promise<void>
   fetchFeaturedProjects: () => Promise<void>
 }
+
+// Helper function to determine size based on index or random assignment
+const getRandomSize = (): 'small' | 'medium' | 'large' => {
+  const sizes: ('small' | 'medium' | 'large')[] = ['small', 'medium', 'large'];
+  return sizes[Math.floor(Math.random() * sizes.length)];
+};
+
+// Helper function to map category IDs to category names
+const getCategoryFromIds = (categoryIds: string[]): string => {
+  // Default to 'restaurants' if no categories, or use first category
+  return categoryIds.length > 0 ? 'restaurants' : 'restaurants';
+};
 
 export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
   projects: [],
@@ -41,7 +53,21 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
       
       if (error) throw error
       
-      set({ projects: data || [], loading: false })
+      // Transform database data to match portfolio interface
+      const transformedProjects: Project[] = (data || []).map(dbProject => ({
+        id: dbProject.id,
+        businessName: dbProject.title,
+        businessType: 'מסעדה', // Default business type
+        serviceType: 'תמונות' as const,
+        imageAfter: dbProject.image_after_url,
+        imageBefore: dbProject.image_before_url || undefined,
+        size: getRandomSize(),
+        category: getCategoryFromIds(dbProject.category_ids || []),
+        tags: dbProject.category_ids || [],
+        createdAt: dbProject.created_at
+      }));
+      
+      set({ projects: transformedProjects, loading: false })
     } catch (error) {
       console.error('Error fetching projects:', error)
       set({ error: 'Failed to fetch projects', loading: false })
@@ -59,7 +85,21 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
       
       if (error) throw error
       
-      set({ featuredProjects: data || [] })
+      // Transform database data to match portfolio interface
+      const transformedProjects: Project[] = (data || []).map(dbProject => ({
+        id: dbProject.id,
+        businessName: dbProject.title,
+        businessType: 'מסעדה',
+        serviceType: 'תמונות' as const,
+        imageAfter: dbProject.image_after_url,
+        imageBefore: dbProject.image_before_url || undefined,
+        size: getRandomSize(),
+        category: getCategoryFromIds(dbProject.category_ids || []),
+        tags: dbProject.category_ids || [],
+        createdAt: dbProject.created_at
+      }));
+      
+      set({ featuredProjects: transformedProjects })
     } catch (error) {
       console.error('Error fetching featured projects:', error)
       set({ error: 'Failed to fetch featured projects' })

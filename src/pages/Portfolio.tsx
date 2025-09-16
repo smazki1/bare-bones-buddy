@@ -37,8 +37,9 @@ const Portfolio = () => {
     }
     // Support both legacy single category and new multi-tags
     return projects.filter(project => 
-      project.category_ids?.includes(activeFilter) || 
-      project.title?.toLowerCase().includes(activeFilter.toLowerCase())
+      project.tags?.includes(activeFilter) || 
+      project.businessName?.toLowerCase().includes(activeFilter.toLowerCase()) ||
+      project.category === activeFilter
     );
   }, [activeFilter, projects]);
 
@@ -88,7 +89,9 @@ const Portfolio = () => {
     
   // Load more initial projects for new filter - no delay
   const filteredData = filter === 'all' ? projects : projects.filter(p => 
-    p.category_ids?.includes(filter) || p.title?.toLowerCase().includes(filter.toLowerCase())
+    p.tags?.includes(filter) || 
+    p.businessName?.toLowerCase().includes(filter.toLowerCase()) ||
+    p.category === filter
   );
   const initialProjects = filteredData.slice(0, itemsPerPage * 2); // Load double amount
   setVisibleProjects(initialProjects);

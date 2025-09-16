@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { StaticImage } from '@/components/ui/StaticImage';
-import { Project } from '@/data/portfolioMock';
+import { Project } from '@/data/portfolioStore';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ProjectCardProps {

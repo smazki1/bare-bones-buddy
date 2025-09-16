@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 import ProjectCard from './ProjectCard';
-import { Project } from '@/data/portfolioMock';
+import { Project } from '@/data/portfolioStore';
 
 interface MasonryGridProps {
   projects: Project[];
