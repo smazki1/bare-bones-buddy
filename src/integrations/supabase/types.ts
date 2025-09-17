@@ -339,6 +339,7 @@ export type Database = {
           image_before_url: string
           is_featured: boolean | null
           order_index: number | null
+          size: string | null
           title: string
           updated_at: string
         }
@@ -352,6 +353,7 @@ export type Database = {
           image_before_url: string
           is_featured?: boolean | null
           order_index?: number | null
+          size?: string | null
           title: string
           updated_at?: string
         }
@@ -365,6 +367,7 @@ export type Database = {
           image_before_url?: string
           is_featured?: boolean | null
           order_index?: number | null
+          size?: string | null
           title?: string
           updated_at?: string
         }

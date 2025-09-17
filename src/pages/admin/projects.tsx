@@ -69,7 +69,7 @@ export default function AdminProjects() {
       if (projectsResult.error) throw projectsResult.error;
       if (categoriesResult.error) throw categoriesResult.error;
 
-      setProjects((projectsResult.data || []).map(p => ({ ...p, size: p.size || 'medium' as 'small' | 'medium' | 'large' })));
+      setProjects((projectsResult.data || []).map(p => ({ ...p, size: (p as any).size || 'medium' as 'small' | 'medium' | 'large' })));
       setCategories(categoriesResult.data || []);
     } catch (error: any) {
       console.error('Error fetching data:', error);
