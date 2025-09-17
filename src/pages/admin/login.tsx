@@ -14,7 +14,30 @@ export default function AdminLogin() {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const { user, isAdmin, isLoading, signIn } = useSupabaseAuth();
+  const { user, isAdmin, isLoading, signIn, error } = useSupabaseAuth();
+
+  // Show any error that came from navigation state (session failures)
+  useEffect(() => {
+    const navigationError = (location.state as any)?.error;
+    if (navigationError) {
+      toast({
+        variant: "destructive",
+        title: "בעיית חיבור",
+        description: navigationError,
+      });
+    }
+  }, [location.state, toast]);
+
+  // Show auth errors
+  useEffect(() => {
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "שגיאה",
+        description: error,
+      });
+    }
+  }, [error, toast]);
 
   useEffect(() => {
     if (!isLoading && user && isAdmin) {
@@ -29,6 +52,11 @@ export default function AdminLogin() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground font-open-sans">בודק הרשאות...</p>
+          {error && (
+            <div className="mt-4 text-sm text-destructive bg-destructive/10 p-3 rounded-lg max-w-md mx-auto">
+              {error}
+            </div>
+          )}
         </div>
       </div>
     );
