@@ -92,11 +92,37 @@ export async function uploadProjectImages(
   };
 }
 
-// Function for category icons
+// Function for category icons - simplified upload without processing
 export async function uploadCategoryIcon(file: File): Promise<string> {
-  console.log('Uploading category icon');
-  const result = await uploadAndProcessImage(file, 'category-icons', 'icons');
-  return result.thumbnail; // Use thumbnail size for icons
+  try {
+    console.log('Uploading category icon directly');
+    
+    // Generate unique filename
+    const fileExt = file.name.split('.').pop();
+    const fileName = `icons/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+    
+    // Upload image directly
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('category-icons')
+      .upload(fileName, file);
+
+    if (uploadError) {
+      console.error('Upload error:', uploadError);
+      throw uploadError;
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('category-icons')
+      .getPublicUrl(fileName);
+
+    console.log('Category icon uploaded successfully:', publicUrl);
+    return publicUrl;
+    
+  } catch (error) {
+    console.error('Category icon upload error:', error);
+    throw new Error('Failed to upload category icon');
+  }
 }
 
 // Function for service images
