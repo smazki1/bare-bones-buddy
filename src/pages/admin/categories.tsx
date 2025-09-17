@@ -53,6 +53,8 @@ export default function CategoriesAdmin() {
     }
 
     fetchCategories();
+    // Trigger category update event for other components
+    window.dispatchEvent(new CustomEvent('categories:updated'));
   };
 
   const toggleActive = async (id: string, currentStatus: boolean) => {
@@ -67,6 +69,8 @@ export default function CategoriesAdmin() {
     }
 
     fetchCategories();
+    // Trigger category update event for other components  
+    window.dispatchEvent(new CustomEvent('categories:updated'));
   };
 
   if (loading) return <AdminLayout title="ניהול קטגוריות"><div>טוען...</div></AdminLayout>;
@@ -242,6 +246,8 @@ function CategoryForm({ category, onClose, onSave }: any) {
       }
 
       onSave();
+      // Trigger category update event for other components
+      window.dispatchEvent(new CustomEvent('categories:updated'));
     } catch (error) {
       console.error('Error saving category:', error);
       alert('שגיאה בשמירת הקטגוריה');

@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { getAvailableTags } from '@/utils/tagUtils';
 import { useState, useEffect } from 'react';
-import '../../data/solutionsSync'; // Import to trigger solutions sync
 
 interface FilterPillsProps {
   activeFilter: string;
@@ -12,14 +11,14 @@ interface FilterPillsProps {
 const FilterPills = ({ activeFilter, onFilterChange }: FilterPillsProps) => {
   const [availableTags, setAvailableTags] = useState(() => getAvailableTags());
 
-  // Listen for solutions updates to refresh available tags
+  // Listen for category updates to refresh available tags
   useEffect(() => {
-    const handleSolutionsUpdate = () => {
+    const handleCategoriesUpdate = () => {
       setAvailableTags(getAvailableTags());
     };
 
-    window.addEventListener('solutions:updated', handleSolutionsUpdate);
-    return () => window.removeEventListener('solutions:updated', handleSolutionsUpdate);
+    window.addEventListener('categories:updated', handleCategoriesUpdate);
+    return () => window.removeEventListener('categories:updated', handleCategoriesUpdate);
   }, []);
 
   return (

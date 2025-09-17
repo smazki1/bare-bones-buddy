@@ -1,13 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { solutionsStore } from '@/data/solutionsStore';
-import { SolutionsConfig, SolutionCard } from '@/types/solutions';
-import '../../data/solutionsSync'; // Import to trigger solutions sync
+import { fetchActiveCategories, transformCategoriesToSolutions } from '@/utils/categoryUtils';
+import { CategoryForBusinessSolutions } from '@/types/categories';
 
 
 
-const BusinessSolutionsCard = ({ item, index }: { item: SolutionCard; index: number }) => {
+const BusinessSolutionsCard = ({ item, index }: { item: CategoryForBusinessSolutions; index: number }) => {
 
   const cardVariants = {
     hidden: { 
@@ -85,58 +84,52 @@ const BusinessSolutionsCard = ({ item, index }: { item: SolutionCard; index: num
 };
 
 const BusinessSolutionsSection = () => {
-  const [config, setConfig] = useState<SolutionsConfig>(() => 
-    solutionsStore.safeGetConfigOrDefaults()
-  );
+  const [categories, setCategories] = useState<CategoryForBusinessSolutions[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const updateConfig = () => {
-      const newConfig = solutionsStore.safeGetConfigOrDefaults();
-      console.log('BusinessSolutions: Loading config with', newConfig.items.length, 'total items');
-      setConfig(newConfig);
-    };
-
-    // Force a fresh fetch from Supabase on first mount, then fallback to local only if it fails
-    let didSetFromCloud = false;
-    (async () => {
+    const loadCategories = async () => {
       try {
-        const cloud = await solutionsStore.fetchFromSupabase();
-        if (cloud) {
-          setConfig(cloud);
-          didSetFromCloud = true;
-        }
-      } catch {}
-      if (!didSetFromCloud) updateConfig();
-    })();
-
-    const handleSaveFailed = () => {
-      console.warn('BusinessSolutions: save_failed event received');
+        const dbCategories = await fetchActiveCategories();
+        const transformedCategories = transformCategoriesToSolutions(dbCategories);
+        setCategories(transformedCategories);
+        console.log('BusinessSolutions: Loaded', transformedCategories.length, 'categories from database');
+      } catch (error) {
+        console.error('BusinessSolutions: Error loading categories:', error);
+        setCategories([]);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    // Cross-tab updates
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'aiMaster:solutions') updateConfig();
-    };
-    window.addEventListener('storage', handleStorageChange);
+    loadCategories();
 
-    // Same-tab updates from admin actions
-    const handleLocalUpdate = () => updateConfig();
-    window.addEventListener('solutions:updated', handleLocalUpdate as EventListener);
-    window.addEventListener('solutions:save_failed', handleSaveFailed as EventListener);
+    // Listen for category updates (when admin updates categories)
+    const handleCategoryUpdate = () => {
+      loadCategories();
+    };
+
+    window.addEventListener('categories:updated', handleCategoryUpdate as EventListener);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('solutions:updated', handleLocalUpdate as EventListener);
-      window.removeEventListener('solutions:save_failed', handleSaveFailed as EventListener);
+      window.removeEventListener('categories:updated', handleCategoryUpdate as EventListener);
     };
   }, []);
 
-  // Guard: ensure items array is safe to iterate
-  const items = Array.isArray(config?.items) ? config.items : [];
-  
-  const enabledSolutions = items.filter(item => item.enabled).sort((a, b) => a.order - b.order);
-  
-  console.log('BusinessSolutions: Rendering', enabledSolutions.length, 'enabled solutions out of', items.length, 'total items');
+  if (loading) {
+    return (
+      <section className="py-16 md:py-24 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <div className="animate-pulse">
+              <div className="h-8 bg-muted rounded w-64 mx-auto mb-4"></div>
+              <div className="h-4 bg-muted rounded w-96 mx-auto"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-16 md:py-24 bg-background">
@@ -150,7 +143,7 @@ const BusinessSolutionsSection = () => {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            {config.sectionTitle}
+            פתרונות מותאמים לכל עסק
           </motion.h2>
           <motion.p
             className="text-lg md:text-xl text-muted-foreground font-open-sans leading-relaxed"
@@ -159,13 +152,13 @@ const BusinessSolutionsSection = () => {
             transition={{ duration: 0.6, delay: 0.1 }}
             viewport={{ once: true }}
           >
-            {config.sectionSubtitle}
+            גלה איך אנחנו מסייעים לעסקים שונים ליצור תמונות מקצועיות
           </motion.p>
         </div>
 
         {/* Grid - Desktop */}
         <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 md:gap-8">
-          {enabledSolutions.map((item, index) => (
+          {categories.map((item, index) => (
             <BusinessSolutionsCard key={item.id} item={item} index={index} />
           ))}
         </div>
@@ -180,7 +173,7 @@ const BusinessSolutionsSection = () => {
           <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
           
           <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4 -mx-4">
-            {enabledSolutions.map((item, index) => (
+            {categories.map((item, index) => (
               <div key={item.id} className="snap-center">
                 <BusinessSolutionsCard item={item} index={index} />
               </div>
@@ -188,9 +181,9 @@ const BusinessSolutionsSection = () => {
           </div>
 
           {/* Dots indicator */}
-          {enabledSolutions.length > 0 && (
+          {categories.length > 0 && (
             <div className="flex justify-center mt-6 gap-2">
-              {enabledSolutions.map((_, index) => (
+              {categories.map((_, index) => (
                 <div
                   key={index}
                   className="w-2 h-2 rounded-full bg-muted-foreground/30"
@@ -200,6 +193,13 @@ const BusinessSolutionsSection = () => {
             </div>
           )}
         </div>
+
+        {/* Empty state */}
+        {categories.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">אין קטגוריות פעילות להצגה</p>
+          </div>
+        )}
       </div>
     </section>
   );
