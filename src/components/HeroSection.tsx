@@ -129,12 +129,13 @@ const HeroSection = () => {
         <div className="text-center max-w-5xl mx-auto">
           <motion.h1
             dir="rtl"
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-assistant font-bold text-white mb-6 leading-tight tracking-tight drop-shadow-lg"
+            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-assistant font-bold mb-6 leading-tight tracking-tight drop-shadow-lg"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.2 }}
           >
-            {content.hero_title}
+            <span className="text-white">מנות מושלמות. </span>
+            <span className="text-secondary">תמונות מושלמות.</span>
           </motion.h1>
 
           <motion.p
