@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { fetchActiveCategories, transformCategoriesToSolutions } from '@/utils/categoryUtils';
 import { CategoryForBusinessSolutions } from '@/types/categories';
+import { runCategoryMigration } from '@/utils/categoryMigration';
 
 
 
@@ -90,6 +91,9 @@ const BusinessSolutionsSection = () => {
   useEffect(() => {
     const loadCategories = async () => {
       try {
+        // Run migration first to ensure data consistency
+        await runCategoryMigration();
+        
         const dbCategories = await fetchActiveCategories();
         const transformedCategories = transformCategoriesToSolutions(dbCategories);
         setCategories(transformedCategories);

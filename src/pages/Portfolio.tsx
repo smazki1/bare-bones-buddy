@@ -28,6 +28,18 @@ const Portfolio = () => {
   // Load projects from Supabase using Zustand store
   useEffect(() => {
     fetchProjects();
+    
+    // Listen for category updates and refresh projects
+    const handleCategoryUpdate = () => {
+      // Force refresh of projects when categories are updated
+      fetchProjects();
+    };
+    
+    window.addEventListener('categories:updated', handleCategoryUpdate);
+    
+    return () => {
+      window.removeEventListener('categories:updated', handleCategoryUpdate);
+    };
   }, [fetchProjects]);
 
   // Filter projects based on active filter
