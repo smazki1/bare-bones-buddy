@@ -93,6 +93,9 @@ const HeroSection = () => {
         
         {/* Overlay - גרדיינט חזק יותר לקריאות טובה */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/40" />
+        
+        {/* Pink/Red Colored Overlay */}
+        <div className="absolute inset-0 bg-primary/40" />
       </motion.div>
 
       {/* Floating Particles */}
