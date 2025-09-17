@@ -200,6 +200,7 @@ function CategoryForm({ category, onClose, onSave }: any) {
   });
   const [loading, setLoading] = useState(false);
   const [iconFile, setIconFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (category) {
@@ -320,15 +321,31 @@ function CategoryForm({ category, onClose, onSave }: any) {
             <input
               type="file"
               accept="image/*"
-              onChange={(e) => setIconFile(e.target.files?.[0] || null)}
+              onChange={(e) => {
+                const file = e.target.files?.[0] || null;
+                setIconFile(file);
+                
+                // Create preview URL for selected file
+                if (file) {
+                  const url = URL.createObjectURL(file);
+                  setPreviewUrl(url);
+                } else {
+                  setPreviewUrl(null);
+                }
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             />
-            {formData.icon_url && (
-              <img
-                src={formData.icon_url}
-                alt="אייקון נוכחי"
-                className="mt-2 w-16 h-16 object-cover rounded"
-              />
+            {(previewUrl || formData.icon_url) && (
+              <div className="mt-2">
+                <img
+                  src={previewUrl || formData.icon_url}
+                  alt={previewUrl ? "תמונה נבחרת" : "אייקון נוכחי"}
+                  className="w-16 h-16 object-cover rounded"
+                />
+                {previewUrl && (
+                  <p className="text-xs text-gray-600 mt-1">תמונה חדשה נבחרה</p>
+                )}
+              </div>
             )}
           </div>
 
