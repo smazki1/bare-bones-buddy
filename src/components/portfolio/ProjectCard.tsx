@@ -17,13 +17,13 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
   const getSizeClasses = (size: Project['size']) => {
     switch (size) {
       case 'small':
-        return 'h-64 sm:h-64';
+        return 'aspect-square'; // 1:1 square
       case 'medium':
-        return 'h-80 sm:h-96';
+        return 'aspect-[2/1]'; // 2:1 rectangle  
       case 'large':
-        return 'h-96 sm:h-[34rem]';
+        return 'aspect-square col-span-full sm:col-span-2 lg:col-span-2'; // 2x2 or full width
       default:
-        return 'h-72 sm:h-80';
+        return 'aspect-square';
     }
   };
 

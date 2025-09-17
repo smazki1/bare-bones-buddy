@@ -16,6 +16,7 @@ import {
   Upload, 
   Image as ImageIcon
 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Project {
   id: string;
@@ -29,6 +30,7 @@ interface Project {
   created_at: string;
   updated_at: string;
   order_index: number;
+  size: 'small' | 'medium' | 'large';
 }
 
 interface Category {
@@ -67,7 +69,7 @@ export default function AdminProjects() {
       if (projectsResult.error) throw projectsResult.error;
       if (categoriesResult.error) throw categoriesResult.error;
 
-      setProjects(projectsResult.data || []);
+      setProjects((projectsResult.data || []).map(p => ({ ...p, size: p.size || 'medium' as 'small' | 'medium' | 'large' })));
       setCategories(categoriesResult.data || []);
     } catch (error: any) {
       console.error('Error fetching data:', error);
@@ -254,7 +256,8 @@ function ProjectForm({
     image_after_url: '',
     image_after_thumb_url: '',
     category_ids: [] as string[],
-    order_index: 0
+    order_index: 0,
+    size: 'medium' as 'small' | 'medium' | 'large'
   });
   const [loading, setLoading] = useState(false);
   const [beforeImage, setBeforeImage] = useState<File | null>(null);
@@ -270,7 +273,8 @@ function ProjectForm({
         image_after_url: project.image_after_url,
         image_after_thumb_url: project.image_after_thumb_url,
         category_ids: project.category_ids,
-        order_index: project.order_index
+        order_index: project.order_index,
+        size: project.size || 'medium'
       });
     }
   }, [project]);
@@ -355,7 +359,8 @@ function ProjectForm({
         image_after_url: imageUrls.afterUrl,
         image_after_thumb_url: imageUrls.afterThumbUrl,
         category_ids: formData.category_ids,
-        order_index: formData.order_index
+        order_index: formData.order_index,
+        size: formData.size
       };
 
       if (project) {
@@ -413,6 +418,20 @@ function ProjectForm({
           <div className="space-y-2">
             <Label htmlFor="description">תיאור</Label>
             <Textarea id="description" value={formData.description} onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))} placeholder="תיאור הפרויקט (אופציונלי)" rows={3} />
+          </div>
+
+          <div className="space-y-2">
+            <Label>גודל תמונה</Label>
+            <Select value={formData.size} onValueChange={(value: 'small' | 'medium' | 'large') => setFormData(prev => ({ ...prev, size: value }))}>
+              <SelectTrigger>
+                <SelectValue placeholder="בחר גודל תמונה" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="small">קטן (1:1 ריבוע)</SelectItem>
+                <SelectItem value="medium">בינוני (2:1 מלבן)</SelectItem>
+                <SelectItem value="large">גדול (2:2 או רוחב מלא)</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -30,7 +30,7 @@ const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridPro
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, delay: 0.1 }}
-        className="columns-1 sm:columns-2 lg:columns-3 gap-4 sm:gap-5 space-y-0"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 auto-rows-max"
       >
         {projects.map((project, index) => {
           // Apply fade effect to last 6 items when max reached
