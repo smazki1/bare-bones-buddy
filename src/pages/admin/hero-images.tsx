@@ -72,14 +72,14 @@ export default function AdminHeroImages() {
       const fileName = `hero-${Date.now()}.${fileExt}`;
       
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('images')
+        .from('backgrounds')
         .upload(fileName, newImageFile);
 
       if (uploadError) throw uploadError;
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
-        .from('images')
+        .from('backgrounds')
         .getPublicUrl(fileName);
 
       // Save to database
@@ -142,7 +142,7 @@ export default function AdminHeroImages() {
       const fileName = url.split('/').pop();
       if (fileName) {
         await supabase.storage
-          .from('images')
+          .from('backgrounds')
           .remove([fileName]);
       }
 
