@@ -209,11 +209,18 @@ function CategoryForm({ category, onClose, onSave }: any) {
   }, [category]);
 
   const generateSlug = (name: string) => {
+    // Handle Hebrew and English characters properly
     return name
       .toLowerCase()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/[\s_-]+/g, '-')
-      .replace(/^-+|-+$/g, '');
+      .trim()
+      // Replace spaces and special chars with hyphens
+      .replace(/[\s\u00A0]+/g, '-')
+      // Remove multiple consecutive hyphens
+      .replace(/-+/g, '-')
+      // Remove leading/trailing hyphens
+      .replace(/^-+|-+$/g, '')
+      // If result is empty (e.g., only Hebrew), use transliteration or timestamp
+      || `category-${Date.now()}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -233,6 +240,11 @@ function CategoryForm({ category, onClose, onSave }: any) {
         slug: formData.slug || generateSlug(formData.name)
       };
 
+      // Validate slug is not empty
+      if (!categoryData.slug || categoryData.slug.trim() === '') {
+        categoryData.slug = `category-${Date.now()}`;
+      }
+
       if (category) {
         const { error } = await supabase
           .from('categories')
@@ -249,9 +261,19 @@ function CategoryForm({ category, onClose, onSave }: any) {
       onSave();
       // Trigger category update event for other components
       window.dispatchEvent(new CustomEvent('categories:updated'));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving category:', error);
-      alert('שגיאה בשמירת הקטגוריה');
+      
+      // Handle specific error types
+      let errorMessage = 'שגיאה בשמירת הקטגוריה';
+      
+      if (error?.message?.includes('duplicate key value violates unique constraint "categories_slug_key"')) {
+        errorMessage = 'קיימת כבר קטגוריה עם ה-Slug הזה. אנא שנה את ה-Slug או את שם הקטגוריה.';
+      } else if (error?.message) {
+        errorMessage = `שגיאה: ${error.message}`;
+      }
+      
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
