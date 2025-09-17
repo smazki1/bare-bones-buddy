@@ -35,6 +35,7 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
     { name: 'סקירה כללית', href: '/admin/dashboard', icon: Home },
     { name: 'פרויקטים', href: '/admin/projects', icon: Image },
     { name: 'קטגוריות', href: '/admin/categories', icon: Tag },
+    { name: 'פתרונות ויזואליים', href: '/admin/visual-solutions', icon: Image },
     { name: 'שירותים', href: '/admin/services', icon: Settings },
     { name: 'לקוחות', href: '/admin/clients', icon: Users },
     { name: 'המלצות', href: '/admin/testimonials', icon: MessageSquare },
