@@ -38,10 +38,13 @@ export function useSupabaseAuth() {
 
       if (!error && data) {
         setIsAdmin(true);
+        setError(null);
       } else {
         setIsAdmin(false);
+        if (error) {
+          setError('Failed to verify admin status');
+        }
       }
-      setError(null);
     } catch (error) {
       console.error('Error checking admin status:', error);
       setIsAdmin(false);
@@ -72,15 +75,15 @@ export function useSupabaseAuth() {
           
           // Defer admin status check to avoid blocking auth flow
           if (initialSession?.user) {
-            setTimeout(() => {
+            checkAdminStatus(initialSession.user.id).finally(() => {
               if (mounted) {
-                checkAdminStatus(initialSession.user.id);
+                setIsLoading(false);
               }
-            }, 100);
+            });
           } else {
             setIsAdmin(false);
+            setIsLoading(false);
           }
-          setIsLoading(false);
         }
       } catch (error) {
         console.error('Error getting initial session:', error);
@@ -112,15 +115,21 @@ export function useSupabaseAuth() {
         if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
           setIsAdmin(false);
           setIsLoading(false);
-        } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        } else if (event === 'SIGNED_IN') {
+          // Keep loading until admin check completes
+          setIsLoading(true);
+        } else if (event === 'TOKEN_REFRESHED' && session) {
           setIsLoading(false);
         }
         
-        // Defer admin status check to next tick
+        // Defer admin status check to next tick, but complete loading state properly
         if (session?.user) {
-          setTimeout(() => {
+          setTimeout(async () => {
             if (mounted) {
-              checkAdminStatus(session.user.id);
+              await checkAdminStatus(session.user.id);
+              if (mounted) {
+                setIsLoading(false);
+              }
             }
           }, 0);
         } else {
