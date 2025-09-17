@@ -107,6 +107,12 @@ export default function AdminDashboard() {
       icon: Plus
     },
     {
+      title: 'נהל תמונות Hero',
+      description: 'עדכן תמונות רקע בעמוד הראשי',
+      href: '/admin/hero-images',
+      icon: Image
+    },
+    {
       title: 'נהל המלצות',
       description: 'הוסף והסר המלצות לקוחות',
       href: '/admin/testimonials',
