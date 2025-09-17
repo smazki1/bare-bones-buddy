@@ -17,11 +17,11 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
   const getSizeClasses = (size: Project['size']) => {
     switch (size) {
       case 'small':
-        return 'aspect-square'; // 1:1 square
+        return 'aspect-square'; // 1:1 square - Instagram style
       case 'medium':
-        return 'aspect-[2/1]'; // 2:1 rectangle  
+        return 'aspect-[16/9]'; // 16:9 landscape - Instagram style  
       case 'large':
-        return 'aspect-square col-span-full sm:col-span-2 lg:col-span-2'; // 2x2 or full width
+        return 'aspect-[4/5] col-span-full sm:col-span-2 lg:col-span-2'; // 4:5 portrait - Instagram style
       default:
         return 'aspect-square';
     }

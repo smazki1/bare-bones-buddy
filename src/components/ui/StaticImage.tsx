@@ -59,7 +59,7 @@ export function StaticImage({
       <motion.img
         src={src}
         alt={alt}
-        className={`w-full h-full transition-all duration-300 ${
+        className={`w-full h-full object-cover object-center transition-all duration-300 ${
           blur && !isLoaded ? 'blur-sm' : ''
         } ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
         loading={priority ? "eager" : "lazy"}
