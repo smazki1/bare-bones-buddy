@@ -15,9 +15,9 @@ const HeroSection = () => {
   ]);
   const [content, setContent] = useState({
     hero_title: 'מנות מושלמות. תמונות מושלמות.',
-    hero_subtitle: 'מה שלקח שבועות עם צלם — אצלנו מוכן תוך ימים, וב־90% פחות כסף',
-    hero_cta_primary: 'התחילו עכשיו',
-    hero_cta_secondary: 'איך זה עובד'
+    hero_subtitle: 'Food Vision יוצרת תמונות מקצועיות למסעדות - מהר, זול, ובלי מאמץ',
+    hero_cta_primary: 'צפה בתמונות המנות שלך עכשיו',
+    hero_cta_secondary: 'ראה דוגמאות'
   });
   const navigate = useNavigate();
   const { scrollY } = useScroll();
