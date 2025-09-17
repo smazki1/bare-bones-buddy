@@ -92,34 +92,38 @@ export async function uploadProjectImages(
   };
 }
 
-// Function for category icons - simplified upload without processing
+// Function for category icons - hardened upload with admin-link + retry
 export async function uploadCategoryIcon(file: File): Promise<string> {
-  try {
-    console.log('Uploading category icon directly');
-    
-    // Generate unique filename
+  const linkAdminBestEffort = async () => { try { await supabase.rpc('link_admin_user'); } catch (_) {} };
+
+  const doUpload = async (): Promise<string> => {
+    await linkAdminBestEffort();
     const fileExt = file.name.split('.').pop();
     const fileName = `icons/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-    
-    // Upload image directly
-    const { data: uploadData, error: uploadError } = await supabase.storage
+
+    const { error: uploadError } = await supabase.storage
       .from('category-icons')
       .upload(fileName, file);
 
-    if (uploadError) {
-      console.error('Upload error:', uploadError);
-      throw uploadError;
-    }
+    if (uploadError) throw uploadError;
 
-    // Get public URL
     const { data: { publicUrl } } = supabase.storage
       .from('category-icons')
       .getPublicUrl(fileName);
 
-    console.log('Category icon uploaded successfully:', publicUrl);
     return publicUrl;
-    
-  } catch (error) {
+  };
+
+  try {
+    return await doUpload();
+  } catch (error: any) {
+    const msg = String(error?.message || '');
+    const code = String(error?.code || '');
+    const isPerm = msg.includes('permission') || code === '42501';
+    if (isPerm) {
+      await new Promise(r => setTimeout(r, 150));
+      return await doUpload();
+    }
     console.error('Category icon upload error:', error);
     throw new Error('Failed to upload category icon');
   }
