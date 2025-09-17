@@ -99,7 +99,7 @@ export function useSupabaseAuth() {
     // Set up auth state listener - CRITICAL: No async calls in callback
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log('Auth state change:', event, session?.user?.id);
+        // Removed console.log to prevent re-renders
         
         if (!mounted) return;
         
