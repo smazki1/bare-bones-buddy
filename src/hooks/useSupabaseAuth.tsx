@@ -69,7 +69,7 @@ export function useSupabaseAuth() {
         .from('admin_users')
         .select('user_id')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (!error && data) {
         setIsAdmin(true);

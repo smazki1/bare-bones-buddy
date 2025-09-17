@@ -209,8 +209,12 @@ function CategoryForm({ category, onClose, onSave }: any) {
   }, [category]);
 
   const generateSlug = (name: string) => {
+    if (!name || name.trim() === '') {
+      return `category-${Date.now()}`;
+    }
+    
     // Handle Hebrew and English characters properly
-    return name
+    const slug = name
       .toLowerCase()
       .trim()
       // Replace spaces and special chars with hyphens
@@ -218,9 +222,10 @@ function CategoryForm({ category, onClose, onSave }: any) {
       // Remove multiple consecutive hyphens
       .replace(/-+/g, '-')
       // Remove leading/trailing hyphens
-      .replace(/^-+|-+$/g, '')
-      // If result is empty (e.g., only Hebrew), use transliteration or timestamp
-      || `category-${Date.now()}`;
+      .replace(/^-+|-+$/g, '');
+    
+    // If result is empty (e.g., only Hebrew), use transliteration or timestamp
+    return slug || `category-${Date.now()}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -234,16 +239,32 @@ function CategoryForm({ category, onClose, onSave }: any) {
         iconUrl = await uploadCategoryIcon(iconFile);
       }
 
+      // Generate unique slug
+      let categorySlug = formData.slug?.trim() || generateSlug(formData.name);
+      
+      // Ensure slug is not empty
+      if (!categorySlug || categorySlug.trim() === '') {
+        categorySlug = `category-${Date.now()}`;
+      }
+      
+      // Check for existing slug and make it unique if needed
+      if (!category) { // Only check for duplicates when creating new category
+        const { data: existingCategory } = await supabase
+          .from('categories')
+          .select('id')
+          .eq('slug', categorySlug)
+          .maybeSingle();
+          
+        if (existingCategory) {
+          categorySlug = `${categorySlug}-${Date.now()}`;
+        }
+      }
+
       const categoryData = {
         ...formData,
         icon_url: iconUrl,
-        slug: formData.slug || generateSlug(formData.name)
+        slug: categorySlug
       };
-
-      // Validate slug is not empty
-      if (!categoryData.slug || categoryData.slug.trim() === '') {
-        categoryData.slug = `category-${Date.now()}`;
-      }
 
       if (category) {
         const { error } = await supabase
