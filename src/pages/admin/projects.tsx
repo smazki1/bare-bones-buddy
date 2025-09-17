@@ -275,31 +275,38 @@ function ProjectForm({
     }
   }, [project]);
 
+  const linkAdminBestEffort = async () => {
+    try { await supabase.rpc('link_admin_user'); } catch (_) {}
+  };
+
   const uploadImage = async (file: File, prefix: string): Promise<string> => {
-    try {
+    const doUpload = async (): Promise<string> => {
+      await linkAdminBestEffort();
       const fileExt = file.name.split('.').pop();
       const fileName = `${prefix}_${Date.now()}.${fileExt}`;
       const filePath = `projects/${fileName}`;
 
-      console.log(`Uploading ${prefix} image:`, fileName);
-
       const { error: uploadError } = await supabase.storage
         .from('project-images')
         .upload(filePath, file);
-
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        throw uploadError;
-      }
+      if (uploadError) throw uploadError;
 
       const { data } = supabase.storage
         .from('project-images')
         .getPublicUrl(filePath);
-
-      console.log('Upload successful:', data.publicUrl);
       return data.publicUrl;
-    } catch (error) {
-      console.error('Error uploading image:', error);
+    };
+
+    try {
+      return await doUpload();
+    } catch (error: any) {
+      const msg = String(error?.message || '');
+      const code = String(error?.code || '');
+      const isPerm = msg.includes('permission') || code === '42501';
+      if (isPerm) {
+        await new Promise(r => setTimeout(r, 150));
+        return await doUpload();
+      }
       throw error;
     }
   };
@@ -315,43 +322,30 @@ function ProjectForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!formData.title.trim()) {
-      toast({
-        title: 'שגיאה',
-        description: 'שם הפרויקט חובה',
-        variant: 'destructive'
-      });
+      toast({ title: 'שגיאה', description: 'שם הפרויקט חובה', variant: 'destructive' });
       return;
     }
-
     if (!project && (!beforeImage || !afterImage)) {
-      toast({
-        title: 'שגיאה',
-        description: 'יש להעלות תמונות לפני ואחרי לפרויקט חדש',
-        variant: 'destructive'
-      });
+      toast({ title: 'שגיאה', description: 'יש להעלות תמונות לפני ואחרי לפרויקט חדש', variant: 'destructive' });
       return;
     }
 
     setLoading(true);
 
-    try {
+    const saveOnce = async () => {
+      await linkAdminBestEffort();
+
       let imageUrls = {
         beforeUrl: formData.image_before_url,
         afterUrl: formData.image_after_url,
         afterThumbUrl: formData.image_after_thumb_url
       };
 
-      // Upload new images if selected
-      if (beforeImage) {
-        console.log('Uploading before image...');
-        imageUrls.beforeUrl = await uploadImage(beforeImage, 'before');
-      }
+      if (beforeImage) imageUrls.beforeUrl = await uploadImage(beforeImage, 'before');
       if (afterImage) {
-        console.log('Uploading after image...');
         imageUrls.afterUrl = await uploadImage(afterImage, 'after');
-        imageUrls.afterThumbUrl = imageUrls.afterUrl; // Use same URL for thumb
+        imageUrls.afterThumbUrl = imageUrls.afterUrl;
       }
 
       const projectData = {
@@ -365,36 +359,37 @@ function ProjectForm({
       };
 
       if (project) {
-        const { error } = await supabase
-          .from('projects')
-          .update(projectData)
-          .eq('id', project.id);
+        const { error } = await supabase.from('projects').update(projectData).eq('id', project.id);
         if (error) throw error;
-        
-        toast({
-          title: 'הצלחה',
-          description: 'הפרויקט עודכן בהצלחה'
-        });
+        toast({ title: 'הצלחה', description: 'הפרויקט עודכן בהצלחה' });
       } else {
-        const { error } = await supabase
-          .from('projects')
-          .insert(projectData);
+        const { error } = await supabase.from('projects').insert(projectData);
         if (error) throw error;
-        
-        toast({
-          title: 'הצלחה',
-          description: 'הפרויקט נוצר בהצלחה'
-        });
+        toast({ title: 'הצלחה', description: 'הפרויקט נוצר בהצלחה' });
       }
+    };
 
+    try {
+      await saveOnce();
       onSave();
     } catch (error: any) {
-      console.error('Error saving project:', error);
-      toast({
-        title: 'שגיאה',
-        description: `שגיאה בשמירת הפרויקט: ${error.message || 'שגיאה לא מזוהה'}`,
-        variant: 'destructive'
-      });
+      const msg = String(error?.message || '');
+      const code = String(error?.code || '');
+      const isPerm = msg.includes('permission') || code === '42501' || code === 'PGRST301';
+      if (isPerm) {
+        try {
+          await new Promise(r => setTimeout(r, 150));
+          await saveOnce();
+          onSave();
+          return;
+        } catch (e2: any) {
+          console.error('Retry save failed:', e2);
+          toast({ title: 'שגיאה', description: 'שגיאת הרשאה בשמירת הפרויקט. נסה לצאת ולהתחבר שוב.', variant: 'destructive' });
+        }
+      } else {
+        console.error('Error saving project:', error);
+        toast({ title: 'שגיאה', description: `שגיאה בשמירת הפרויקט: ${msg || 'שגיאה לא מזוהה'}`, variant: 'destructive' });
+      }
     } finally {
       setLoading(false);
     }
@@ -412,59 +407,25 @@ function ProjectForm({
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="title">שם הפרויקט *</Label>
-            <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-              placeholder="הכנס שם פרויקט"
-              required
-            />
+            <Input id="title" value={formData.title} onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))} placeholder="הכנס שם פרויקט" required />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="description">תיאור</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="תיאור הפרויקט (אופציונלי)"
-              rows={3}
-            />
+            <Textarea id="description" value={formData.description} onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))} placeholder="תיאור הפרויקט (אופציונלי)" rows={3} />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="beforeImage">תמונה לפני {!project && '*'}</Label>
-              <Input
-                id="beforeImage"
-                type="file"
-                accept="image/*"
-                onChange={(e) => setBeforeImage(e.target.files?.[0] || null)}
-              />
-              {formData.image_before_url && (
-                <img
-                  src={formData.image_before_url}
-                  alt="לפני"
-                  className="w-full h-32 object-cover rounded border"
-                />
-              )}
+              <Input id="beforeImage" type="file" accept="image/*" onChange={(e) => setBeforeImage(e.target.files?.[0] || null)} />
+              {formData.image_before_url && (<img src={formData.image_before_url} alt="לפני" className="w-full h-32 object-cover rounded border" />)}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="afterImage">תמונה אחרי {!project && '*'}</Label>
-              <Input
-                id="afterImage"
-                type="file"
-                accept="image/*"
-                onChange={(e) => setAfterImage(e.target.files?.[0] || null)}
-              />
-              {formData.image_after_thumb_url && (
-                <img
-                  src={formData.image_after_thumb_url}
-                  alt="אחרי"
-                  className="w-full h-32 object-cover rounded border"
-                />
-              )}
+              <Input id="afterImage" type="file" accept="image/*" onChange={(e) => setAfterImage(e.target.files?.[0] || null)} />
+              {formData.image_after_thumb_url && (<img src={formData.image_after_thumb_url} alt="אחרי" className="w-full h-32 object-cover rounded border" />)}
             </div>
           </div>
 
@@ -474,28 +435,17 @@ function ProjectForm({
               <div className="grid grid-cols-2 gap-2">
                 {categories.map((category) => (
                   <div key={category.id} className="flex items-center space-x-2 space-x-reverse">
-                    <Checkbox
-                      id={`category-${category.id}`}
-                      checked={formData.category_ids.includes(category.id)}
-                      onCheckedChange={() => handleCategoryToggle(category.id)}
-                    />
-                    <Label htmlFor={`category-${category.id}`} className="text-sm">
-                      {category.name}
-                    </Label>
+                    <Checkbox id={`category-${category.id}`} checked={formData.category_ids.includes(category.id)} onCheckedChange={() => handleCategoryToggle(category.id)} />
+                    <Label htmlFor={`category-${category.id}`} className="text-sm">{category.name}</Label>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-
           <div className="flex justify-end gap-3 pt-6 border-t">
-            <Button type="button" variant="outline" onClick={onClose}>
-              ביטול
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'שומר...' : 'שמור'}
-            </Button>
+            <Button type="button" variant="outline" onClick={onClose}>ביטול</Button>
+            <Button type="submit" disabled={loading}>{loading ? 'שומר...' : 'שמור'}</Button>
           </div>
         </form>
       </DialogContent>
