@@ -15,7 +15,7 @@ const HeroSection = () => {
   ]);
   const [content, setContent] = useState({
     hero_title: 'מנות מושלמות. תמונות מושלמות.',
-    hero_subtitle: 'מה שלקח שבועות עם צלם — אצלנו מוכן תוך ימים בודדים, 80% פחות כסף,
+    hero_subtitle: 'מה שלקח שבועות עם צלם — אצלנו מוכן תוך ימים, וב־90% פחות כסף',
     hero_cta_primary: 'אני רוצה תמונות מקצועיות',
     hero_cta_secondary: 'תיק עבודות'
   });
