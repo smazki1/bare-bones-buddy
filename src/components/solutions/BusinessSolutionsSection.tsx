@@ -170,11 +170,12 @@ const BusinessSolutionsSection = () => {
         {/* Horizontal Scroll - Mobile/Tablet */}
         <div 
           className="lg:hidden relative"
+          dir="rtl"
           aria-label="פתרונות עסקיים - גלילה אופקית"
         >
-          {/* Edge fade mask */}
-          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+          {/* Edge fade mask - adjusted for RTL */}
           <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
           
           <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4 -mx-4">
             {categories.map((item, index) => (
