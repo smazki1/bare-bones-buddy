@@ -15,9 +15,9 @@ const HeroSection = () => {
   ]);
   const [content, setContent] = useState({
     hero_title: 'מנות מושלמות. תמונות מושלמות.',
-    hero_subtitle: 'מה שלקח שבועות עם צלם — אצלנו מוכן תוך ימים, וב־90% פחות כסף,
-    hero_cta_primary: 'צפה בתמונות המנות שלך עכשיו',
-    hero_cta_secondary: 'ראה דוגמאות'
+    hero_subtitle: 'מה שלקח שבועות עם צלם — אצלנו מוכן תוך ימים בודדים, 80% פחות כסף,
+    hero_cta_primary: 'אני רוצה תמונות מקצועיות',
+    hero_cta_secondary: 'תיק עבודות'
   });
   const navigate = useNavigate();
   const { scrollY } = useScroll();
@@ -143,9 +143,8 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.4 }}
-            dir="rtl"
           >
-            מה שלקח שבועות עם צלם — אצלנו מוכן תוך ימים, וב־90% פחות כסף
+            {content.hero_subtitle}
           </motion.p>
 
           <motion.div
