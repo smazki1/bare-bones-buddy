@@ -15,7 +15,7 @@ const HeroSection = () => {
   ]);
   const [content, setContent] = useState({
     hero_title: 'מנות מושלמות. תמונות מושלמות.',
-    hero_subtitle: 'מה שלקח שבועות עם צלם — אצלנו מוכן תוך ימים, וב־90% פחות כסף',
+    hero_subtitle: 'כל מה שצריך ליצירת תמונות ברמת סטודיו מקצועי - ב-90% פחות כסף',
     hero_cta_primary: 'אני רוצה תמונות מקצועיות',
     hero_cta_secondary: 'תיק עבודות'
   });
@@ -129,7 +129,7 @@ const HeroSection = () => {
         <div className="text-center max-w-6xl mx-auto">
           <motion.h1
             dir="rtl"
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-assistant font-bold mb-4 sm:mb-6 leading-tight tracking-tight drop-shadow-lg"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-assistant font-bold mb-4 sm:mb-6 leading-tight tracking-tight drop-shadow-lg"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.2 }}
