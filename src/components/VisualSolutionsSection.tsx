@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { VisualSolutionsConfig, VisualSolutionCard } from '@/types/visualSolutions';
 import { visualSolutionsStore } from '@/data/visualSolutionsStore';
+import useEmblaCarousel from 'embla-carousel-react';
+import { Button } from '@/components/ui/button';
 
 interface VisualSolutionCardProps {
   solution: VisualSolutionCard;
@@ -42,10 +45,10 @@ const VisualSolutionCardComponent = ({ solution, index, isIntersecting }: Visual
       initial={{ opacity: 0, y: 50 }}
       animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="group cursor-pointer"
+      className="group cursor-pointer h-full"
       onClick={handleClick}
     >
-      <div className="relative overflow-hidden rounded-2xl shadow-elegant hover:shadow-warm transition-all duration-500 group-hover:scale-105 aspect-[3/2]">
+      <div className="relative overflow-hidden rounded-2xl shadow-elegant hover:shadow-warm transition-all duration-500 group-hover:scale-105 aspect-[4/3] h-full">
         {solution.videoSrc ? (
           <video
             autoPlay
@@ -70,10 +73,10 @@ const VisualSolutionCardComponent = ({ solution, index, isIntersecting }: Visual
           />
         )}
         
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/15 to-transparent group-hover:from-black/60 transition-all duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent group-hover:from-black/70 transition-all duration-500" />
         
         <div className="absolute bottom-6 left-6 right-6 text-white">
-          <h3 className="text-xl md:text-2xl font-assistant font-bold mb-2">
+          <h3 className="text-lg md:text-xl lg:text-2xl font-assistant font-bold mb-2 line-clamp-2">
             {solution.title}
           </h3>
         </div>
@@ -93,6 +96,50 @@ const VisualSolutionsSection = () => {
   const [config, setConfig] = useState<VisualSolutionsConfig>(() => 
     visualSolutionsStore.safeGetConfigOrDefaults()
   );
+
+  // Carousel setup
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    direction: 'rtl',
+    align: 'start',
+    containScroll: 'trimSnaps',
+    dragFree: false,
+    breakpoints: {
+      '(min-width: 768px)': { 
+        slidesToScroll: 1,
+        align: 'start'
+      }
+    }
+  });
+
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
+
+  const scrollPrev = useCallback(() => {
+    if (emblaApi) emblaApi.scrollPrev();
+  }, [emblaApi]);
+
+  const scrollNext = useCallback(() => {
+    if (emblaApi) emblaApi.scrollNext();
+  }, [emblaApi]);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setCanScrollPrev(emblaApi.canScrollPrev());
+    setCanScrollNext(emblaApi.canScrollNext());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    
+    onSelect();
+    emblaApi.on('reInit', onSelect);
+    emblaApi.on('select', onSelect);
+    
+    return () => {
+      emblaApi.off('reInit', onSelect);
+      emblaApi.off('select', onSelect);
+    };
+  }, [emblaApi, onSelect]);
 
   useEffect(() => {
     const loadConfig = () => {
@@ -161,16 +208,51 @@ const VisualSolutionsSection = () => {
           </p>
         </motion.div>
 
-        {/* Unified Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {enabledSolutions.slice(0, 6).map((solution, index) => (
-            <VisualSolutionCardComponent
-              key={solution.id}
-              solution={solution}
-              index={index}
-              isIntersecting={isIntersecting}
-            />
-          ))}
+        {/* Carousel Layout */}
+        <div className="relative max-w-7xl mx-auto">
+          <div className="overflow-hidden" ref={emblaRef}>
+            <div className="flex gap-6 rtl:flex-row-reverse">
+              {enabledSolutions.map((solution, index) => (
+                <div
+                  key={solution.id}
+                  className="flex-none w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 min-w-0"
+                >
+                  <VisualSolutionCardComponent
+                    solution={solution}
+                    index={index}
+                    isIntersecting={isIntersecting}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Navigation Arrows */}
+          <Button
+            variant="outline"
+            size="icon"
+            className={`absolute top-1/2 -translate-y-1/2 right-4 z-10 bg-background/90 backdrop-blur-sm border-border/50 hover:bg-accent hover:border-accent-foreground/20 transition-all duration-300 ${
+              !canScrollNext ? 'opacity-50 cursor-not-allowed' : 'opacity-90 hover:opacity-100'
+            } hidden md:flex`}
+            onClick={scrollNext}
+            disabled={!canScrollNext}
+            aria-label="הקלף הבא"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+
+          <Button
+            variant="outline"
+            size="icon"
+            className={`absolute top-1/2 -translate-y-1/2 left-4 z-10 bg-background/90 backdrop-blur-sm border-border/50 hover:bg-accent hover:border-accent-foreground/20 transition-all duration-300 ${
+              !canScrollPrev ? 'opacity-50 cursor-not-allowed' : 'opacity-90 hover:opacity-100'
+            } hidden md:flex`}
+            onClick={scrollPrev}
+            disabled={!canScrollPrev}
+            aria-label="הקלף הקודם"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </section>
