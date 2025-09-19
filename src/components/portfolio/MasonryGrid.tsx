@@ -20,9 +20,9 @@ const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridPro
           case 'small':
             return 'col-span-1 row-span-1 aspect-square';
           case 'medium':
-            return 'col-span-1 sm:col-span-2 row-span-1 aspect-square sm:aspect-[2/1]';
+            return 'col-span-2 row-span-1 aspect-square sm:aspect-[2/1]';
           case 'large':
-            return 'col-span-1 sm:col-span-2 row-span-1 sm:row-span-2 aspect-square';
+            return 'col-span-2 row-span-2 aspect-square';
           default:
             return 'col-span-1 row-span-1 aspect-square';
         }
@@ -44,7 +44,7 @@ const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridPro
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, delay: 0.1 }}
-        className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 auto-rows-fr"
+        className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 auto-rows-fr"
         style={{ gridAutoRows: '200px' }}
       >
         {projects.map((project, index) => {
