@@ -18,7 +18,7 @@ export interface VisualSolutionsConfig {
 
 export const DEFAULT_VISUAL_SOLUTIONS_CONFIG: VisualSolutionsConfig = {
   sectionTitle: 'כל מה שאתם צריכים ליצירת תוכן ויזואלי במקום אחד',
-  sectionSubtitle: 'פתרונות מקצועיים לכל הצרכים הויזואליים שלכם',
+  sectionSubtitle: 'פתרונות מקצועיים לכל צורך',
   items: [
     {
       id: 'menu-photos',

@@ -15,7 +15,7 @@ const HeroSection = () => {
   ]);
   const [content, setContent] = useState({
     hero_title: 'מנות מושלמות. תמונות מושלמות.',
-    hero_subtitle: 'מה שלקח שבועות עם צלם — אצלנו מוכן תוך ימים, וב־90% פחות כסף',
+    hero_subtitle: 'כל מה שצריך ליצירת תמונות ברמת סטודיו מקצועי - ב-90% פחות כסף',
     hero_cta_primary: 'התחילו עכשיו',
     hero_cta_secondary: 'איך זה עובד'
   });
@@ -43,10 +43,17 @@ const HeroSection = () => {
         .in('key', ['hero_title', 'hero_subtitle', 'hero_cta_primary', 'hero_cta_secondary']);
 
       if (data) {
-        const contentMap = data.reduce((acc, item) => ({
-          ...acc,
-          [item.key]: item.value
-        }), {});
+        const allowedKeys = new Set(['hero_title', 'hero_subtitle', 'hero_cta_primary', 'hero_cta_secondary']);
+        const contentMap = data.reduce((acc: Record<string, string>, item: { key: string; value: any }) => {
+          if (
+            allowedKeys.has(item.key) &&
+            typeof item.value === 'string' &&
+            item.value.trim().length > 0
+          ) {
+            acc[item.key] = item.value;
+          }
+          return acc;
+        }, {} as Record<string, string>);
         setContent(prev => ({ ...prev, ...contentMap }));
       }
     } catch (error) {
@@ -131,7 +138,12 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.2 }}
           >
-            {content.hero_title}
+            <span className="bg-gradient-to-r from-secondary to-secondary/80 bg-clip-text text-transparent">
+              תמונות מושלמות.
+            </span>{' '}
+            <span className="text-white">
+              מנות מושלמות.
+            </span>
           </motion.h1>
 
           <motion.p
