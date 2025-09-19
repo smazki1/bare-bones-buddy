@@ -143,69 +143,47 @@
     }
   }
 
-  /* Portfolio Grid System - FIXED */
-  .portfolio-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-auto-rows: 200px;
+  /* SIMPLE TEST GRID SYSTEM */
+  .test-grid {
+    display: flex;
+    flex-wrap: wrap;
     gap: 16px;
-    overflow-x: hidden;
+    padding: 20px;
   }
-  
-  @media (max-width: 768px) {
-    .portfolio-grid {
-      grid-template-columns: repeat(2, 1fr);
-      grid-auto-rows: 150px;
-      gap: 12px;
-    }
+
+  .test-small { 
+    width: 200px; 
+    height: 200px; 
+    background: red;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
   }
-  
-  @media (max-width: 480px) {
-    .portfolio-grid {
-      grid-template-columns: 1fr;
-      grid-auto-rows: 200px;
-      gap: 12px;
-    }
+
+  .test-medium { 
+    width: 400px; 
+    height: 200px; 
+    background: blue;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
   }
-  
-  /* Card Size Classes */
-  .card-small {
-    grid-column: span 1;
-    grid-row: span 1;
-  }
-  
-  .card-medium {
-    grid-column: span 2;
-    grid-row: span 1;
-  }
-  
-  .card-large {
-    grid-column: span 2;
-    grid-row: span 2;
-  }
-  
-  /* Mobile adjustments */
-  @media (max-width: 768px) {
-    .card-medium {
-      grid-column: span 2;
-      grid-row: span 1;
-    }
-    
-    .card-large {
-      grid-column: span 2;
-      grid-row: span 2;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .card-small,
-    .card-medium,
-    .card-large {
-      grid-column: span 1;
-    }
-    
-    .card-large {
-      grid-row: span 2;
-    }
+
+  .test-large { 
+    width: 400px; 
+    height: 400px; 
+    background: green;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
   }
 }
