@@ -430,9 +430,9 @@ function ProjectForm({
                 <SelectValue placeholder="בחר גודל תמונה" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="small">קטן (1:1 ריבוע)</SelectItem>
-                <SelectItem value="medium">בינוני (2:1 מלבן)</SelectItem>
-                <SelectItem value="large">גדול (2:2 או רוחב מלא)</SelectItem>
+                <SelectItem value="small">קטן (פוזיציה 1 - 1x1 ריבוע)</SelectItem>
+                <SelectItem value="medium">בינוני (פוזיציה 5 - 2x1 מלבן)</SelectItem>
+                <SelectItem value="large">גדול (פוזיציה 9 - 2x2 ריבוע)</SelectItem>
               </SelectContent>
             </Select>
           </div>

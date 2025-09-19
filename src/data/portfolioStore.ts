@@ -26,10 +26,13 @@ interface PortfolioStore {
   refreshOnCategoryUpdate: () => void
 }
 
-// Helper function to determine size based on index or random assignment
-const getRandomSize = (): 'small' | 'medium' | 'large' => {
-  const sizes: ('small' | 'medium' | 'large')[] = ['small', 'medium', 'large'];
-  return sizes[Math.floor(Math.random() * sizes.length)];
+// Helper function to get size from database or fallback to medium
+const getProjectSize = (dbProject: any): 'small' | 'medium' | 'large' => {
+  const size = dbProject.size;
+  if (size === 'small' || size === 'medium' || size === 'large') {
+    return size;
+  }
+  return 'medium'; // Default fallback
 };
 
 // Cache for category mapping
@@ -119,7 +122,7 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
           serviceType: 'תמונות' as const,
           imageAfter: dbProject.image_after_url,
           imageBefore: dbProject.image_before_url || undefined,
-          size: getRandomSize(),
+          size: getProjectSize(dbProject),
           category: categoryInfo.category,
           tags: categoryInfo.tags,
           createdAt: dbProject.created_at
@@ -157,7 +160,7 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
           serviceType: 'תמונות' as const,
           imageAfter: dbProject.image_after_url,
           imageBefore: dbProject.image_before_url || undefined,
-          size: getRandomSize(),
+          size: getProjectSize(dbProject),
           category: categoryInfo.category,
           tags: categoryInfo.tags,
           createdAt: dbProject.created_at
