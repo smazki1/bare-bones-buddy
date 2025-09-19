@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -34,11 +34,11 @@ const VisualSolutionCardComponent = ({ solution, index, isIntersecting }: Visual
     return () => observer.disconnect();
   }, [cardRef]);
 
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     navigate('/services');
-  };
+  }, [navigate]);
 
-  const CardContent = () => (
+  const CardContent = useMemo(() => (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
       animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
@@ -46,14 +46,14 @@ const VisualSolutionCardComponent = ({ solution, index, isIntersecting }: Visual
       className="group cursor-pointer h-full"
       onClick={handleClick}
     >
-      <div className="relative overflow-hidden rounded-2xl shadow-elegant hover:shadow-warm transition-all duration-500 group-hover:scale-105 aspect-[4/3] h-full">
+      <div className="relative overflow-hidden rounded-2xl shadow-elegant hover:shadow-warm transition-all duration-300 group-hover:scale-[1.02] aspect-[4/3] h-full">
         {solution.videoSrc ? (
           <video
             autoPlay
             loop
             muted
             playsInline
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
           >
             <source src={solution.videoSrc} type="video/mp4" />
             <img
@@ -66,12 +66,12 @@ const VisualSolutionCardComponent = ({ solution, index, isIntersecting }: Visual
           <img
             src={solution.imageSrc}
             alt={solution.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
             loading="lazy"
           />
         )}
         
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent group-hover:from-black/70 transition-all duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent group-hover:from-black/70 transition-all duration-300" />
         
         <div className="absolute bottom-6 left-6 right-6 text-white">
           <h3 className="text-lg md:text-xl lg:text-2xl font-assistant font-bold mb-2 line-clamp-2">
@@ -80,11 +80,11 @@ const VisualSolutionCardComponent = ({ solution, index, isIntersecting }: Visual
         </div>
       </div>
     </motion.div>
-  );
+  ), [solution, index, isVisible, handleClick]);
 
   return (
     <div ref={setCardRef}>
-      <CardContent />
+      {CardContent}
     </div>
   );
 };
@@ -95,35 +95,44 @@ const VisualSolutionsSection = () => {
     visualSolutionsStore.safeGetConfigOrDefaults()
   );
 
-  // Carousel state
+  // Carousel refs and state
+  const carouselRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [cardsPerView, setCardsPerView] = useState(3);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
-  // Update cards per view based on screen size
-  useEffect(() => {
-    const updateCardsPerView = () => {
-      if (window.innerWidth < 768) {
-        setCardsPerView(1);
-      } else if (window.innerWidth < 1024) {
-        setCardsPerView(2);
-      } else {
-        setCardsPerView(3);
-      }
-    };
-
-    updateCardsPerView();
-    window.addEventListener('resize', updateCardsPerView);
-    return () => window.removeEventListener('resize', updateCardsPerView);
+  // Responsive breakpoints
+  const getCardsPerView = useCallback(() => {
+    if (typeof window === 'undefined') return 3;
+    const width = window.innerWidth;
+    if (width < 640) return 1;
+    if (width < 1024) return 2;
+    return 3;
   }, []);
 
+  const [cardsPerView, setCardsPerView] = useState(getCardsPerView);
+
+  // Update cards per view on resize
+  useEffect(() => {
+    const handleResize = () => {
+      setCardsPerView(getCardsPerView());
+      // Reset to first slide on resize to avoid layout issues
+      setCurrentIndex(0);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [getCardsPerView]);
+
+  // Load configuration
   useEffect(() => {
     const loadConfig = () => {
       const newConfig = visualSolutionsStore.safeGetConfigOrDefaults();
-      console.log('Loading visual solutions config:', newConfig);
       setConfig(newConfig);
     };
 
-    // Cloud-first load with fallback
     let didSetFromCloud = false;
     (async () => {
       try {
@@ -136,19 +145,14 @@ const VisualSolutionsSection = () => {
       if (!didSetFromCloud) loadConfig();
     })();
 
-    // Cross-tab updates
     const handleStorageChange = (e: StorageEvent) => {
-      console.log('Storage change detected:', e.key);
       if (e.key === 'aiMaster:visualSolutions') {
-        console.log('Visual solutions storage updated');
         loadConfig();
       }
     };
     window.addEventListener('storage', handleStorageChange);
 
-    // Same-tab updates
     const handleLocalUpdate = (e: CustomEvent) => {
-      console.log('Visual solutions update event received:', e.detail);
       loadConfig();
     };
     window.addEventListener('visualSolutions:updated', handleLocalUpdate as EventListener);
@@ -159,22 +163,78 @@ const VisualSolutionsSection = () => {
     };
   }, []);
 
-  const enabledSolutions = config.items
-    .filter(solution => solution.enabled)
-    .sort((a, b) => a.order - b.order);
+  const enabledSolutions = useMemo(() => 
+    config.items
+      .filter(solution => solution.enabled)
+      .sort((a, b) => a.order - b.order),
+    [config.items]
+  );
 
-  const maxIndex = Math.max(0, enabledSolutions.length - cardsPerView);
-  
-  const scrollNext = () => {
-    setCurrentIndex(prev => Math.min(prev + 1, maxIndex));
-  };
+  const maxIndex = useMemo(() => 
+    Math.max(0, enabledSolutions.length - cardsPerView),
+    [enabledSolutions.length, cardsPerView]
+  );
 
-  const scrollPrev = () => {
-    setCurrentIndex(prev => Math.max(prev - 1, 0));
-  };
+  // Smooth slide transition with hardware acceleration
+  const slideToIndex = useCallback((index: number) => {
+    if (isTransitioning || !carouselRef.current) return;
+    
+    const targetIndex = Math.max(0, Math.min(index, maxIndex));
+    if (targetIndex === currentIndex) return;
+
+    setIsTransitioning(true);
+    setCurrentIndex(targetIndex);
+
+    // Use requestAnimationFrame for smooth transition
+    requestAnimationFrame(() => {
+      if (carouselRef.current) {
+        const translateX = -(targetIndex * (100 / cardsPerView));
+        carouselRef.current.style.transform = `translate3d(${translateX}%, 0, 0)`;
+      }
+      
+      // Reset transition state after animation
+      setTimeout(() => setIsTransitioning(false), 300);
+    });
+  }, [currentIndex, maxIndex, cardsPerView, isTransitioning]);
+
+  const scrollNext = useCallback(() => {
+    slideToIndex(currentIndex + 1);
+  }, [currentIndex, slideToIndex]);
+
+  const scrollPrev = useCallback(() => {
+    slideToIndex(currentIndex - 1);
+  }, [currentIndex, slideToIndex]);
+
+  // Touch handlers for swipe
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe && currentIndex < maxIndex) {
+      scrollNext();
+    }
+    if (isRightSwipe && currentIndex > 0) {
+      scrollPrev();
+    }
+  }, [touchStart, touchEnd, currentIndex, maxIndex, scrollNext, scrollPrev]);
 
   const canScrollNext = currentIndex < maxIndex;
   const canScrollPrev = currentIndex > 0;
+
+  // Calculate dots for pagination
+  const totalDots = Math.ceil(enabledSolutions.length / cardsPerView);
 
   return (
     <section ref={ref} className="py-20 bg-muted/30 relative">
@@ -196,75 +256,84 @@ const VisualSolutionsSection = () => {
           </p>
         </motion.div>
 
-        {/* Carousel Layout */}
+        {/* Carousel Container */}
         <div className="relative max-w-7xl mx-auto">
           <div className="overflow-hidden">
             <div 
-              className="flex transition-transform duration-500 ease-out gap-6"
+              ref={carouselRef}
+              className="flex transition-transform duration-300 ease-out will-change-transform"
               style={{ 
-                transform: `translateX(-${currentIndex * (100 / cardsPerView)}%)`,
+                transform: `translate3d(-${currentIndex * (100 / cardsPerView)}%, 0, 0)`,
                 width: `${(enabledSolutions.length / cardsPerView) * 100}%`
               }}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
             >
               {enabledSolutions.map((solution, index) => (
                 <div
                   key={solution.id}
-                  className="flex-none"
+                  className="flex-none px-3"
                   style={{ width: `${100 / enabledSolutions.length}%` }}
                 >
-                  <div className="px-3">
-                    <VisualSolutionCardComponent
-                      solution={solution}
-                      index={index}
-                      isIntersecting={isIntersecting}
-                    />
-                  </div>
+                  <VisualSolutionCardComponent
+                    solution={solution}
+                    index={index}
+                    isIntersecting={isIntersecting}
+                  />
                 </div>
               ))}
             </div>
           </div>
 
           {/* Navigation Arrows */}
-          <Button
-            variant="outline"
-            size="icon"
-            className={`absolute top-1/2 -translate-y-1/2 left-4 z-10 bg-background/90 backdrop-blur-sm border-border/50 hover:bg-accent hover:border-accent-foreground/20 transition-all duration-300 ${
-              !canScrollPrev ? 'opacity-50 cursor-not-allowed' : 'opacity-90 hover:opacity-100'
-            } hidden md:flex`}
-            onClick={scrollPrev}
-            disabled={!canScrollPrev}
-            aria-label="הקלף הקודם"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
+          {enabledSolutions.length > cardsPerView && (
+            <>
+              <Button
+                variant="outline"
+                size="icon"
+                className={`absolute top-1/2 -translate-y-1/2 left-4 z-10 bg-background/90 backdrop-blur-sm border-border/50 hover:bg-accent hover:border-accent-foreground/20 transition-all duration-300 ${
+                  !canScrollPrev ? 'opacity-30 cursor-not-allowed' : 'opacity-90 hover:opacity-100'
+                } hidden md:flex`}
+                onClick={scrollPrev}
+                disabled={!canScrollPrev || isTransitioning}
+                aria-label="הקלף הקודם"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
 
-          <Button
-            variant="outline"
-            size="icon"
-            className={`absolute top-1/2 -translate-y-1/2 right-4 z-10 bg-background/90 backdrop-blur-sm border-border/50 hover:bg-accent hover:border-accent-foreground/20 transition-all duration-300 ${
-              !canScrollNext ? 'opacity-50 cursor-not-allowed' : 'opacity-90 hover:opacity-100'
-            } hidden md:flex`}
-            onClick={scrollNext}
-            disabled={!canScrollNext}
-            aria-label="הקלף הבא"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className={`absolute top-1/2 -translate-y-1/2 right-4 z-10 bg-background/90 backdrop-blur-sm border-border/50 hover:bg-accent hover:border-accent-foreground/20 transition-all duration-300 ${
+                  !canScrollNext ? 'opacity-30 cursor-not-allowed' : 'opacity-90 hover:opacity-100'
+                } hidden md:flex`}
+                onClick={scrollNext}
+                disabled={!canScrollNext || isTransitioning}
+                aria-label="הקלף הבא"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Dots indicator */}
-        <div className="flex justify-center mt-8 space-x-2">
-          {Array.from({ length: maxIndex + 1 }, (_, index) => (
-            <button
-              key={index}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                index === currentIndex ? 'bg-primary' : 'bg-muted-foreground/30'
-              }`}
-              onClick={() => setCurrentIndex(index)}
-              aria-label={`עבור לקבוצת קלפים ${index + 1}`}
-            />
-          ))}
-        </div>
+        {totalDots > 1 && (
+          <div className="flex justify-center mt-8 gap-2">
+            {Array.from({ length: totalDots }, (_, index) => (
+              <button
+                key={index}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  index === currentIndex ? 'bg-primary' : 'bg-muted-foreground/30'
+                }`}
+                onClick={() => slideToIndex(index)}
+                disabled={isTransitioning}
+                aria-label={`עבור לקבוצת קלפים ${index + 1}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
