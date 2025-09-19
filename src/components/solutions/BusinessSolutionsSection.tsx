@@ -22,12 +22,12 @@ const BusinessSolutionsCard = ({ item, index }: { item: CategoryForBusinessSolut
 
   const CardContent = () => (
     <div
-      className="group relative aspect-[16/11] rounded-2xl overflow-hidden shadow-soft cursor-pointer transform transition-transform duration-200 hover:scale-105 min-w-[280px] md:min-w-0"
+      className="group relative aspect-[3/2] rounded-2xl overflow-hidden shadow-elegant hover:shadow-warm cursor-pointer transform transition-all duration-500 hover:scale-105"
     >
       {/* Background Media */}
       {item.videoSrc ? (
         <video
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           autoPlay
           loop
           muted
@@ -42,16 +42,17 @@ const BusinessSolutionsCard = ({ item, index }: { item: CategoryForBusinessSolut
         <img
           src={item.imageSrc || '/placeholder.svg'}
           alt={item.title}
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          loading="lazy"
         />
       )}
       
       {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent group-hover:from-black/70 transition-all duration-200" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/15 to-transparent group-hover:from-black/60 transition-all duration-500" />
       
       {/* Content */}
-      <div className="absolute bottom-0 left-0 right-0 p-6">
-        <h3 className="text-white font-assistant font-bold text-xl leading-tight drop-shadow-lg">
+      <div className="absolute bottom-6 left-6 right-6 text-white">
+        <h3 className="font-assistant font-bold text-xl md:text-2xl leading-tight drop-shadow-lg">
           {item.title}
         </h3>
       </div>
@@ -64,23 +65,32 @@ const BusinessSolutionsCard = ({ item, index }: { item: CategoryForBusinessSolut
   // If no link should be generated, render as non-clickable
   if (!href) {
     return (
-      <div 
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: index * 0.1 }}
         className="cursor-default"
         aria-disabled="true"
       >
         <CardContent />
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <Link 
-      to={href}
-      className="block"
-      aria-label={`פתיחת קטלוג מסונן: ${item.title}`}
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: index * 0.1 }}
     >
-      <CardContent />
-    </Link>
+      <Link 
+        to={href}
+        className="block"
+        aria-label={`פתיחת קטלוג מסונן: ${item.title}`}
+      >
+        <CardContent />
+      </Link>
+    </motion.div>
   );
 };
 
@@ -136,10 +146,10 @@ const BusinessSolutionsSection = () => {
   }
 
   return (
-    <section className="py-16 md:py-24 bg-background">
+    <section className="py-20 bg-background">
       <div className="container mx-auto px-4">
         {/* Header */}
-        <div className="text-center max-w-4xl mx-auto mb-12 md:mb-16">
+        <div className="text-center max-w-4xl mx-auto mb-16">
           <motion.h2
             className="text-3xl md:text-4xl lg:text-5xl font-assistant font-bold text-primary mb-4 leading-tight"
             initial={{ opacity: 0, y: 20 }}
@@ -150,7 +160,7 @@ const BusinessSolutionsSection = () => {
             פתרונות מותאמים לכל עסק
           </motion.h2>
           <motion.p
-            className="text-lg md:text-xl text-muted-foreground font-open-sans leading-relaxed"
+            className="text-xl text-muted-foreground font-open-sans leading-relaxed max-w-2xl mx-auto"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
@@ -160,43 +170,11 @@ const BusinessSolutionsSection = () => {
           </motion.p>
         </div>
 
-        {/* Grid - Desktop */}
-        <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 md:gap-8">
+        {/* Unified Grid Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 max-w-6xl mx-auto">
           {categories.map((item, index) => (
             <BusinessSolutionsCard key={item.id} item={item} index={index} />
           ))}
-        </div>
-
-        {/* Horizontal Scroll - Mobile/Tablet */}
-        <div 
-          className="lg:hidden relative"
-          dir="rtl"
-          aria-label="פתרונות עסקיים - גלילה אופקית"
-        >
-          {/* Edge fade mask - adjusted for RTL */}
-          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
-          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-          
-          <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4 -mx-4">
-            {categories.map((item, index) => (
-              <div key={item.id} className="snap-center">
-                <BusinessSolutionsCard item={item} index={index} />
-              </div>
-            ))}
-          </div>
-
-          {/* Dots indicator */}
-          {categories.length > 0 && (
-            <div className="flex justify-center mt-6 gap-2">
-              {categories.map((_, index) => (
-                <div
-                  key={index}
-                  className="w-2 h-2 rounded-full bg-muted-foreground/30"
-                  aria-hidden="true"
-                />
-              ))}
-            </div>
-          )}
         </div>
 
         {/* Empty state */}

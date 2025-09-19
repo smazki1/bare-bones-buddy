@@ -45,7 +45,7 @@ const VisualSolutionCardComponent = ({ solution, index, isIntersecting }: Visual
       className="group cursor-pointer"
       onClick={handleClick}
     >
-      <div className="relative overflow-hidden rounded-2xl shadow-elegant hover:shadow-warm transition-all duration-500 group-hover:scale-105 aspect-[4/3]">
+      <div className="relative overflow-hidden rounded-2xl shadow-elegant hover:shadow-warm transition-all duration-500 group-hover:scale-105 aspect-[3/2]">
         {solution.videoSrc ? (
           <video
             autoPlay
@@ -70,7 +70,7 @@ const VisualSolutionCardComponent = ({ solution, index, isIntersecting }: Visual
           />
         )}
         
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/15 to-transparent group-hover:from-black/60 transition-all duration-500" />
         
         <div className="absolute bottom-6 left-6 right-6 text-white">
           <h3 className="text-xl md:text-2xl font-assistant font-bold mb-2">
@@ -142,12 +142,15 @@ const VisualSolutionsSection = () => {
     .sort((a, b) => a.order - b.order);
 
   return (
-    <section ref={ref} className="py-20 bg-gradient-subtle">
+    <section ref={ref} className="py-20 bg-muted/30 relative">
+      {/* Seamless transition gradient */}
+      <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-background to-muted/30" />
+      
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={isIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-assistant font-bold text-primary mb-4 leading-tight max-w-4xl mx-auto">
@@ -158,32 +161,16 @@ const VisualSolutionsSection = () => {
           </p>
         </motion.div>
 
-        {/* Desktop Grid Layout */}
-        <div className="hidden lg:block">
-          <div className="grid grid-cols-2 xl:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {enabledSolutions.slice(0, 6).map((solution, index) => (
-              <VisualSolutionCardComponent
-                key={solution.id}
-                solution={solution}
-                index={index}
-                isIntersecting={isIntersecting}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Mobile/Tablet Static Grid */}
-        <div className="lg:hidden">
-          <div className="grid grid-cols-1 gap-4 max-w-4xl mx-auto">
-            {enabledSolutions.map((solution, index) => (
-              <VisualSolutionCardComponent
-                key={solution.id}
-                solution={solution}
-                index={index}
-                isIntersecting={isIntersecting}
-              />
-            ))}
-          </div>
+        {/* Unified Grid Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {enabledSolutions.slice(0, 6).map((solution, index) => (
+            <VisualSolutionCardComponent
+              key={solution.id}
+              solution={solution}
+              index={index}
+              isIntersecting={isIntersecting}
+            />
+          ))}
         </div>
       </div>
     </section>
