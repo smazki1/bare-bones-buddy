@@ -10,72 +10,168 @@ interface MasonryGridProps {
 }
 
 const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridProps) => {
-  // SIMPLE TEST FIRST - DELETE THIS ONCE WORKING
-  const testCards = [
-    { id: 'test1', size: 'small', name: 'SMALL TEST' },
-    { id: 'test2', size: 'medium', name: 'MEDIUM TEST' },
-    { id: 'test3', size: 'large', name: 'LARGE TEST' },
-  ];
+  
+  // Portfolio card size system with inline styles
+  const getCardStyles = (size: Project['size']) => {
+    const baseStyles = {
+      position: 'relative' as const,
+      borderRadius: '12px',
+      overflow: 'hidden',
+      cursor: 'pointer',
+      boxShadow: '0 4px 20px rgba(139, 30, 63, 0.1)',
+      transition: 'all 0.3s ease',
+    };
 
-  // Test with inline styles to debug CSS loading
-  const getInlineStyles = (size: string) => {
     switch(size) {
       case 'small':
         return {
-          width: '200px',
-          height: '200px',
-          backgroundColor: 'red',
-          borderRadius: '8px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white',
-          fontWeight: 'bold',
-          fontSize: '16px'
+          ...baseStyles,
+          width: '280px',
+          height: '280px',
         };
       case 'medium':
         return {
-          width: '400px',
-          height: '200px',
-          backgroundColor: 'blue',
-          borderRadius: '8px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white',
-          fontWeight: 'bold',
-          fontSize: '16px'
+          ...baseStyles,
+          width: '280px',
+          height: '420px',
         };
       case 'large':
         return {
-          width: '400px',
-          height: '400px',
-          backgroundColor: 'green',
-          borderRadius: '8px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white',
-          fontWeight: 'bold',
-          fontSize: '16px'
+          ...baseStyles,
+          width: '580px',
+          height: '420px',
         };
       default:
-        return {};
+        return {
+          ...baseStyles,
+          width: '280px',
+          height: '280px',
+        };
     }
   };
 
+  // Loading skeleton styles
+  const getSkeletonStyles = (size: string) => {
+    const cardStyles = getCardStyles(size as Project['size']);
+    return {
+      ...cardStyles,
+      backgroundColor: '#f3f4f6',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    };
+  };
+
   return (
-    <div className="w-full max-w-6xl mx-auto">
-      <div className="test-grid">
-        {testCards.map((card) => (
-          <div 
-            key={card.id}
-            style={getInlineStyles(card.size)}
+    <div className="w-full max-w-6xl mx-auto px-4">
+      {/* Portfolio Grid */}
+      <div className="flex flex-wrap gap-6 justify-center">
+        {/* Render Projects */}
+        {projects.map((project, index) => (
+          <motion.div
+            key={project.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.3) }}
+            style={getCardStyles(project.size)}
+            className="group hover:shadow-lg active:scale-[0.98] sm:hover:scale-[1.02]"
           >
-            {card.name}
-          </div>
+            {/* Image Container */}
+            <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+              <img
+                src={project.imageAfter}
+                alt={`${project.businessName} - אחרי`}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: 'center',
+                }}
+                loading={index < 6 ? 'eager' : 'lazy'}
+              />
+              
+              {/* Gradient Overlay */}
+              <div style={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: '100px',
+                background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
+                pointerEvents: 'none',
+              }} />
+
+              {/* "אחרי" Badge */}
+              <div style={{
+                position: 'absolute',
+                top: '12px',
+                right: '12px',
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                color: '#8B1E3F',
+                padding: '4px 8px',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontWeight: '600',
+                fontFamily: 'Assistant, sans-serif',
+              }}>
+                אחרי
+              </div>
+
+              {/* Business Name */}
+              <div style={{
+                position: 'absolute',
+                bottom: '16px',
+                left: '16px',
+                right: '16px',
+                color: 'white',
+              }}>
+                <h3 style={{
+                  fontSize: project.size === 'large' ? '20px' : '16px',
+                  fontWeight: '700',
+                  fontFamily: 'Assistant, sans-serif',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                  margin: 0,
+                }}>
+                  {project.businessName || 'פרויקט ללא שם'}
+                </h3>
+              </div>
+            </div>
+          </motion.div>
         ))}
+
+        {/* Loading Skeletons */}
+        {isLoading && (
+          <>
+            {Array.from({ length: 6 }).map((_, index) => {
+              const sizes = ['small', 'medium', 'large'];
+              const randomSize = sizes[index % sizes.length];
+              return (
+                <div 
+                  key={`skeleton-${index}`}
+                  style={getSkeletonStyles(randomSize)}
+                >
+                  <div style={{
+                    color: '#9ca3af',
+                    fontSize: '14px',
+                    fontFamily: 'Assistant, sans-serif',
+                  }}>
+                    טוען...
+                  </div>
+                </div>
+              );
+            })}
+          </>
+        )}
       </div>
+
+      {/* Empty State */}
+      {!isLoading && projects.length === 0 && (
+        <div className="text-center py-16">
+          <p className="text-muted-foreground text-lg">
+            אין פרויקטים להצגה
+          </p>
+        </div>
+      )}
     </div>
   );
 };
