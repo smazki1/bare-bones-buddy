@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import ProjectCard from './ProjectCard';
 import { Project } from '@/data/portfolioStore';
@@ -10,7 +11,17 @@ interface MasonryGridProps {
 }
 
 const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridProps) => {
+  // State to track before/after toggle for each project
+  const [toggleStates, setToggleStates] = useState<Record<string, boolean>>({});
   
+  // Toggle handler for individual projects
+  const handleToggle = (projectId: string) => {
+    setToggleStates(prev => ({
+      ...prev,
+      [projectId]: !prev[projectId]
+    }));
+  };
+
   // Portfolio card size system with inline styles
   const getCardStyles = (size: Project['size']) => {
     const baseStyles = {
@@ -67,77 +78,120 @@ const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridPro
       {/* Portfolio Grid */}
       <div className="flex flex-wrap gap-6 justify-center">
         {/* Render Projects */}
-        {projects.map((project, index) => (
-          <motion.div
-            key={project.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.3) }}
-            style={getCardStyles(project.size)}
-            className="group hover:shadow-lg active:scale-[0.98] sm:hover:scale-[1.02]"
-          >
-            {/* Image Container */}
-            <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-              <img
-                src={project.imageAfter}
-                alt={`${project.businessName} - אחרי`}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  objectPosition: 'center',
-                }}
-                loading={index < 6 ? 'eager' : 'lazy'}
-              />
-              
-              {/* Gradient Overlay */}
-              <div style={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: '100px',
-                background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
-                pointerEvents: 'none',
-              }} />
+        {projects.map((project, index) => {
+          const showBefore = toggleStates[project.id] || false;
+          const currentImage = showBefore && project.imageBefore ? project.imageBefore : project.imageAfter;
+          const canToggle = project.imageBefore && project.imageBefore !== project.imageAfter;
+          
+          return (
+            <motion.div
+              key={project.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.3) }}
+              style={getCardStyles(project.size)}
+              className="group hover:shadow-lg active:scale-[0.98] sm:hover:scale-[1.02]"
+              onClick={() => canToggle && handleToggle(project.id)}
+              role={canToggle ? "button" : undefined}
+              tabIndex={canToggle ? 0 : undefined}
+              onKeyDown={(e) => {
+                if (canToggle && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault();
+                  handleToggle(project.id);
+                }
+              }}
+            >
+              {/* Image Container */}
+              <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                <img
+                  key={`${project.id}-${showBefore}`} // Force re-render for smooth transition
+                  src={currentImage}
+                  alt={`${project.businessName} - ${showBefore ? 'לפני' : 'אחרי'}`}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    objectPosition: 'center',
+                    transition: 'opacity 0.3s ease',
+                  }}
+                  loading={index < 6 ? 'eager' : 'lazy'}
+                />
+                
+                {/* Gradient Overlay */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  height: '100px',
+                  background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
+                  pointerEvents: 'none',
+                }} />
 
-              {/* "אחרי" Badge */}
-              <div style={{
-                position: 'absolute',
-                top: '12px',
-                right: '12px',
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                color: '#8B1E3F',
-                padding: '4px 8px',
-                borderRadius: '6px',
-                fontSize: '12px',
-                fontWeight: '600',
-                fontFamily: 'Assistant, sans-serif',
-              }}>
-                אחרי
-              </div>
+                {/* Before/After Badge - only show if toggle is available */}
+                {canToggle && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '12px',
+                    right: '12px',
+                    backgroundColor: showBefore ? 'rgba(243, 117, 43, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+                    color: showBefore ? 'white' : '#8B1E3F',
+                    padding: '6px 10px',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    fontFamily: 'Assistant, sans-serif',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                  }}>
+                    {showBefore ? 'לפני' : 'אחרי'}
+                  </div>
+                )}
 
-              {/* Business Name */}
-              <div style={{
-                position: 'absolute',
-                bottom: '16px',
-                left: '16px',
-                right: '16px',
-                color: 'white',
-              }}>
-                <h3 style={{
-                  fontSize: project.size === 'large' ? '20px' : '16px',
-                  fontWeight: '700',
-                  fontFamily: 'Assistant, sans-serif',
-                  textShadow: '0 2px 4px rgba(0,0,0,0.5)',
-                  margin: 0,
+                {/* Click indicator for toggle-able cards */}
+                {canToggle && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '12px',
+                    left: '12px',
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    color: 'white',
+                    padding: '4px 6px',
+                    borderRadius: '6px',
+                    fontSize: '10px',
+                    fontWeight: '500',
+                    fontFamily: 'Assistant, sans-serif',
+                    opacity: 0,
+                    transition: 'opacity 0.3s ease',
+                  }}
+                  className="group-hover:opacity-100"
+                  >
+                    לחץ להחלפה
+                  </div>
+                )}
+
+                {/* Business Name */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: '16px',
+                  left: '16px',
+                  right: '16px',
+                  color: 'white',
                 }}>
-                  {project.businessName || 'פרויקט ללא שם'}
-                </h3>
+                  <h3 style={{
+                    fontSize: project.size === 'large' ? '20px' : '16px',
+                    fontWeight: '700',
+                    fontFamily: 'Assistant, sans-serif',
+                    textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                    margin: 0,
+                  }}>
+                    {project.businessName || 'פרויקט ללא שם'}
+                  </h3>
+                </div>
               </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          );
+        })}
 
         {/* Loading Skeletons */}
         {isLoading && (
