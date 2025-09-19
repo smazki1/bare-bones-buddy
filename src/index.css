@@ -143,52 +143,68 @@
     }
   }
 
-  /* Portfolio Grid System */
+  /* Portfolio Grid System - FIXED */
   .portfolio-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-auto-rows: 150px;
-    gap: 12px;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 200px;
+    gap: 16px;
+    overflow-x: hidden;
   }
   
-  @media (min-width: 640px) {
+  @media (max-width: 768px) {
     .portfolio-grid {
-      grid-template-columns: repeat(3, 1fr);
-      grid-auto-rows: 180px;
-      gap: 16px;
+      grid-template-columns: repeat(2, 1fr);
+      grid-auto-rows: 150px;
+      gap: 12px;
     }
   }
   
-  @media (min-width: 1024px) {
+  @media (max-width: 480px) {
     .portfolio-grid {
+      grid-template-columns: 1fr;
       grid-auto-rows: 200px;
-      gap: 20px;
+      gap: 12px;
     }
   }
   
-  .portfolio-grid-small {
+  /* Card Size Classes */
+  .card-small {
     grid-column: span 1;
     grid-row: span 1;
   }
   
-  .portfolio-grid-medium {
+  .card-medium {
     grid-column: span 2;
     grid-row: span 1;
   }
   
-  .portfolio-grid-large {
+  .card-large {
     grid-column: span 2;
     grid-row: span 2;
   }
   
-  @media (max-width: 639px) {
-    .portfolio-grid-medium {
+  /* Mobile adjustments */
+  @media (max-width: 768px) {
+    .card-medium {
       grid-column: span 2;
       grid-row: span 1;
     }
     
-    .portfolio-grid-large {
+    .card-large {
       grid-column: span 2;
+      grid-row: span 2;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .card-small,
+    .card-medium,
+    .card-large {
+      grid-column: span 1;
+    }
+    
+    .card-large {
       grid-row: span 2;
     }
   }

@@ -15,16 +15,12 @@ const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridPro
     
     return Array.from({ length: 6 }, (_, index) => {
       const size = skeletonSizes[index];
+      const sizeClass = size === 'small' ? 'card-small' : size === 'medium' ? 'card-medium' : 'card-large';
       
       return (
         <div 
           key={`skeleton-${index}`} 
-          className={`
-            ${size === 'small' ? 'portfolio-grid-small' : ''}
-            ${size === 'medium' ? 'portfolio-grid-medium' : ''}
-            ${size === 'large' ? 'portfolio-grid-large' : ''}
-            overflow-hidden
-          `}
+          className={`${sizeClass} overflow-hidden`}
         >
           <div className="w-full h-full min-h-[150px] rounded-lg sm:rounded-xl bg-gradient-to-br from-muted via-muted/80 to-muted animate-pulse flex items-center justify-center">
             <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
@@ -35,7 +31,7 @@ const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridPro
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6">
+    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6" style={{ overflowX: 'hidden' }}>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

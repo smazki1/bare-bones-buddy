@@ -15,13 +15,13 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
   const getSizeClasses = (size: Project['size']) => {
     switch (size) {
       case 'small':
-        return 'portfolio-grid-small';
+        return 'card-small';
       case 'medium':
-        return 'portfolio-grid-medium';
+        return 'card-medium';
       case 'large':
-        return 'portfolio-grid-large';
+        return 'card-large';
       default:
-        return 'portfolio-grid-small';
+        return 'card-small';
     }
   };
 
