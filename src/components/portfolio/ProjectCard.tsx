@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { StaticImage } from '@/components/ui/StaticImage';
 import { Project } from '@/data/portfolioStore';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ProjectCardProps {
   project: Project;
@@ -12,33 +11,17 @@ interface ProjectCardProps {
 
 const ProjectCard = ({ project, index }: ProjectCardProps) => {
   const [showBefore, setShowBefore] = useState(false);
-  const isMobile = useIsMobile();
 
   const getSizeClasses = (size: Project['size']) => {
-    // Mobile-first responsive design
-    if (isMobile) {
-      switch (size) {
-        case 'small':
-          return 'col-span-1 aspect-square'; // 1x1 square
-        case 'medium':
-          return 'col-span-2 aspect-[2/1]'; // 2x1 landscape rectangle
-        case 'large':
-          return 'col-span-2 aspect-square'; // 2x1 but square (taller on mobile)
-        default:
-          return 'col-span-1 aspect-square';
-      }
-    }
-
-    // Desktop and tablet grid spanning
     switch (size) {
       case 'small':
-        return 'col-span-1 aspect-square'; // 1x1 square
+        return 'portfolio-grid-small';
       case 'medium':
-        return 'col-span-2 aspect-[2/1]'; // 2x1 wide rectangle
+        return 'portfolio-grid-medium';
       case 'large':
-        return 'col-span-2 row-span-2 aspect-square'; // 2x2 large square
+        return 'portfolio-grid-large';
       default:
-        return 'col-span-1 aspect-square';
+        return 'portfolio-grid-small';
     }
   };
 
@@ -71,7 +54,7 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
     >
       <div className="relative overflow-hidden rounded-lg sm:rounded-xl shadow-elegant 
         transition-all duration-200 active:scale-[0.98] sm:hover:shadow-warm sm:group-hover:scale-[1.02] 
-        w-full h-full"
+        w-full h-full min-h-[150px]"
       >
         {/* Main Image */}
         <div className="relative w-full h-full">

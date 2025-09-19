@@ -15,21 +15,17 @@ const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridPro
     
     return Array.from({ length: 6 }, (_, index) => {
       const size = skeletonSizes[index];
-      const getSizeClasses = (size: string) => {
-        switch (size) {
-          case 'small':
-            return 'col-span-1 aspect-square';
-          case 'medium':
-            return 'col-span-2 aspect-[2/1]';
-          case 'large':
-            return 'col-span-2 row-span-2 aspect-square';
-          default:
-            return 'col-span-1 aspect-square';
-        }
-      };
-
+      
       return (
-        <div key={`skeleton-${index}`} className={`${getSizeClasses(size)} overflow-hidden`}>
+        <div 
+          key={`skeleton-${index}`} 
+          className={`
+            ${size === 'small' ? 'portfolio-grid-small' : ''}
+            ${size === 'medium' ? 'portfolio-grid-medium' : ''}
+            ${size === 'large' ? 'portfolio-grid-large' : ''}
+            overflow-hidden
+          `}
+        >
           <div className="w-full h-full min-h-[150px] rounded-lg sm:rounded-xl bg-gradient-to-br from-muted via-muted/80 to-muted animate-pulse flex items-center justify-center">
             <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
           </div>
@@ -39,16 +35,12 @@ const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridPro
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, delay: 0.1 }}
-        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4 lg:gap-6"
-        style={{ 
-          gridAutoRows: 'minmax(150px, auto)',
-          gridTemplateRows: 'repeat(auto, minmax(150px, 200px))'
-        }}
+        className="portfolio-grid"
       >
         {projects.map((project, index) => {
           // Apply fade effect to last 6 items when max reached
