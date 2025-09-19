@@ -1,11 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { VisualSolutionsConfig, VisualSolutionCard } from '@/types/visualSolutions';
 import { visualSolutionsStore } from '@/data/visualSolutionsStore';
-import useEmblaCarousel from 'embla-carousel-react';
 import { Button } from '@/components/ui/button';
 
 interface VisualSolutionCardProps {
@@ -36,7 +35,6 @@ const VisualSolutionCardComponent = ({ solution, index, isIntersecting }: Visual
   }, [cardRef]);
 
   const handleClick = () => {
-    // Navigate to services page
     navigate('/services');
   };
 
@@ -97,49 +95,26 @@ const VisualSolutionsSection = () => {
     visualSolutionsStore.safeGetConfigOrDefaults()
   );
 
-  // Carousel setup
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    direction: 'rtl',
-    align: 'start',
-    containScroll: 'trimSnaps',
-    dragFree: false,
-    breakpoints: {
-      '(min-width: 768px)': { 
-        slidesToScroll: 1,
-        align: 'start'
-      }
-    }
-  });
+  // Carousel state
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [cardsPerView, setCardsPerView] = useState(3);
 
-  const [canScrollPrev, setCanScrollPrev] = useState(false);
-  const [canScrollNext, setCanScrollNext] = useState(false);
-
-  const scrollPrev = useCallback(() => {
-    if (emblaApi) emblaApi.scrollPrev();
-  }, [emblaApi]);
-
-  const scrollNext = useCallback(() => {
-    if (emblaApi) emblaApi.scrollNext();
-  }, [emblaApi]);
-
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setCanScrollPrev(emblaApi.canScrollPrev());
-    setCanScrollNext(emblaApi.canScrollNext());
-  }, [emblaApi]);
-
+  // Update cards per view based on screen size
   useEffect(() => {
-    if (!emblaApi) return;
-    
-    onSelect();
-    emblaApi.on('reInit', onSelect);
-    emblaApi.on('select', onSelect);
-    
-    return () => {
-      emblaApi.off('reInit', onSelect);
-      emblaApi.off('select', onSelect);
+    const updateCardsPerView = () => {
+      if (window.innerWidth < 768) {
+        setCardsPerView(1);
+      } else if (window.innerWidth < 1024) {
+        setCardsPerView(2);
+      } else {
+        setCardsPerView(3);
+      }
     };
-  }, [emblaApi, onSelect]);
+
+    updateCardsPerView();
+    window.addEventListener('resize', updateCardsPerView);
+    return () => window.removeEventListener('resize', updateCardsPerView);
+  }, []);
 
   useEffect(() => {
     const loadConfig = () => {
@@ -188,6 +163,19 @@ const VisualSolutionsSection = () => {
     .filter(solution => solution.enabled)
     .sort((a, b) => a.order - b.order);
 
+  const maxIndex = Math.max(0, enabledSolutions.length - cardsPerView);
+  
+  const scrollNext = () => {
+    setCurrentIndex(prev => Math.min(prev + 1, maxIndex));
+  };
+
+  const scrollPrev = () => {
+    setCurrentIndex(prev => Math.max(prev - 1, 0));
+  };
+
+  const canScrollNext = currentIndex < maxIndex;
+  const canScrollPrev = currentIndex > 0;
+
   return (
     <section ref={ref} className="py-20 bg-muted/30 relative">
       {/* Seamless transition gradient */}
@@ -210,37 +198,33 @@ const VisualSolutionsSection = () => {
 
         {/* Carousel Layout */}
         <div className="relative max-w-7xl mx-auto">
-          <div className="overflow-hidden" ref={emblaRef}>
-            <div className="flex gap-6 rtl:flex-row-reverse">
+          <div className="overflow-hidden">
+            <div 
+              className="flex transition-transform duration-500 ease-out gap-6"
+              style={{ 
+                transform: `translateX(-${currentIndex * (100 / cardsPerView)}%)`,
+                width: `${(enabledSolutions.length / cardsPerView) * 100}%`
+              }}
+            >
               {enabledSolutions.map((solution, index) => (
                 <div
                   key={solution.id}
-                  className="flex-none w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 min-w-0"
+                  className="flex-none"
+                  style={{ width: `${100 / enabledSolutions.length}%` }}
                 >
-                  <VisualSolutionCardComponent
-                    solution={solution}
-                    index={index}
-                    isIntersecting={isIntersecting}
-                  />
+                  <div className="px-3">
+                    <VisualSolutionCardComponent
+                      solution={solution}
+                      index={index}
+                      isIntersecting={isIntersecting}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Navigation Arrows */}
-          <Button
-            variant="outline"
-            size="icon"
-            className={`absolute top-1/2 -translate-y-1/2 right-4 z-10 bg-background/90 backdrop-blur-sm border-border/50 hover:bg-accent hover:border-accent-foreground/20 transition-all duration-300 ${
-              !canScrollNext ? 'opacity-50 cursor-not-allowed' : 'opacity-90 hover:opacity-100'
-            } hidden md:flex`}
-            onClick={scrollNext}
-            disabled={!canScrollNext}
-            aria-label="הקלף הבא"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-
           <Button
             variant="outline"
             size="icon"
@@ -253,6 +237,33 @@ const VisualSolutionsSection = () => {
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
+
+          <Button
+            variant="outline"
+            size="icon"
+            className={`absolute top-1/2 -translate-y-1/2 right-4 z-10 bg-background/90 backdrop-blur-sm border-border/50 hover:bg-accent hover:border-accent-foreground/20 transition-all duration-300 ${
+              !canScrollNext ? 'opacity-50 cursor-not-allowed' : 'opacity-90 hover:opacity-100'
+            } hidden md:flex`}
+            onClick={scrollNext}
+            disabled={!canScrollNext}
+            aria-label="הקלף הבא"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Dots indicator */}
+        <div className="flex justify-center mt-8 space-x-2">
+          {Array.from({ length: maxIndex + 1 }, (_, index) => (
+            <button
+              key={index}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                index === currentIndex ? 'bg-primary' : 'bg-muted-foreground/30'
+              }`}
+              onClick={() => setCurrentIndex(index)}
+              aria-label={`עבור לקבוצת קלפים ${index + 1}`}
+            />
+          ))}
         </div>
       </div>
     </section>
