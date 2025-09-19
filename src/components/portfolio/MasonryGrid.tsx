@@ -17,13 +17,60 @@ const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridPro
     { id: 'test3', size: 'large', name: 'LARGE TEST' },
   ];
 
+  // Test with inline styles to debug CSS loading
+  const getInlineStyles = (size: string) => {
+    switch(size) {
+      case 'small':
+        return {
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'red',
+          borderRadius: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'white',
+          fontWeight: 'bold',
+          fontSize: '16px'
+        };
+      case 'medium':
+        return {
+          width: '400px',
+          height: '200px',
+          backgroundColor: 'blue',
+          borderRadius: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'white',
+          fontWeight: 'bold',
+          fontSize: '16px'
+        };
+      case 'large':
+        return {
+          width: '400px',
+          height: '400px',
+          backgroundColor: 'green',
+          borderRadius: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'white',
+          fontWeight: 'bold',
+          fontSize: '16px'
+        };
+      default:
+        return {};
+    }
+  };
+
   return (
     <div className="w-full max-w-6xl mx-auto">
       <div className="test-grid">
         {testCards.map((card) => (
           <div 
             key={card.id}
-            className={`test-${card.size}`}
+            style={getInlineStyles(card.size)}
           >
             {card.name}
           </div>
