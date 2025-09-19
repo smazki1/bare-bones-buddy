@@ -15,30 +15,30 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
   const isMobile = useIsMobile();
 
   const getSizeClasses = (size: Project['size']) => {
+    // Mobile-first responsive design
     if (isMobile) {
-      // On mobile, all sizes take single column but maintain their aspect ratios
       switch (size) {
         case 'small':
-          return 'col-span-1 row-span-1 aspect-square'; // 1x1 square
+          return 'col-span-1 aspect-square'; // 1x1 square
         case 'medium':
-          return 'col-span-1 row-span-1 aspect-[16/9]'; // 1x1 but landscape aspect
+          return 'col-span-2 aspect-[2/1]'; // 2x1 landscape rectangle
         case 'large':
-          return 'col-span-1 row-span-2 aspect-square'; // 1x2 square
+          return 'col-span-2 aspect-square'; // 2x1 but square (taller on mobile)
         default:
-          return 'col-span-1 row-span-1 aspect-square';
+          return 'col-span-1 aspect-square';
       }
     }
 
-    // Desktop grid spanning
+    // Desktop and tablet grid spanning
     switch (size) {
       case 'small':
-        return 'col-span-1 row-span-1 aspect-square'; // 1x1 square
+        return 'col-span-1 aspect-square'; // 1x1 square
       case 'medium':
-        return 'col-span-2 row-span-1 aspect-[2/1]'; // 2x1 landscape
+        return 'col-span-2 aspect-[2/1]'; // 2x1 wide rectangle
       case 'large':
-        return 'col-span-2 row-span-2 aspect-square'; // 2x2 square
+        return 'col-span-2 row-span-2 aspect-square'; // 2x2 large square
       default:
-        return 'col-span-1 row-span-1 aspect-square';
+        return 'col-span-1 aspect-square';
     }
   };
 

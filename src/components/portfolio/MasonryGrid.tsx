@@ -18,19 +18,19 @@ const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridPro
       const getSizeClasses = (size: string) => {
         switch (size) {
           case 'small':
-            return 'col-span-1 row-span-1 aspect-square';
+            return 'col-span-1 aspect-square';
           case 'medium':
-            return 'col-span-2 row-span-1 aspect-square sm:aspect-[2/1]';
+            return 'col-span-2 aspect-[2/1]';
           case 'large':
             return 'col-span-2 row-span-2 aspect-square';
           default:
-            return 'col-span-1 row-span-1 aspect-square';
+            return 'col-span-1 aspect-square';
         }
       };
 
       return (
-        <div key={`skeleton-${index}`} className={`${getSizeClasses(size)}`}>
-          <div className="w-full h-full rounded-lg sm:rounded-xl bg-gradient-to-br from-muted via-muted/80 to-muted animate-pulse flex items-center justify-center">
+        <div key={`skeleton-${index}`} className={`${getSizeClasses(size)} overflow-hidden`}>
+          <div className="w-full h-full min-h-[150px] rounded-lg sm:rounded-xl bg-gradient-to-br from-muted via-muted/80 to-muted animate-pulse flex items-center justify-center">
             <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
           </div>
         </div>
@@ -39,13 +39,16 @@ const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridPro
   };
 
   return (
-    <div className="container mx-auto px-3 sm:px-4">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, delay: 0.1 }}
-        className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 auto-rows-fr"
-        style={{ gridAutoRows: '200px' }}
+        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4 lg:gap-6"
+        style={{ 
+          gridAutoRows: 'minmax(150px, auto)',
+          gridTemplateRows: 'repeat(auto, minmax(150px, 200px))'
+        }}
       >
         {projects.map((project, index) => {
           // Apply fade effect to last 6 items when max reached
