@@ -11,17 +11,31 @@ interface MasonryGridProps {
 
 const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridProps) => {
   const renderSkeletons = () => {
-    return Array.from({ length: 6 }, (_, index) => (
-      <div key={`skeleton-${index}`} className="break-inside-avoid mb-4 sm:mb-5">
-        <div className={`
-          w-full rounded-lg sm:rounded-xl bg-gradient-to-br from-muted via-muted/80 to-muted animate-pulse
-          ${index % 3 === 0 ? 'h-72 sm:h-64' : index % 3 === 1 ? 'h-80 sm:h-96' : 'h-64 sm:h-80'}
-          flex items-center justify-center
-        `}>
-          <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+    const skeletonSizes = ['small', 'medium', 'large', 'small', 'medium', 'small'];
+    
+    return Array.from({ length: 6 }, (_, index) => {
+      const size = skeletonSizes[index];
+      const getSizeClasses = (size: string) => {
+        switch (size) {
+          case 'small':
+            return 'col-span-1 row-span-1 aspect-square';
+          case 'medium':
+            return 'col-span-1 sm:col-span-2 row-span-1 aspect-square sm:aspect-[2/1]';
+          case 'large':
+            return 'col-span-1 sm:col-span-2 row-span-1 sm:row-span-2 aspect-square';
+          default:
+            return 'col-span-1 row-span-1 aspect-square';
+        }
+      };
+
+      return (
+        <div key={`skeleton-${index}`} className={`${getSizeClasses(size)}`}>
+          <div className="w-full h-full rounded-lg sm:rounded-xl bg-gradient-to-br from-muted via-muted/80 to-muted animate-pulse flex items-center justify-center">
+            <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+          </div>
         </div>
-      </div>
-    ));
+      );
+    });
   };
 
   return (
@@ -30,7 +44,8 @@ const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridPro
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, delay: 0.1 }}
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 auto-rows-max"
+        className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 auto-rows-fr"
+        style={{ gridAutoRows: '200px' }}
       >
         {projects.map((project, index) => {
           // Apply fade effect to last 6 items when max reached
@@ -46,6 +61,7 @@ const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridPro
                 duration: hasReachedMaxItems ? 0.8 : 0.3,
                 delay: hasReachedMaxItems && isLastRow ? (index - (projects.length - 6)) * 0.05 : 0
               }}
+              style={{ opacity: fadeOpacity }}
             >
               <ProjectCard
                 project={project}

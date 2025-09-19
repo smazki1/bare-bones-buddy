@@ -15,15 +15,30 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
   const isMobile = useIsMobile();
 
   const getSizeClasses = (size: Project['size']) => {
+    if (isMobile) {
+      // On mobile, all sizes take single column but maintain their aspect ratios
+      switch (size) {
+        case 'small':
+          return 'col-span-1 row-span-1 aspect-square'; // 1x1 square
+        case 'medium':
+          return 'col-span-1 row-span-1 aspect-[16/9]'; // 1x1 but landscape aspect
+        case 'large':
+          return 'col-span-1 row-span-2 aspect-square'; // 1x2 square
+        default:
+          return 'col-span-1 row-span-1 aspect-square';
+      }
+    }
+
+    // Desktop grid spanning
     switch (size) {
       case 'small':
-        return 'aspect-square'; // 1:1 square - Instagram style
+        return 'col-span-1 row-span-1 aspect-square'; // 1x1 square
       case 'medium':
-        return 'aspect-[16/9]'; // 16:9 landscape - Instagram style  
+        return 'col-span-2 row-span-1 aspect-[2/1]'; // 2x1 landscape
       case 'large':
-        return 'aspect-[4/5] col-span-full sm:col-span-2 lg:col-span-2'; // 4:5 portrait - Instagram style
+        return 'col-span-2 row-span-2 aspect-square'; // 2x2 square
       default:
-        return 'aspect-square';
+        return 'col-span-1 row-span-1 aspect-square';
     }
   };
 
@@ -41,7 +56,7 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.3) }}
-      className="break-inside-avoid mb-4 sm:mb-5 group cursor-pointer touch-manipulation"
+      className={`group cursor-pointer touch-manipulation ${getSizeClasses(project.size)}`}
       style={{ contentVisibility: 'auto' }}
       onClick={handleToggle}
       aria-label={`פרויקט: ${project.businessName}`}
@@ -54,18 +69,17 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
         }
       }}
     >
-      <div className={`
-        relative overflow-hidden rounded-lg sm:rounded-xl shadow-elegant 
+      <div className="relative overflow-hidden rounded-lg sm:rounded-xl shadow-elegant 
         transition-all duration-200 active:scale-[0.98] sm:hover:shadow-warm sm:group-hover:scale-[1.02] 
-        ${getSizeClasses(project.size)}
-      `}>
+        w-full h-full"
+      >
         {/* Main Image */}
         <div className="relative w-full h-full">
           <StaticImage
             src={currentSrc}
             alt={`${project.businessName} - ${showBefore && project.imageBefore ? 'לפני' : 'אחרי'}`}
             priority={index < 6} 
-            className="w-full h-full object-cover sm:group-hover:scale-105 transition-transform duration-200"
+            className="w-full h-full object-cover object-center sm:group-hover:scale-105 transition-transform duration-200"
             blur={true}
             showSkeleton={false}
           />
