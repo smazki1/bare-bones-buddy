@@ -107,6 +107,12 @@ export default function AdminDashboard() {
       icon: Plus
     },
     {
+      title: 'נהל פתרונות ויזואליים',
+      description: 'עדכן כרטיסי הפתרונות הויזואליים',
+      href: '/admin/visual-solutions',
+      icon: Image
+    },
+    {
       title: 'נהל תמונות Hero',
       description: 'עדכן תמונות רקע בעמוד הראשי',
       href: '/admin/hero-images',

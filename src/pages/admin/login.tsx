@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 import { Button } from '@/components/ui/button';
@@ -11,43 +11,62 @@ export default function AdminLogin() {
   const [email, setEmail] = useState('admin@foodvision.com');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [hasShownError, setHasShownError] = useState(false);
+  
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const { user, isAdmin, isLoading, signIn } = useSupabaseAuth();
+  const { user, isAdmin, isLoading, signIn, error } = useSupabaseAuth();
 
+  // Memoize navigation state to prevent re-renders
+  const navigationState = useMemo(() => location.state as any, [location.state]);
+  
+  // Stable redirect function to prevent useEffect loops
+  const redirectToDashboard = useCallback(() => {
+    const redirectTo = navigationState?.from || '/admin/dashboard';
+    navigate(redirectTo, { replace: true });
+  }, [navigate, navigationState]);
+
+  // Handle navigation errors only once
+  useEffect(() => {
+    if (navigationState?.error && !hasShownError) {
+      toast({
+        variant: "destructive",
+        title: "בעיית חיבור",
+        description: navigationState.error,
+      });
+      setHasShownError(true);
+    }
+  }, [navigationState?.error, hasShownError, toast]);
+
+  // Handle auth errors only once per error
+  useEffect(() => {
+    if (error && !hasShownError) {
+      toast({
+        variant: "destructive",
+        title: "שגיאה",
+        description: error,
+      });
+      setHasShownError(true);
+    }
+    
+    // Reset error flag when error clears
+    if (!error) {
+      setHasShownError(false);
+    }
+  }, [error, hasShownError, toast]);
+
+  // Handle redirection with stable dependencies
   useEffect(() => {
     if (!isLoading && user && isAdmin) {
-      const redirectTo = (location.state as any)?.from || '/admin/dashboard';
-      navigate(redirectTo, { replace: true });
+      redirectToDashboard();
     }
-  }, [user, isAdmin, isLoading, navigate, location.state]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground font-open-sans">בודק הרשאות...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (user && isAdmin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground font-open-sans">מעביר לדשבורד...</p>
-        </div>
-      </div>
-    );
-  }
+  }, [user, isAdmin, isLoading, redirectToDashboard]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setHasShownError(false); // Reset error flag before new attempt
 
     try {
       const { error } = await signIn(email, password);
@@ -68,6 +87,7 @@ export default function AdminLogin() {
           description: errorMessage,
           variant: 'destructive'
         });
+        setHasShownError(true);
       }
     } catch (error: any) {
       toast({
@@ -75,10 +95,36 @@ export default function AdminLogin() {
         description: 'בעיה ברשת או בשרת. אנא נסה שנית',
         variant: 'destructive'
       });
+      setHasShownError(true);
     } finally {
       setLoading(false);
     }
   };
+
+  // Stable loading component to prevent layout shifts
+  const LoadingScreen = ({ message }: { message: string }) => (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="text-center space-y-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+        <p className="text-muted-foreground font-open-sans">{message}</p>
+        {error && (
+          <div className="mt-4 text-sm text-destructive bg-destructive/10 p-3 rounded-lg max-w-md mx-auto">
+            {error}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  // Show loading while checking auth state
+  if (isLoading) {
+    return <LoadingScreen message="בודק הרשאות..." />;
+  }
+
+  // Show loading while redirecting authenticated user
+  if (user && isAdmin) {
+    return <LoadingScreen message="מעביר לדשבורד..." />;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background" dir="rtl">

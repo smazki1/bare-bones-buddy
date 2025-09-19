@@ -2,7 +2,26 @@ import { useState, useEffect } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { uploadCategoryIcon } from '@/utils/imageProcessing';
-import { Plus, Edit, Trash2, Tag } from 'lucide-react';
+import { Plus, Edit, Trash2, Tag, GripVertical } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface Category {
   id: string;
@@ -15,11 +34,156 @@ interface Category {
   created_at: string;
 }
 
+interface SortableRowProps {
+  category: Category;
+  onEdit: (category: Category) => void;
+  onToggleActive: (id: string, currentStatus: boolean) => void;
+  onDelete: (id: string) => void;
+}
+
+function SortableRow({ category, onEdit, onToggleActive, onDelete }: SortableRowProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: category.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <tr
+      ref={setNodeRef}
+      style={style}
+      className={`${isDragging ? 'bg-gray-50' : ''}`}
+    >
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div
+          className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600"
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical size={20} />
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="flex items-center">
+          {category.icon_url ? (
+            <img
+              src={category.icon_url}
+              alt={category.name}
+              className="h-8 w-8 rounded-full ml-3"
+            />
+          ) : (
+            <Tag className="h-8 w-8 text-gray-400 ml-3" />
+          )}
+          <div>
+            <div className="text-sm font-medium text-gray-900">{category.name}</div>
+            <div className="text-sm text-gray-500">{category.slug}</div>
+          </div>
+        </div>
+      </td>
+      <td className="px-6 py-4">
+        <div className="text-sm text-gray-900">{category.description}</div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+          category.is_active 
+            ? 'bg-green-100 text-green-800'
+            : 'bg-red-100 text-red-800'
+        }`}>
+          {category.is_active ? 'פעיל' : 'לא פעיל'}
+        </span>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+        <div className="flex gap-2">
+          <button
+            onClick={() => onEdit(category)}
+            className="text-blue-600 hover:text-blue-900"
+          >
+            <Edit size={16} />
+          </button>
+          <button
+            onClick={() => onToggleActive(category.id, category.is_active)}
+            className="text-yellow-600 hover:text-yellow-900"
+          >
+            {category.is_active ? 'השבת' : 'הפעל'}
+          </button>
+          <button
+            onClick={() => onDelete(category.id)}
+            className="text-red-600 hover:text-red-900"
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+}
+
 export default function CategoriesAdmin() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    const oldIndex = categories.findIndex((cat) => cat.id === active.id);
+    const newIndex = categories.findIndex((cat) => cat.id === over.id);
+
+    const reorderedCategories = arrayMove(categories, oldIndex, newIndex);
+    
+    // Update local state immediately for better UX
+    setCategories(reorderedCategories);
+
+    // Update order_index in database
+    try {
+      const updates = reorderedCategories.map((category, index) => ({
+        id: category.id,
+        order_index: index
+      }));
+
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('categories')
+          .update({ order_index: update.order_index })
+          .eq('id', update.id);
+
+        if (error) {
+          console.error('Error updating category order:', error);
+          // Revert on error
+          fetchCategories();
+          return;
+        }
+      }
+
+      // Notify other components of the change
+      window.dispatchEvent(new CustomEvent('categories:updated'));
+    } catch (error) {
+      console.error('Error reordering categories:', error);
+      // Revert on error
+      fetchCategories();
+    }
+  };
 
   useEffect(() => {
     fetchCategories();
@@ -90,84 +254,49 @@ export default function CategoriesAdmin() {
         </div>
 
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  קטגוריה
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  תיאור
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  סטטוס
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  פעולות
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {categories.map((category) => (
-                <tr key={category.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      {category.icon_url ? (
-                        <img
-                          src={category.icon_url}
-                          alt={category.name}
-                          className="h-8 w-8 rounded-full ml-3"
-                        />
-                      ) : (
-                        <Tag className="h-8 w-8 text-gray-400 ml-3" />
-                      )}
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">{category.name}</div>
-                        <div className="text-sm text-gray-500">{category.slug}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900">{category.description}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      category.is_active 
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {category.is_active ? 'פעיל' : 'לא פעיל'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          setEditingCategory(category);
-                          setShowForm(true);
-                        }}
-                        className="text-blue-600 hover:text-blue-900"
-                      >
-                        <Edit size={16} />
-                      </button>
-                      <button
-                        onClick={() => toggleActive(category.id, category.is_active)}
-                        className="text-yellow-600 hover:text-yellow-900"
-                      >
-                        {category.is_active ? 'השבת' : 'הפעל'}
-                      </button>
-                      <button
-                        onClick={() => handleDelete(category.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    קטגוריה
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    תיאור
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    סטטוס
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    פעולות
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <SortableContext items={categories.map(cat => cat.id)} strategy={verticalListSortingStrategy}>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {categories.map((category) => (
+                    <SortableRow
+                      key={category.id}
+                      category={category}
+                      onEdit={(cat) => {
+                        setEditingCategory(cat);
+                        setShowForm(true);
+                      }}
+                      onToggleActive={toggleActive}
+                      onDelete={handleDelete}
+                    />
+                  ))}
+                </tbody>
+              </SortableContext>
+            </table>
+          </DndContext>
         </div>
 
         {showForm && (

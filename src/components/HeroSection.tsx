@@ -16,8 +16,8 @@ const HeroSection = () => {
   const [content, setContent] = useState({
     hero_title: 'מנות מושלמות. תמונות מושלמות.',
     hero_subtitle: 'כל מה שצריך ליצירת תמונות ברמת סטודיו מקצועי - ב-90% פחות כסף',
-    hero_cta_primary: 'התחילו עכשיו',
-    hero_cta_secondary: 'איך זה עובד'
+    hero_cta_primary: 'אני רוצה תמונות מקצועיות',
+    hero_cta_secondary: 'תיק עבודות'
   });
   const navigate = useNavigate();
   const { scrollY } = useScroll();
@@ -100,6 +100,9 @@ const HeroSection = () => {
         
         {/* Overlay - גרדיינט חזק יותר לקריאות טובה */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/40" />
+        
+        {/* Pink/Red Colored Overlay */}
+        <div className="absolute inset-0 bg-primary/40" />
       </motion.div>
 
       {/* Floating Particles */}
@@ -107,7 +110,7 @@ const HeroSection = () => {
         {[...Array(20)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-2 h-2 bg-secondary/30 rounded-full"
+            className="absolute w-1 h-1 sm:w-2 sm:h-2 bg-secondary/30 rounded-full hidden sm:block"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -129,25 +132,22 @@ const HeroSection = () => {
       <Navigation theme="dark" />
 
       {/* Hero Content */}
-      <div className="relative z-20 flex items-center justify-center min-h-screen px-4">
-        <div className="text-center max-w-5xl mx-auto">
+      <div className="relative z-20 flex items-center justify-center min-h-screen px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-6xl mx-auto">
           <motion.h1
             dir="rtl"
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-assistant font-bold text-white mb-6 leading-tight tracking-tight drop-shadow-lg"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-assistant font-bold mb-4 sm:mb-6 leading-tight tracking-tight drop-shadow-lg"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.2 }}
           >
-            <span className="bg-gradient-to-r from-secondary to-secondary/80 bg-clip-text text-transparent">
-              תמונות מושלמות.
-            </span>{' '}
-            <span className="text-white">
-              מנות מושלמות.
-            </span>
+            <span className="text-white">מנות מושלמות. </span>
+            <span className="text-secondary">תמונות מושלמות.</span>
           </motion.h1>
 
           <motion.p
-            className="text-xl md:text-2xl lg:text-3xl text-white mb-8 font-open-sans font-semibold max-w-4xl mx-auto leading-relaxed drop-shadow-2xl text-shadow-lg border-2 border-white/20 bg-black/40 backdrop-blur-sm rounded-lg p-6"
+            dir="rtl"
+            className="text-base sm:text-lg md:text-xl lg:text-2xl text-white mb-6 sm:mb-8 font-open-sans font-semibold max-w-4xl mx-auto leading-relaxed drop-shadow-2xl border-2 border-white/20 bg-black/40 backdrop-blur-sm rounded-lg p-4 sm:p-6"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.4 }}
@@ -156,14 +156,14 @@ const HeroSection = () => {
           </motion.p>
 
           <motion.div
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8"
+            className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-8 px-4"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.6 }}
           >
             <Button 
               size="lg" 
-              className="bg-secondary hover:bg-secondary/90 text-white px-10 py-7 text-xl font-assistant font-bold shadow-warm transition-all duration-300 hover:scale-105"
+              className="w-full sm:w-auto bg-secondary hover:bg-secondary/90 text-white px-6 sm:px-8 lg:px-10 py-4 sm:py-6 lg:py-7 text-sm sm:text-base lg:text-xl font-assistant font-bold shadow-warm transition-all duration-300 hover:scale-105"
               onClick={() => navigate('/services')}
             >
               {content.hero_cta_primary}
@@ -171,7 +171,7 @@ const HeroSection = () => {
             <Button 
               variant="outline" 
               size="lg"
-              className="bg-white/95 text-primary hover:bg-white px-10 py-7 text-xl font-assistant font-bold border-0 shadow-lg transition-all duration-300 hover:scale-105"
+              className="w-full sm:w-auto bg-white/95 text-primary hover:bg-white px-6 sm:px-8 lg:px-10 py-4 sm:py-6 lg:py-7 text-sm sm:text-base lg:text-xl font-assistant font-bold border-0 shadow-lg transition-all duration-300 hover:scale-105"
               onClick={() => navigate('/faq#top')}
             >
               {content.hero_cta_secondary}
@@ -182,12 +182,12 @@ const HeroSection = () => {
 
       {/* Scroll Indicator */}
       <motion.div
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20"
+        className="absolute bottom-4 sm:bottom-8 left-1/2 transform -translate-x-1/2 z-20"
         animate={{ y: [0, 10, 0] }}
         transition={{ duration: 2, repeat: Infinity }}
       >
-        <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center">
-          <div className="w-1 h-3 bg-white/70 rounded-full mt-2 animate-pulse" />
+        <div className="w-5 h-8 sm:w-6 sm:h-10 border-2 border-white/50 rounded-full flex justify-center">
+          <div className="w-1 h-2 sm:h-3 bg-white/70 rounded-full mt-1 sm:mt-2 animate-pulse" />
         </div>
       </motion.div>
     </div>
