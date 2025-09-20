@@ -460,9 +460,12 @@ function SolutionForm({ solution, onClose, onSave }: {
         }
       }
 
+      // If video was uploaded but no image, use video as fallback for imageSrc
+      const finalImageSrc = imageSrc || (videoSrc && videoFile ? videoSrc : formData.imageSrc);
+      
       onSave({
         ...formData,
-        imageSrc,
+        imageSrc: finalImageSrc,
         videoSrc: videoSrc || undefined
       });
     } catch (error: any) {
