@@ -280,10 +280,10 @@ const VisualSolutionsSection = () => {
           <div className="overflow-hidden">
             <div 
               ref={carouselRef}
-              className="flex transition-transform duration-300 ease-out will-change-transform"
+              className="flex flex-nowrap transition-transform duration-300 ease-out will-change-transform"
               style={{ 
                 transform: `translate3d(-${currentIndex * (100 / cardsPerView)}%, 0, 0)`,
-                width: `${Math.max(100, (enabledSolutions.length * 100) / cardsPerView)}%`
+                width: `${(enabledSolutions.length * 100) / cardsPerView}%`
               }}
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
@@ -292,10 +292,10 @@ const VisualSolutionsSection = () => {
               {enabledSolutions.map((solution, index) => (
                 <div
                   key={solution.id}
-                  className="flex-none"
+                  className="flex-none px-3"
                   style={{ width: `${100 / cardsPerView}%` }}
                 >
-                  <div className="h-full p-3">
+                  <div className="h-full">
                     <VisualSolutionCardComponent
                       solution={solution}
                       index={index}
