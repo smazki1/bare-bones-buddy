@@ -13,6 +13,10 @@ export async function uploadAndProcessImage(
 ): Promise<ImageProcessingResult> {
   try {
     console.log(`Starting upload process for file: ${file.name}`);
+    console.log(`File size: ${file.size} bytes`);
+    console.log(`File type: ${file.type}`);
+    console.log(`Target bucket: ${bucket}`);
+    console.log(`Target folder: ${folder || 'root'}`);
 
     // Generate unique filename
     const fileExt = file.name.split('.').pop();
@@ -23,51 +27,86 @@ export async function uploadAndProcessImage(
     // Upload original image
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from(bucket)
-      .upload(fileName, file);
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
 
     if (uploadError) {
       console.error('Upload error:', uploadError);
-      throw uploadError;
+      throw new Error(`שגיאה בהעלאה: ${uploadError.message}`);
     }
 
-    console.log('Original image uploaded successfully');
+    if (!uploadData) {
+      throw new Error('לא התקבלה תגובה מהשרת');
+    }
+
+    console.log('Original image uploaded successfully:', uploadData);
 
     // Get original image URL
     const { data: { publicUrl: originalUrl } } = supabase.storage
       .from(bucket)
       .getPublicUrl(fileName);
 
-    console.log('Calling process-image Edge Function');
+    console.log('Original URL:', originalUrl);
 
-    // Call Edge Function to process image
-    const { data: processResult, error: processError } = await supabase.functions
-      .invoke('process-image', {
-        body: {
-          originalPath: fileName,
-          bucket: bucket,
-          sizes: {
-            thumbnail: { width: 600 },
-            large: { width: 1200 }
+    // For images, try to process them. For videos, return the original
+    if (file.type.startsWith('image/')) {
+      console.log('Processing image with Edge Function');
+
+      // Call Edge Function to process image
+      const { data: processResult, error: processError } = await supabase.functions
+        .invoke('process-image', {
+          body: {
+            originalPath: fileName,
+            bucket: bucket,
+            sizes: {
+              thumbnail: { width: 600 },
+              large: { width: 1200 }
+            }
           }
-        }
-      });
+        });
 
-    if (processError) {
-      console.error('Process error:', processError);
-      throw processError;
+      if (processError) {
+        console.warn('Process error, falling back to original:', processError);
+        // If processing fails, return original URL for all sizes
+        return {
+          thumbnail: originalUrl,
+          large: originalUrl,
+          original: originalUrl
+        };
+      }
+
+      console.log('Image processing completed:', processResult);
+
+      return {
+        thumbnail: processResult.urls.thumbnail,
+        large: processResult.urls.large,
+        original: originalUrl
+      };
+    } else {
+      // For videos, return original URL for all sizes
+      console.log('File is video, returning original URL');
+      return {
+        thumbnail: originalUrl,
+        large: originalUrl,
+        original: originalUrl
+      };
     }
 
-    console.log('Image processing completed:', processResult);
-
-    return {
-      thumbnail: processResult.urls.thumbnail,
-      large: processResult.urls.large,
-      original: originalUrl
-    };
-
-  } catch (error) {
+  } catch (error: any) {
     console.error('Image processing error:', error);
-    throw new Error('Failed to upload and process image');
+    
+    // Provide more specific error messages
+    if (error.message?.includes('InvalidBucketName')) {
+      throw new Error('שגיאה בהגדרת האחסון');
+    } else if (error.message?.includes('EntityTooLarge')) {
+      throw new Error('הקובץ גדול מדי');
+    } else if (error.message?.includes('permission')) {
+      throw new Error('אין הרשאה להעלות קבצים');
+    }
+    
+    throw new Error('שגיאה בעיבוד התמונה');
   }
 }
 
@@ -136,13 +175,50 @@ export async function uploadServiceImage(file: File): Promise<string> {
   return result.large;
 }
 
-// Generic function for single image uploads
+// Generic function for single image uploads with better error handling
 export async function uploadSingleImage(
   file: File,
   bucket: string,
   folder?: string,
   useThumb = false
 ): Promise<string> {
-  const result = await uploadAndProcessImage(file, bucket, folder);
-  return useThumb ? result.thumbnail : result.large;
+  try {
+    console.log(`Starting single image upload: ${file.name} to ${bucket}/${folder || ''}`);
+    
+    // Validate file
+    if (!file) {
+      throw new Error('לא נבחר קובץ');
+    }
+    
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      throw new Error('הקובץ גדול מדי. מקסימום 10MB');
+    }
+    
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm'];
+    if (!allowedTypes.includes(file.type)) {
+      throw new Error('סוג קובץ לא נתמך. אנא השתמש ב-JPG, PNG, GIF, WebP או MP4');
+    }
+    
+    const result = await uploadAndProcessImage(file, bucket, folder);
+    console.log('Single image upload result:', result);
+    
+    return useThumb ? result.thumbnail : result.large;
+  } catch (error: any) {
+    console.error('Single image upload error:', error);
+    
+    // Provide user-friendly error messages
+    let userMessage = 'שגיאה בהעלאת הקובץ';
+    
+    if (error.message?.includes('permission')) {
+      userMessage = 'שגיאת הרשאה. אנא התחבר שוב';
+    } else if (error.message?.includes('network')) {
+      userMessage = 'שגיאת רשת. אנא נסה שוב';
+    } else if (error.message?.includes('size')) {
+      userMessage = 'הקובץ גדול מדי';
+    } else if (error.message) {
+      userMessage = error.message;
+    }
+    
+    throw new Error(userMessage);
+  }
 }

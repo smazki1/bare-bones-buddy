@@ -181,20 +181,41 @@ class VisualSolutionsStore {
   async fetchFromSupabase(): Promise<VisualSolutionsConfig | null> {
     if (!this.isSupabaseReady()) return null;
     try {
+      console.log('Fetching visual solutions from Supabase...');
       const { data, error } = await (supabase as any)
         .from('site_configs')
         .select('content, updated_at')
         .eq('key', SUPABASE_KEY)
         .maybeSingle();
+      
       if (error) {
         console.warn('Supabase visual solutions fetch error:', error.message);
         return null;
       }
-      if (!data?.content) return null;
+      
+      if (!data?.content) {
+        console.log('No visual solutions data found in Supabase');
+        return null;
+      }
+      
+      console.log('Raw Supabase data:', data.content);
       const cfg = data.content as VisualSolutionsConfig;
-      if (!this.validateConfig(cfg)) return null;
+      
+      if (!this.validateConfig(cfg)) {
+        console.warn('Invalid config structure from Supabase');
+        return null;
+      }
+      
       const normalized = this.normalize(cfg);
-      try { this.saveConfig({ ...normalized, updatedAt: new Date().toISOString() } as any); } catch {}
+      console.log('Normalized config:', normalized);
+      
+      // Save to localStorage for caching
+      try { 
+        this.saveConfig({ ...normalized, updatedAt: data.updated_at || new Date().toISOString() } as any); 
+      } catch (e) {
+        console.warn('Failed to cache config to localStorage:', e);
+      }
+      
       return normalized;
     } catch (e) {
       console.warn('Supabase visual solutions fetch exception:', e);
@@ -205,20 +226,38 @@ class VisualSolutionsStore {
   async saveToSupabase(config: VisualSolutionsConfig): Promise<boolean> {
     if (!this.isSupabaseReady()) return false;
     try {
+      console.log('Saving visual solutions to Supabase...');
       const normalized = this.normalize(config);
       const payload = {
         key: SUPABASE_KEY,
         content: normalized,
         updated_at: new Date().toISOString()
       };
+      
+      console.log('Saving payload:', payload);
+      
       const { error } = await (supabase as any)
         .from('site_configs')
         .upsert(payload, { onConflict: 'key' });
+        
       if (error) {
         console.error('Supabase visual solutions save error:', error.message);
         return false;
       }
-      try { window.dispatchEvent(new Event('visualSolutions:updated')); } catch {}
+      
+      console.log('Successfully saved to Supabase');
+      
+      // Also save to localStorage
+      this.saveConfig(normalized);
+      
+      try { 
+        window.dispatchEvent(new CustomEvent('visualSolutions:updated', { 
+          detail: normalized 
+        })); 
+      } catch (e) {
+        console.warn('Failed to dispatch event:', e);
+      }
+      
       return true;
     } catch (e) {
       console.error('Supabase visual solutions save exception:', e);

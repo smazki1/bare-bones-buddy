@@ -126,8 +126,24 @@ export default function VisualSolutionsAdmin() {
   );
 
   useEffect(() => {
-    const loadConfig = () => {
+    const loadConfig = async () => {
+      console.log('Admin Panel: Loading config...');
+      
+      try {
+        // Try Supabase first
+        const cloudConfig = await visualSolutionsStore.fetchFromSupabase();
+        if (cloudConfig && cloudConfig.items) {
+          console.log('Admin Panel: Loaded from Supabase:', cloudConfig);
+          setConfig(cloudConfig);
+          return;
+        }
+      } catch (error) {
+        console.warn('Admin Panel: Supabase fetch failed:', error);
+      }
+      
+      // Fallback to local storage
       const newConfig = visualSolutionsStore.safeGetConfigOrDefaults();
+      console.log('Admin Panel: Loaded from localStorage:', newConfig);
       setConfig(newConfig);
     };
 
@@ -136,12 +152,14 @@ export default function VisualSolutionsAdmin() {
 
     // Listen for updates
     const handleUpdate = () => {
+      console.log('Admin Panel: Config update event received');
       loadConfig();
     };
     
     window.addEventListener('visualSolutions:updated', handleUpdate);
     window.addEventListener('storage', (e) => {
       if (e.key === 'aiMaster:visualSolutions') {
+        console.log('Admin Panel: Storage change detected');
         loadConfig();
       }
     });
@@ -210,16 +228,20 @@ export default function VisualSolutionsAdmin() {
     visualSolutionsStore.saveToSupabase(newConfig);
   };
 
-  const handleSave = (solutionData: Partial<VisualSolutionCard>) => {
+  const handleSave = async (solutionData: Partial<VisualSolutionCard>) => {
+    console.log('Admin Panel: Saving solution data:', solutionData);
+    
     let updatedItems;
     
     if (editingSolution) {
       // Edit existing
+      console.log('Admin Panel: Editing existing solution:', editingSolution.id);
       updatedItems = config.items.map(item =>
         item.id === editingSolution.id ? { ...item, ...solutionData } : item
       );
     } else {
       // Add new
+      console.log('Admin Panel: Adding new solution');
       const newSolution: VisualSolutionCard = {
         id: visualSolutionsStore.generateId(solutionData.title || 'פתרון חדש'),
         title: solutionData.title || 'פתרון חדש',
@@ -238,9 +260,25 @@ export default function VisualSolutionsAdmin() {
       items: updatedItems
     };
 
+    console.log('Admin Panel: Saving new config:', newConfig);
+    
+    // Update local state immediately
     setConfig(newConfig);
+    
+    // Save to localStorage
     visualSolutionsStore.saveConfig(newConfig);
-    visualSolutionsStore.saveToSupabase(newConfig);
+    
+    // Save to Supabase
+    try {
+      const saved = await visualSolutionsStore.saveToSupabase(newConfig);
+      if (saved) {
+        console.log('Admin Panel: Successfully saved to Supabase');
+      } else {
+        console.warn('Admin Panel: Failed to save to Supabase, but localStorage updated');
+      }
+    } catch (error) {
+      console.error('Admin Panel: Supabase save error:', error);
+    }
     
     setShowForm(false);
     setEditingSolution(null);
@@ -401,11 +439,25 @@ function SolutionForm({ solution, onClose, onSave }: {
       let videoSrc = formData.videoSrc;
 
       if (imageFile) {
-        imageSrc = await uploadSingleImage(imageFile, 'service-images', 'visual-solutions');
+        try {
+          console.log('Uploading image file:', imageFile.name);
+          imageSrc = await uploadSingleImage(imageFile, 'service-images', 'visual-solutions');
+          console.log('Image uploaded successfully:', imageSrc);
+        } catch (error) {
+          console.error('Image upload failed:', error);
+          throw new Error(`שגיאה בהעלאת התמונה: ${error}`);
+        }
       }
 
       if (videoFile) {
-        videoSrc = await uploadSingleImage(videoFile, 'service-images', 'visual-solutions');
+        try {
+          console.log('Uploading video file:', videoFile.name);
+          videoSrc = await uploadSingleImage(videoFile, 'service-images', 'visual-solutions');
+          console.log('Video uploaded successfully:', videoSrc);
+        } catch (error) {
+          console.error('Video upload failed:', error);
+          throw new Error(`שגיאה בהעלאת הסרטון: ${error}`);
+        }
       }
 
       onSave({

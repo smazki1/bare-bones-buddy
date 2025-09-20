@@ -129,21 +129,24 @@ const VisualSolutionsSection = () => {
   // Force reload config and sync with Supabase on mount
   useEffect(() => {
     const loadLatestConfig = async () => {
+      console.log('VisualSolutionsSection: Loading latest config...');
+      
       try {
         // Always fetch from Supabase first for latest data
         const cloudConfig = await visualSolutionsStore.fetchFromSupabase();
-        if (cloudConfig) {
-          console.log('Loaded config from Supabase:', cloudConfig);
+        if (cloudConfig && cloudConfig.items && cloudConfig.items.length > 0) {
+          console.log('VisualSolutionsSection: Loaded config from Supabase:', cloudConfig);
           setConfig(cloudConfig);
           return;
         }
+        console.log('VisualSolutionsSection: No valid config from Supabase, trying localStorage');
       } catch (error) {
-        console.warn('Failed to fetch visual solutions from Supabase:', error);
+        console.warn('VisualSolutionsSection: Failed to fetch from Supabase:', error);
       }
       
       // Fallback to local storage
       const localConfig = visualSolutionsStore.safeGetConfigOrDefaults();
-      console.log('Loaded config from localStorage:', localConfig);
+      console.log('VisualSolutionsSection: Loaded config from localStorage:', localConfig);
       setConfig(localConfig);
     };
 
