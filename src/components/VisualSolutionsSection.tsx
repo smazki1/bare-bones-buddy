@@ -126,29 +126,33 @@ const VisualSolutionsSection = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, [getCardsPerView]);
 
-  // Load configuration and sync with latest data
+  // Force reload config and sync with Supabase on mount
   useEffect(() => {
-    const loadConfig = async () => {
+    const loadLatestConfig = async () => {
       try {
-        // First try to get from Supabase for latest data
+        // Always fetch from Supabase first for latest data
         const cloudConfig = await visualSolutionsStore.fetchFromSupabase();
         if (cloudConfig) {
+          console.log('Loaded config from Supabase:', cloudConfig);
           setConfig(cloudConfig);
           return;
         }
       } catch (error) {
-        console.warn('Failed to fetch from Supabase:', error);
+        console.warn('Failed to fetch visual solutions from Supabase:', error);
       }
       
       // Fallback to local storage
       const localConfig = visualSolutionsStore.safeGetConfigOrDefaults();
+      console.log('Loaded config from localStorage:', localConfig);
       setConfig(localConfig);
     };
 
-    loadConfig();
+    loadLatestConfig();
 
+    // Listen for real-time updates
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'aiMaster:visualSolutions') {
+        console.log('Storage changed, reloading config');
         const newConfig = visualSolutionsStore.safeGetConfigOrDefaults();
         setConfig(newConfig);
       }
@@ -156,6 +160,7 @@ const VisualSolutionsSection = () => {
     window.addEventListener('storage', handleStorageChange);
 
     const handleLocalUpdate = () => {
+      console.log('Local update event received, reloading config');
       const newConfig = visualSolutionsStore.safeGetConfigOrDefaults();
       setConfig(newConfig);
     };
@@ -167,12 +172,19 @@ const VisualSolutionsSection = () => {
     };
   }, []);
 
-  const enabledSolutions = useMemo(() => 
-    config.items
+  const enabledSolutions = useMemo(() => {
+    const filtered = config.items
       .filter(solution => solution.enabled)
-      .sort((a, b) => a.order - b.order),
-    [config.items]
-  );
+      .sort((a, b) => a.order - b.order);
+    
+    console.log('Visual Solutions Debug:', {
+      totalItems: config.items.length,
+      enabledItems: filtered.length,
+      items: filtered.map(item => ({ id: item.id, title: item.title, enabled: item.enabled }))
+    });
+    
+    return filtered;
+  }, [config.items]);
 
   const maxIndex = useMemo(() => 
     Math.max(0, enabledSolutions.length - cardsPerView),
