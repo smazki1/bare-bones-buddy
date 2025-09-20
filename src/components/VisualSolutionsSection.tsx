@@ -46,7 +46,7 @@ const VisualSolutionCardComponent = ({ solution, index, isIntersecting }: Visual
       className="group cursor-pointer h-full"
       onClick={handleClick}
     >
-      <div className="relative overflow-hidden rounded-2xl shadow-elegant hover:shadow-warm transition-all duration-300 group-hover:scale-[1.02] aspect-[4/3] h-full">
+      <div className="relative overflow-hidden rounded-2xl shadow-elegant hover:shadow-warm transition-all duration-300 group-hover:scale-[1.02] aspect-[4/3] w-full">
         {solution.videoSrc ? (
           <video
             autoPlay
