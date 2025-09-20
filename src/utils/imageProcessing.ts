@@ -34,7 +34,7 @@ export async function uploadAndProcessImage(
 
     if (uploadError) {
       console.error('Upload error:', uploadError);
-      throw new Error(`שגיאה בהעלאה: ${uploadError.message}`);
+      throw new Error(`Upload error: ${uploadError.message}`);
     }
 
     if (!uploadData) {
@@ -77,11 +77,20 @@ export async function uploadAndProcessImage(
         };
       }
 
+      if (!processResult || !processResult.urls) {
+        console.warn('Invalid process result, falling back to original');
+        return {
+          thumbnail: originalUrl,
+          large: originalUrl,
+          original: originalUrl
+        };
+      }
+
       console.log('Image processing completed:', processResult);
 
       return {
-        thumbnail: processResult.urls.thumbnail,
-        large: processResult.urls.large,
+        thumbnail: processResult.urls.thumbnail || originalUrl,
+        large: processResult.urls.large || originalUrl,
         original: originalUrl
       };
     } else {
@@ -97,6 +106,32 @@ export async function uploadAndProcessImage(
   } catch (error: any) {
     console.error('Image processing error:', error);
     
+    // If there was an upload error, we can't recover
+    if (error.message?.includes('Upload error') || error.message?.includes('לא התקבלה תגובה')) {
+      throw error;
+    }
+    
+    // For processing errors, try to return original URL if we have it
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${folder ? folder + '/' : ''}${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      
+      const { data: { publicUrl } } = supabase.storage
+        .from(bucket)
+        .getPublicUrl(fileName);
+        
+      if (publicUrl) {
+        console.log('Fallback: returning original URL only');
+        return {
+          thumbnail: publicUrl,
+          large: publicUrl,
+          original: publicUrl
+        };
+      }
+    } catch (fallbackError) {
+      console.error('Fallback failed:', fallbackError);
+    }
+    
     // Provide more specific error messages
     if (error.message?.includes('InvalidBucketName')) {
       throw new Error('שגיאה בהגדרת האחסון');
@@ -106,7 +141,7 @@ export async function uploadAndProcessImage(
       throw new Error('אין הרשאה להעלות קבצים');
     }
     
-    throw new Error('שגיאה בעיבוד התמונה');
+    throw new Error('שגיאה בהעלאת הקובץ - נסה שוב');
   }
 }
 
@@ -183,7 +218,7 @@ export async function uploadSingleImage(
   useThumb = false
 ): Promise<string> {
   try {
-    console.log(`Starting single image upload: ${file.name} to ${bucket}/${folder || ''}`);
+    console.log(`[uploadSingleImage] Starting upload: ${file.name} to ${bucket}/${folder || ''}`);
     
     // Validate file
     if (!file) {
@@ -199,12 +234,16 @@ export async function uploadSingleImage(
       throw new Error('סוג קובץ לא נתמך לתמונות. אנא השתמש ב-JPG, PNG, GIF או WebP');
     }
     
+    console.log(`[uploadSingleImage] File validation passed, calling uploadAndProcessImage`);
     const result = await uploadAndProcessImage(file, bucket, folder);
-    console.log('Single image upload result:', result);
+    console.log('[uploadSingleImage] Upload result:', result);
     
-    return useThumb ? result.thumbnail : result.large;
+    const finalUrl = useThumb ? result.thumbnail : result.large;
+    console.log(`[uploadSingleImage] Returning ${useThumb ? 'thumbnail' : 'large'} URL:`, finalUrl);
+    
+    return finalUrl;
   } catch (error: any) {
-    console.error('Single image upload error:', error);
+    console.error('[uploadSingleImage] Error:', error);
     
     // Provide user-friendly error messages
     let userMessage = 'שגיאה בהעלאת הקובץ';
@@ -215,6 +254,8 @@ export async function uploadSingleImage(
       userMessage = 'שגיאת רשת. אנא נסה שוב';
     } else if (error.message?.includes('size')) {
       userMessage = 'הקובץ גדול מדי';
+    } else if (error.message?.includes('Upload error')) {
+      userMessage = `שגיאת העלאה: ${error.message}`;
     } else if (error.message) {
       userMessage = error.message;
     }
