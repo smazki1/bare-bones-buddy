@@ -191,10 +191,10 @@ const VisualSolutionsSection = () => {
     return filtered;
   }, [config.items]);
 
-  const maxIndex = useMemo(() => 
-    Math.max(0, enabledSolutions.length - cardsPerView),
-    [enabledSolutions.length, cardsPerView]
-  );
+  const maxIndex = useMemo(() => {
+    const totalSlides = Math.ceil(enabledSolutions.length / cardsPerView);
+    return Math.max(0, totalSlides - 1);
+  }, [enabledSolutions.length, cardsPerView]);
 
   // Smooth slide transition with hardware acceleration
   const slideToIndex = useCallback((index: number) => {
@@ -206,16 +206,16 @@ const VisualSolutionsSection = () => {
     setIsTransitioning(true);
     setCurrentIndex(targetIndex);
 
-    // Use requestAnimationFrame for smooth transition
-    requestAnimationFrame(() => {
-      if (carouselRef.current) {
-        const translateX = -(targetIndex * (100 / cardsPerView));
-        carouselRef.current.style.transform = `translate3d(${translateX}%, 0, 0)`;
-      }
-      
-      // Reset transition state after animation
-      setTimeout(() => setIsTransitioning(false), 300);
-    });
+      // Use requestAnimationFrame for smooth transition
+      requestAnimationFrame(() => {
+        if (carouselRef.current) {
+          const translateX = -(targetIndex * 100);
+          carouselRef.current.style.transform = `translate3d(${translateX}%, 0, 0)`;
+        }
+        
+        // Reset transition state after animation
+        setTimeout(() => setIsTransitioning(false), 300);
+      });
   }, [currentIndex, maxIndex, cardsPerView, isTransitioning]);
 
   const scrollNext = useCallback(() => {
@@ -282,8 +282,8 @@ const VisualSolutionsSection = () => {
               ref={carouselRef}
               className="flex flex-nowrap transition-transform duration-300 ease-out will-change-transform"
               style={{ 
-                transform: `translate3d(-${currentIndex * (100 / cardsPerView)}%, 0, 0)`,
-                width: `${(enabledSolutions.length * 100) / cardsPerView}%`
+                transform: `translate3d(-${currentIndex * 100}%, 0, 0)`,
+                width: `${enabledSolutions.length * (100 / cardsPerView)}%`
               }}
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
@@ -293,7 +293,7 @@ const VisualSolutionsSection = () => {
                 <div
                   key={solution.id}
                   className="flex-none flex-shrink-0"
-                  style={{ width: `${100 / cardsPerView}%` }}
+                  style={{ width: `${100 / enabledSolutions.length}%` }}
                 >
                   <div className="h-full p-3">
                     <VisualSolutionCardComponent
