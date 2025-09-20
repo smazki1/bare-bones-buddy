@@ -291,7 +291,7 @@ const VisualSolutionsSection = () => {
                 <div
                   key={solution.id}
                   className="flex-none px-3"
-                  style={{ width: `${100 / enabledSolutions.length}%` }}
+                  style={{ width: `${100 / cardsPerView}%` }}
                 >
                   <VisualSolutionCardComponent
                     solution={solution}
