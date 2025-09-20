@@ -16,8 +16,8 @@ const HeroSection = () => {
   const [content, setContent] = useState({
     hero_title: 'מנות מושלמות. תמונות מושלמות.',
     hero_subtitle: 'כל מה שצריך ליצירת תמונות ברמת סטודיו מקצועי - ב-90% פחות כסף',
-    hero_cta_primary: 'אני רוצה תמונות מקצועיות',
-    hero_cta_secondary: 'תיק עבודות'
+    hero_cta_primary: 'תיק עבודות',
+    hero_cta_secondary: 'איך זה עובד'
   });
   const navigate = useNavigate();
   const { scrollY } = useScroll();
@@ -164,7 +164,7 @@ const HeroSection = () => {
             <Button 
               size="lg" 
               className="w-full sm:w-auto bg-secondary hover:bg-secondary/90 text-white px-7 sm:px-9 lg:px-12 py-5 sm:py-7 lg:py-8 text-base sm:text-lg lg:text-2xl font-assistant font-bold shadow-warm transition-all duration-300 hover:scale-105"
-              onClick={() => navigate('/services')}
+              onClick={() => navigate('/portfolio')}
             >
               {content.hero_cta_primary}
             </Button>
