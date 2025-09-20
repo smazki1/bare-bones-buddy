@@ -95,30 +95,27 @@ const VisualSolutionsSection = () => {
     visualSolutionsStore.safeGetConfigOrDefaults()
   );
 
-  // Carousel refs and state
-  const carouselRef = useRef<HTMLDivElement>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  // Simple carousel state
+  const [currentPage, setCurrentPage] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
 
-  // Responsive breakpoints
+  // Responsive cards per view
   const getCardsPerView = useCallback(() => {
     if (typeof window === 'undefined') return 3;
     const width = window.innerWidth;
-    if (width < 640) return 1;
-    if (width < 1024) return 2;
-    return 3;
+    if (width < 640) return 1; // mobile
+    if (width < 1024) return 2; // tablet
+    return 3; // desktop
   }, []);
 
   const [cardsPerView, setCardsPerView] = useState(getCardsPerView);
 
-  // Update cards per view on resize
+  // Update on resize
   useEffect(() => {
     const handleResize = () => {
       setCardsPerView(getCardsPerView());
-      // Reset to first slide on resize to avoid layout issues
-      setCurrentIndex(0);
+      setCurrentPage(0); // Reset to first page
     };
 
     handleResize();
@@ -126,34 +123,26 @@ const VisualSolutionsSection = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, [getCardsPerView]);
 
-  // Force reload config and sync with Supabase on mount
+  // Load config from Supabase
   useEffect(() => {
     const loadLatestConfig = async () => {
-      console.log('VisualSolutionsSection: Loading latest config...');
-      
       try {
-        // Always fetch from Supabase first for latest data
         const cloudConfig = await visualSolutionsStore.fetchFromSupabase();
         if (cloudConfig && cloudConfig.items && cloudConfig.items.length > 0) {
-          console.log('VisualSolutionsSection: Loaded config from Supabase:', cloudConfig);
           setConfig(cloudConfig);
           return;
         }
-        console.log('VisualSolutionsSection: No valid config from Supabase, trying localStorage');
       } catch (error) {
-        console.warn('VisualSolutionsSection: Failed to fetch from Supabase:', error);
+        console.warn('Failed to fetch from Supabase:', error);
       }
       
-      // Fallback to local storage
       const localConfig = visualSolutionsStore.safeGetConfigOrDefaults();
-      console.log('VisualSolutionsSection: Loaded config from localStorage:', localConfig);
       setConfig(localConfig);
     };
 
     loadLatestConfig();
 
-    // Listen for updates and always prefer cloud
-    const reloadFromCloud = async () => {
+    const handleLocalUpdate = async () => {
       try {
         const cloud = await visualSolutionsStore.fetchFromSupabase();
         if (cloud) {
@@ -164,69 +153,61 @@ const VisualSolutionsSection = () => {
       setConfig(visualSolutionsStore.safeGetConfigOrDefaults());
     };
 
-    // Remove storage listener to avoid loops
-
-    const handleLocalUpdate = () => {
-      console.log('Local update event received, reloading from cloud');
-      void reloadFromCloud();
-    };
     window.addEventListener('visualSolutions:updated', handleLocalUpdate as EventListener);
-
     return () => {
       window.removeEventListener('visualSolutions:updated', handleLocalUpdate as EventListener);
     };
   }, []);
 
+  // Get enabled solutions
   const enabledSolutions = useMemo(() => {
     const filtered = config.items
       .filter(solution => solution.enabled)
       .sort((a, b) => a.order - b.order);
     
-    console.log('Visual Solutions Debug:', {
-      totalItems: config.items.length,
-      enabledItems: filtered.length,
-      items: filtered.map(item => ({ id: item.id, title: item.title, enabled: item.enabled }))
+    console.log('Enabled Solutions:', {
+      total: config.items.length,
+      enabled: filtered.length,
+      cardsPerView,
+      titles: filtered.map(s => s.title)
     });
     
     return filtered;
-  }, [config.items]);
+  }, [config.items, cardsPerView]);
 
-  const maxIndex = useMemo(() => {
-    const totalSlides = Math.ceil(enabledSolutions.length / cardsPerView);
-    return Math.max(0, totalSlides - 1);
-  }, [enabledSolutions.length, cardsPerView]);
+  // Calculate total pages
+  const totalPages = Math.ceil(enabledSolutions.length / cardsPerView);
+  const maxPage = totalPages - 1;
 
-  // Smooth slide transition with hardware acceleration
-  const slideToIndex = useCallback((index: number) => {
+  // Navigation functions
+  const goToPage = useCallback((pageIndex: number) => {
     if (isTransitioning || !carouselRef.current) return;
     
-    const targetIndex = Math.max(0, Math.min(index, maxIndex));
-    if (targetIndex === currentIndex) return;
+    const targetPage = Math.max(0, Math.min(pageIndex, maxPage));
+    if (targetPage === currentPage) return;
 
     setIsTransitioning(true);
-    setCurrentIndex(targetIndex);
+    setCurrentPage(targetPage);
 
-      // Use requestAnimationFrame for smooth transition
-      requestAnimationFrame(() => {
-        if (carouselRef.current) {
-          const translateX = -(targetIndex * 100);
-          carouselRef.current.style.transform = `translate3d(${translateX}%, 0, 0)`;
-        }
-        
-        // Reset transition state after animation
-        setTimeout(() => setIsTransitioning(false), 300);
-      });
-  }, [currentIndex, maxIndex, cardsPerView, isTransitioning]);
+    // Apply transform
+    const translateX = -(targetPage * 100);
+    carouselRef.current.style.transform = `translate3d(${translateX}%, 0, 0)`;
+    
+    setTimeout(() => setIsTransitioning(false), 300);
+  }, [currentPage, maxPage, isTransitioning]);
 
-  const scrollNext = useCallback(() => {
-    slideToIndex(currentIndex + 1);
-  }, [currentIndex, slideToIndex]);
+  const nextPage = useCallback(() => {
+    goToPage(currentPage + 1);
+  }, [currentPage, goToPage]);
 
-  const scrollPrev = useCallback(() => {
-    slideToIndex(currentIndex - 1);
-  }, [currentIndex, slideToIndex]);
+  const prevPage = useCallback(() => {
+    goToPage(currentPage - 1);
+  }, [currentPage, goToPage]);
 
-  // Touch handlers for swipe
+  // Touch handlers
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
@@ -243,30 +224,22 @@ const VisualSolutionsSection = () => {
     const isLeftSwipe = distance > 50;
     const isRightSwipe = distance < -50;
 
-    if (isLeftSwipe && currentIndex < maxIndex) {
-      scrollNext();
+    if (isLeftSwipe && currentPage < maxPage) {
+      nextPage();
     }
-    if (isRightSwipe && currentIndex > 0) {
-      scrollPrev();
+    if (isRightSwipe && currentPage > 0) {
+      prevPage();
     }
-  }, [touchStart, touchEnd, currentIndex, maxIndex, scrollNext, scrollPrev]);
+  }, [touchStart, touchEnd, currentPage, maxPage, nextPage, prevPage]);
 
-  console.log('Carousel Debug:', {
+  // Debug info
+  console.log('Carousel State:', {
     enabledSolutions: enabledSolutions.length,
     cardsPerView,
-    currentIndex,
-    maxIndex,
-    totalSlides: Math.ceil(enabledSolutions.length / cardsPerView),
-    containerWidth: `${Math.ceil(enabledSolutions.length / cardsPerView) * 100}%`,
-    cardWidth: `${100 / enabledSolutions.length}%`,
-    transform: `translate3d(-${currentIndex * 100}%, 0, 0)`
+    totalPages,
+    currentPage,
+    maxPage
   });
-
-  const canScrollNext = currentIndex < maxIndex;
-  const canScrollPrev = currentIndex > 0;
-
-  // Calculate dots for pagination
-  const totalDots = Math.ceil(enabledSolutions.length / cardsPerView);
 
   return (
     <section ref={ref} className="py-20 bg-muted/30 relative">
@@ -291,44 +264,54 @@ const VisualSolutionsSection = () => {
           <div className="overflow-hidden">
             <div 
               ref={carouselRef}
-              className="flex flex-nowrap transition-transform duration-300 ease-out will-change-transform"
+              className="flex transition-transform duration-300 ease-out"
               style={{ 
-                transform: `translate3d(-${currentIndex * 100}%, 0, 0)`,
-                width: `${Math.ceil(enabledSolutions.length / cardsPerView) * 100}%`
+                width: `${totalPages * 100}%`,
+                transform: `translate3d(-${currentPage * 100}%, 0, 0)`
               }}
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
             >
-              {enabledSolutions.map((solution, index) => (
+              {/* Create pages */}
+              {Array.from({ length: totalPages }, (_, pageIndex) => (
                 <div
-                  key={solution.id}
-                  className="flex-none flex-shrink-0"
-                  style={{ width: `${100 / enabledSolutions.length}%` }}
+                  key={`page-${pageIndex}`}
+                  className="flex"
+                  style={{ width: `${100 / totalPages}%` }}
                 >
-                  <div className="h-full p-3">
-                    <VisualSolutionCardComponent
-                      solution={solution}
-                      index={index}
-                      isIntersecting={isIntersecting}
-                    />
-                  </div>
+                  {/* Cards for this page */}
+                  {enabledSolutions
+                    .slice(pageIndex * cardsPerView, (pageIndex + 1) * cardsPerView)
+                    .map((solution, cardIndex) => (
+                      <div
+                        key={solution.id}
+                        className="flex-1 p-3"
+                        style={{ width: `${100 / cardsPerView}%` }}
+                      >
+                        <VisualSolutionCardComponent
+                          solution={solution}
+                          index={pageIndex * cardsPerView + cardIndex}
+                          isIntersecting={isIntersecting}
+                        />
+                      </div>
+                    ))}
                 </div>
               ))}
             </div>
           </div>
 
           {/* Navigation Arrows */}
-          {enabledSolutions.length > cardsPerView && (
+          {totalPages > 1 && (
             <>
               <Button
                 variant="outline"
                 size="icon"
                 className={`absolute top-1/2 -translate-y-1/2 left-4 z-10 bg-background/90 backdrop-blur-sm border-border/50 hover:bg-accent hover:border-accent-foreground/20 transition-all duration-300 ${
-                  !canScrollPrev ? 'opacity-30 cursor-not-allowed' : 'opacity-90 hover:opacity-100'
+                  currentPage === 0 ? 'opacity-30 cursor-not-allowed' : 'opacity-90 hover:opacity-100'
                 } hidden md:flex`}
-                onClick={scrollPrev}
-                disabled={!canScrollPrev || isTransitioning}
+                onClick={prevPage}
+                disabled={currentPage === 0 || isTransitioning}
                 aria-label="הקלף הקודם"
               >
                 <ChevronRight className="h-4 w-4" />
@@ -338,10 +321,10 @@ const VisualSolutionsSection = () => {
                 variant="outline"
                 size="icon"
                 className={`absolute top-1/2 -translate-y-1/2 right-4 z-10 bg-background/90 backdrop-blur-sm border-border/50 hover:bg-accent hover:border-accent-foreground/20 transition-all duration-300 ${
-                  !canScrollNext ? 'opacity-30 cursor-not-allowed' : 'opacity-90 hover:opacity-100'
+                  currentPage === maxPage ? 'opacity-30 cursor-not-allowed' : 'opacity-90 hover:opacity-100'
                 } hidden md:flex`}
-                onClick={scrollNext}
-                disabled={!canScrollNext || isTransitioning}
+                onClick={nextPage}
+                disabled={currentPage === maxPage || isTransitioning}
                 aria-label="הקלף הבא"
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -351,15 +334,15 @@ const VisualSolutionsSection = () => {
         </div>
 
         {/* Dots indicator */}
-        {totalDots > 1 && (
+        {totalPages > 1 && (
           <div className="flex justify-center mt-8 gap-2">
-            {Array.from({ length: totalDots }, (_, index) => (
+            {Array.from({ length: totalPages }, (_, index) => (
               <button
                 key={index}
                 className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  index === currentIndex ? 'bg-primary' : 'bg-muted-foreground/30'
+                  index === currentPage ? 'bg-primary' : 'bg-muted-foreground/30'
                 }`}
-                onClick={() => slideToIndex(index)}
+                onClick={() => goToPage(index)}
                 disabled={isTransitioning}
                 aria-label={`עבור לקבוצת קלפים ${index + 1}`}
               />
