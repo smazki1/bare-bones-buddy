@@ -152,25 +152,27 @@ const VisualSolutionsSection = () => {
 
     loadLatestConfig();
 
-    // Listen for real-time updates
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'aiMaster:visualSolutions') {
-        console.log('Storage changed, reloading config');
-        const newConfig = visualSolutionsStore.safeGetConfigOrDefaults();
-        setConfig(newConfig);
-      }
+    // Listen for updates and always prefer cloud
+    const reloadFromCloud = async () => {
+      try {
+        const cloud = await visualSolutionsStore.fetchFromSupabase();
+        if (cloud) {
+          setConfig(cloud);
+          return;
+        }
+      } catch {}
+      setConfig(visualSolutionsStore.safeGetConfigOrDefaults());
     };
-    window.addEventListener('storage', handleStorageChange);
+
+    // Remove storage listener to avoid loops
 
     const handleLocalUpdate = () => {
-      console.log('Local update event received, reloading config');
-      const newConfig = visualSolutionsStore.safeGetConfigOrDefaults();
-      setConfig(newConfig);
+      console.log('Local update event received, reloading from cloud');
+      void reloadFromCloud();
     };
     window.addEventListener('visualSolutions:updated', handleLocalUpdate as EventListener);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('visualSolutions:updated', handleLocalUpdate as EventListener);
     };
   }, []);
@@ -281,7 +283,7 @@ const VisualSolutionsSection = () => {
               className="flex transition-transform duration-300 ease-out will-change-transform"
               style={{ 
                 transform: `translate3d(-${currentIndex * (100 / cardsPerView)}%, 0, 0)`,
-                width: `${Math.max(100, (enabledSolutions.length / cardsPerView) * 100)}%`
+                width: `${Math.max(100, (enabledSolutions.length * 100) / cardsPerView)}%`
               }}
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
@@ -290,14 +292,16 @@ const VisualSolutionsSection = () => {
               {enabledSolutions.map((solution, index) => (
                 <div
                   key={solution.id}
-                  className="flex-none px-3"
-                  style={{ width: `${100 / enabledSolutions.length}%` }}
+                  className="flex-none"
+                  style={{ width: `${100 / cardsPerView}%` }}
                 >
-                  <VisualSolutionCardComponent
-                    solution={solution}
-                    index={index}
-                    isIntersecting={isIntersecting}
-                  />
+                  <div className="h-full p-3">
+                    <VisualSolutionCardComponent
+                      solution={solution}
+                      index={index}
+                      isIntersecting={isIntersecting}
+                    />
+                  </div>
                 </div>
               ))}
             </div>

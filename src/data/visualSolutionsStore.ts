@@ -87,7 +87,7 @@ class VisualSolutionsStore {
       
       console.log('Visual solutions config saved successfully');
       
-      // Notify same-tab listeners with a small delay to ensure storage is written
+      // Notify listeners with a small delay to ensure storage is written
       setTimeout(() => {
         try {
           const updateEvent = new CustomEvent('visualSolutions:updated', { 
@@ -95,15 +95,6 @@ class VisualSolutionsStore {
           });
           window.dispatchEvent(updateEvent);
           console.log('Visual solutions update event dispatched');
-          
-          // Also trigger storage event manually for same-tab updates
-          const storageEvent = new StorageEvent('storage', {
-            key: STORAGE_KEY,
-            newValue: JSON.stringify(configToSave),
-            storageArea: localStorage
-          });
-          window.dispatchEvent(storageEvent);
-          console.log('Storage event dispatched manually');
         } catch (error) {
           console.error('Failed to dispatch update event:', error);
         }

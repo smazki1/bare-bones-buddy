@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,17 @@ import {
   Image as ImageIcon
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { GripVertical } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent
+} from '@dnd-kit/core';
+import { SortableContext, rectSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface Project {
   id: string;
@@ -46,7 +57,12 @@ export default function AdminProjects() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [savingOrder, setSavingOrder] = useState(false);
   const { toast } = useToast();
+  const originalOrderIdsRef = useRef<string[]>([]);
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
+  );
 
   useEffect(() => {
     fetchData();
@@ -69,7 +85,9 @@ export default function AdminProjects() {
       if (projectsResult.error) throw projectsResult.error;
       if (categoriesResult.error) throw categoriesResult.error;
 
-      setProjects((projectsResult.data || []).map(p => ({ ...p, size: (p as any).size || 'medium' as 'small' | 'medium' | 'large' })));
+      const ordered = (projectsResult.data || []).map(p => ({ ...p, size: (p as any).size || 'medium' as 'small' | 'medium' | 'large' }));
+      setProjects(ordered);
+      originalOrderIdsRef.current = ordered.map(p => p.id);
       setCategories(categoriesResult.data || []);
     } catch (error: any) {
       console.error('Error fetching data:', error);
@@ -80,6 +98,39 @@ export default function AdminProjects() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const hasOrderChanged = useMemo(() => {
+    const current = projects.map(p => p.id).join('|');
+    const initial = originalOrderIdsRef.current.join('|');
+    return current !== initial;
+  }, [projects]);
+
+  const onDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = projects.findIndex(p => p.id === active.id);
+    const newIndex = projects.findIndex(p => p.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+    setProjects(prev => arrayMove(prev, oldIndex, newIndex));
+  };
+
+  const saveOrder = async () => {
+    try {
+      setSavingOrder(true);
+      await Promise.all(
+        projects.map((p, index) =>
+          supabase.from('projects').update({ order_index: index }).eq('id', p.id)
+        )
+      );
+      originalOrderIdsRef.current = projects.map(p => p.id);
+      toast({ title: 'הצלחה', description: 'הסדר נשמר בהצלחה' });
+    } catch (error: any) {
+      console.error('Error saving order:', error);
+      toast({ title: 'שגיאה', description: 'שמירת הסדר נכשלה', variant: 'destructive' });
+    } finally {
+      setSavingOrder(false);
     }
   };
 
@@ -139,10 +190,19 @@ export default function AdminProjects() {
               ניהול פרויקטים ותמונות לפני ואחרי
             </p>
           </div>
-          <Button onClick={() => setShowForm(true)}>
-            <Plus className="w-4 h-4 ml-2" />
-            פרויקט חדש
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              disabled={!hasOrderChanged || savingOrder}
+              onClick={saveOrder}
+            >
+              {savingOrder ? 'שומר...' : 'שמור סדר'}
+            </Button>
+            <Button onClick={() => setShowForm(true)}>
+              <Plus className="w-4 h-4 ml-2" />
+              פרויקט חדש
+            </Button>
+          </div>
         </div>
 
         {/* Projects Grid */}
@@ -161,60 +221,22 @@ export default function AdminProjects() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.map((project) => (
-              <Card key={project.id} className="overflow-hidden">
-                <div className="aspect-square relative">
-                  <img
-                    src={project.image_after_thumb_url}
-                    alt={project.title}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = project.image_after_url;
-                    }}
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+            <SortableContext items={projects.map(p => p.id)} strategy={rectSortingStrategy}>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {projects.map((project) => (
+                  <SortableProjectCard
+                    key={project.id}
+                    id={project.id}
+                    project={project}
+                    onEdit={() => { setEditingProject(project); setShowForm(true); }}
+                    onDelete={() => handleDelete(project.id, project.title)}
+                    getCategoryNames={getCategoryNames}
                   />
-                </div>
-                
-                <CardContent className="p-4">
-                  <h3 className="font-semibold text-lg mb-2 font-assistant line-clamp-2">
-                    {project.title}
-                  </h3>
-                  {project.description && (
-                    <p className="text-muted-foreground text-sm mb-2 line-clamp-2 font-open-sans">
-                      {project.description}
-                    </p>
-                  )}
-                  <p className="text-xs text-muted-foreground mb-3 font-open-sans">
-                    קטגוריות: {getCategoryNames(project.category_ids) || 'ללא קטגוריה'}
-                  </p>
-                  
-                  <div className="flex justify-between items-center">
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setEditingProject(project);
-                          setShowForm(true);
-                        }}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(project.id, project.title)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         )}
 
         {/* Project Form Dialog */}
@@ -235,6 +257,88 @@ export default function AdminProjects() {
         )}
       </div>
     </AdminLayout>
+  );
+}
+
+function SortableProjectCard({
+  id,
+  project,
+  onEdit,
+  onDelete,
+  getCategoryNames,
+}: {
+  id: string;
+  project: Project;
+  onEdit: () => void;
+  onDelete: () => void;
+  getCategoryNames: (categoryIds: string[]) => string;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.9 : 1,
+    cursor: 'grab',
+  };
+
+  return (
+    <Card ref={setNodeRef} style={style} className="overflow-hidden">
+      <div className="aspect-square relative">
+        <button
+          type="button"
+          className="absolute top-2 left-2 z-10 inline-flex items-center gap-1 rounded bg-background/80 px-2 py-1 text-xs border shadow-sm"
+          aria-label="גרור לשינוי סדר"
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical className="w-4 h-4" />
+          גרור
+        </button>
+        <img
+          src={project.image_after_thumb_url}
+          alt={project.title}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = project.image_after_url;
+          }}
+        />
+      </div>
+      
+      <CardContent className="p-4">
+        <h3 className="font-semibold text-lg mb-2 font-assistant line-clamp-2">
+          {project.title}
+        </h3>
+        {project.description && (
+          <p className="text-muted-foreground text-sm mb-2 line-clamp-2 font-open-sans">
+            {project.description}
+          </p>
+        )}
+        <p className="text-xs text-muted-foreground mb-3 font-open-sans">
+          קטגוריות: {getCategoryNames(project.category_ids) || 'ללא קטגוריה'}
+        </p>
+        
+        <div className="flex justify-between items-center">
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onEdit}
+            >
+              <Edit className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onDelete}
+              className="text-destructive hover:text-destructive"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
