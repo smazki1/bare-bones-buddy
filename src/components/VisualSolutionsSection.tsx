@@ -355,9 +355,23 @@ const VisualSolutionsSection = () => {
           {/* Subtitle intentionally removed per request */}
         </motion.div>
 
-        {/* Responsive Grid (no carousel) */}
+        {/* Mobile: Horizontal scroll, Desktop: Responsive Grid */}
         <div className="relative max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Mobile Layout: Horizontal scrolling with large fixed-size cards */}
+          <div className="flex overflow-x-auto gap-6 pb-4 sm:hidden scroll-smooth">
+            {enabledSolutions.map((solution, index) => (
+              <div key={solution.id} className="w-80 flex-shrink-0">
+                <VisualSolutionCardComponent
+                  solution={solution}
+                  index={index}
+                  isIntersecting={isIntersecting}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop/Tablet Layout: Responsive grid */}
+          <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {enabledSolutions.map((solution, index) => (
               <div key={solution.id} className="p-3">
                 <VisualSolutionCardComponent
