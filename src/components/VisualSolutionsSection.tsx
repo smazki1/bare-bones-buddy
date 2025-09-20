@@ -6,6 +6,7 @@ import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { VisualSolutionsConfig, VisualSolutionCard } from '@/types/visualSolutions';
 import { visualSolutionsStore } from '@/data/visualSolutionsStore';
 import { Button } from '@/components/ui/button';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from '@/components/ui/carousel';
 
 interface VisualSolutionCardProps {
   solution: VisualSolutionCard;
@@ -15,7 +16,7 @@ interface VisualSolutionCardProps {
 
 const VisualSolutionCardComponent = ({ solution, index, isIntersecting }: VisualSolutionCardProps) => {
   const [cardRef, setCardRef] = useState<HTMLDivElement | null>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,6 +34,13 @@ const VisualSolutionCardComponent = ({ solution, index, isIntersecting }: Visual
     observer.observe(cardRef);
     return () => observer.disconnect();
   }, [cardRef]);
+
+  // Ensure visibility when the section itself is intersecting (fallback for transformed pages)
+  useEffect(() => {
+    if (isIntersecting) {
+      setIsVisible(true);
+    }
+  }, [isIntersecting]);
 
   const handleClick = useCallback(() => {
     navigate('/services');
@@ -99,29 +107,59 @@ const VisualSolutionsSection = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [pageWidth, setPageWidth] = useState(0);
+  const [embla, setEmbla] = useState<CarouselApi | null>(null);
 
   // Responsive cards per view
   const getCardsPerView = useCallback(() => {
     if (typeof window === 'undefined') return 3;
     const width = window.innerWidth;
+    console.log('Window width:', width);
     if (width < 640) return 1; // mobile
     if (width < 1024) return 2; // tablet
     return 3; // desktop
   }, []);
 
-  const [cardsPerView, setCardsPerView] = useState(getCardsPerView);
+  const [cardsPerView, setCardsPerView] = useState(() => getCardsPerView());
 
   // Update on resize
   useEffect(() => {
     const handleResize = () => {
-      setCardsPerView(getCardsPerView());
-      setCurrentPage(0); // Reset to first page
+      const next = getCardsPerView();
+      if (next !== cardsPerView) {
+        console.log('Resize -> cardsPerView change:', { from: cardsPerView, to: next });
+        setCardsPerView(next);
+      }
+      if (containerRef.current) {
+        const w = containerRef.current.clientWidth;
+        if (w && w !== pageWidth) setPageWidth(w);
+      }
     };
 
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [getCardsPerView]);
+  }, [getCardsPerView, cardsPerView, pageWidth]);
+
+  // Observe container width for reliable page width on mount and layout changes
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const el = containerRef.current;
+    const ro = new ResizeObserver((entries) => {
+      const cr = entries[0]?.contentRect;
+      if (!cr) return;
+      const w = Math.round(cr.width);
+      if (w && w !== pageWidth) setPageWidth(w);
+    });
+    ro.observe(el);
+    // Initial measure
+    const initialW = el.clientWidth;
+    if (initialW && initialW !== pageWidth) setPageWidth(initialW);
+    return () => ro.disconnect();
+  }, [pageWidth]);
+
+  
 
   // Load config from Supabase
   useEffect(() => {
@@ -176,25 +214,70 @@ const VisualSolutionsSection = () => {
   }, [config.items, cardsPerView]);
 
   // Calculate total pages
-  const totalPages = Math.ceil(enabledSolutions.length / cardsPerView);
+  const totalPages = Math.max(1, Math.ceil(enabledSolutions.length / cardsPerView));
   const maxPage = totalPages - 1;
+
+  // Clamp currentPage if totalPages shrinks (run after totalPages is defined)
+  useEffect(() => {
+    const newMax = Math.max(0, totalPages - 1);
+    if (currentPage > newMax) {
+      setCurrentPage(newMax);
+    }
+  }, [totalPages, currentPage]);
 
   // Navigation functions
   const goToPage = useCallback((pageIndex: number) => {
-    if (isTransitioning || !carouselRef.current) return;
+    if (isTransitioning) return;
     
     const targetPage = Math.max(0, Math.min(pageIndex, maxPage));
     if (targetPage === currentPage) return;
 
+    console.log('goToPage ->', { pageIndex, targetPage, currentPage, totalPages, cardsPerView });
     setIsTransitioning(true);
     setCurrentPage(targetPage);
-
-    // Apply transform
-    const translateX = -(targetPage * 100);
-    carouselRef.current.style.transform = `translate3d(${translateX}%, 0, 0)`;
+    // If embla exists, scroll via API
+    if (embla) embla.scrollTo(targetPage);
     
     setTimeout(() => setIsTransitioning(false), 300);
-  }, [currentPage, maxPage, isTransitioning]);
+  }, [currentPage, maxPage, isTransitioning, totalPages, cardsPerView, embla]);
+
+  // Sync currentPage with Embla selection for reliable indicator and content
+  useEffect(() => {
+    if (!embla) return;
+    const onSelect = () => {
+      try {
+        const snap = embla.selectedScrollSnap();
+        if (typeof snap === 'number' && snap !== currentPage) {
+          setCurrentPage(snap);
+        }
+      } catch {}
+    };
+    onSelect();
+    embla.on('select', onSelect);
+    embla.on('reInit', onSelect);
+    return () => {
+      embla.off('select', onSelect);
+      embla.off('reInit', onSelect);
+    };
+  }, [embla]);
+
+  // Scroll container to current page (more reliable across devices)
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const w = pageWidth || containerRef.current.clientWidth || 0;
+    if (!w) return;
+    containerRef.current.scrollTo({ left: currentPage * w, behavior: 'smooth' });
+  }, [currentPage, pageWidth]);
+
+  // Keep currentPage in sync with user-driven scroll (swipe/drag)
+  const handleContainerScroll = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const w = pageWidth || el.clientWidth || 0;
+    if (!w) return;
+    const page = Math.round(el.scrollLeft / w);
+    if (page !== currentPage) setCurrentPage(page);
+  }, [currentPage, pageWidth]);
 
   const nextPage = useCallback(() => {
     goToPage(currentPage + 1);
@@ -207,6 +290,7 @@ const VisualSolutionsSection = () => {
   // Touch handlers
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const SWIPE_THRESHOLD = 25; // px
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     setTouchEnd(null);
@@ -217,19 +301,23 @@ const VisualSolutionsSection = () => {
     setTouchEnd(e.targetTouches[0].clientX);
   }, []);
 
-  const handleTouchEnd = useCallback(() => {
-    if (!touchStart || !touchEnd) return;
-    
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    const endX = touchEnd ?? (e.changedTouches && e.changedTouches[0]?.clientX) ?? null;
+    if (touchStart === null || endX === null) return;
+
+    const distance = touchStart - endX;
+    const isLeftSwipe = distance > SWIPE_THRESHOLD;
+    const isRightSwipe = distance < -SWIPE_THRESHOLD;
 
     if (isLeftSwipe && currentPage < maxPage) {
       nextPage();
-    }
-    if (isRightSwipe && currentPage > 0) {
+    } else if (isRightSwipe && currentPage > 0) {
       prevPage();
     }
+
+    // reset for next gesture
+    setTouchStart(null);
+    setTouchEnd(null);
   }, [touchStart, touchEnd, currentPage, maxPage, nextPage, prevPage]);
 
   // Debug info
@@ -240,6 +328,14 @@ const VisualSolutionsSection = () => {
     currentPage,
     maxPage
   });
+  try {
+    console.log('Total pages being created:', totalPages);
+    console.log('Cards per page:', cardsPerView);
+    Array.from({ length: totalPages }, (_, pageIndex) => {
+      const pageCards = enabledSolutions.slice(pageIndex * cardsPerView, (pageIndex + 1) * cardsPerView);
+      console.log(`Page ${pageIndex}:`, pageCards.map(c => c.title));
+    });
+  } catch {}
 
   return (
     <section ref={ref} className="py-20 bg-muted/30 relative">
@@ -259,96 +355,22 @@ const VisualSolutionsSection = () => {
           {/* Subtitle intentionally removed per request */}
         </motion.div>
 
-        {/* Carousel Container */}
+        {/* Responsive Grid (no carousel) */}
         <div className="relative max-w-7xl mx-auto">
-          <div className="overflow-hidden">
-            <div 
-              ref={carouselRef}
-              className="flex transition-transform duration-300 ease-out"
-              style={{ 
-                width: `${totalPages * 100}%`,
-                transform: `translate3d(-${currentPage * 100}%, 0, 0)`
-              }}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-            >
-              {/* Create pages */}
-              {Array.from({ length: totalPages }, (_, pageIndex) => (
-                <div
-                  key={`page-${pageIndex}`}
-                  className="flex"
-                  style={{ width: `${100 / totalPages}%` }}
-                >
-                  {/* Cards for this page */}
-                  {enabledSolutions
-                    .slice(pageIndex * cardsPerView, (pageIndex + 1) * cardsPerView)
-                    .map((solution, cardIndex) => (
-                      <div
-                        key={solution.id}
-                        className="flex-1 p-3"
-                        style={{ width: `${100 / cardsPerView}%` }}
-                      >
-                        <VisualSolutionCardComponent
-                          solution={solution}
-                          index={pageIndex * cardsPerView + cardIndex}
-                          isIntersecting={isIntersecting}
-                        />
-                      </div>
-                    ))}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Navigation Arrows */}
-          {totalPages > 1 && (
-            <>
-              <Button
-                variant="outline"
-                size="icon"
-                className={`absolute top-1/2 -translate-y-1/2 left-4 z-10 bg-background/90 backdrop-blur-sm border-border/50 hover:bg-accent hover:border-accent-foreground/20 transition-all duration-300 ${
-                  currentPage === 0 ? 'opacity-30 cursor-not-allowed' : 'opacity-90 hover:opacity-100'
-                } hidden md:flex`}
-                onClick={prevPage}
-                disabled={currentPage === 0 || isTransitioning}
-                aria-label="הקלף הקודם"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-
-              <Button
-                variant="outline"
-                size="icon"
-                className={`absolute top-1/2 -translate-y-1/2 right-4 z-10 bg-background/90 backdrop-blur-sm border-border/50 hover:bg-accent hover:border-accent-foreground/20 transition-all duration-300 ${
-                  currentPage === maxPage ? 'opacity-30 cursor-not-allowed' : 'opacity-90 hover:opacity-100'
-                } hidden md:flex`}
-                onClick={nextPage}
-                disabled={currentPage === maxPage || isTransitioning}
-                aria-label="הקלף הבא"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-            </>
-          )}
-        </div>
-
-        {/* Dots indicator */}
-        {totalPages > 1 && (
-          <div className="flex justify-center mt-8 gap-2">
-            {Array.from({ length: totalPages }, (_, index) => (
-              <button
-                key={index}
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  index === currentPage ? 'bg-primary' : 'bg-muted-foreground/30'
-                }`}
-                onClick={() => goToPage(index)}
-                disabled={isTransitioning}
-                aria-label={`עבור לקבוצת קלפים ${index + 1}`}
-              />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {enabledSolutions.map((solution, index) => (
+              <div key={solution.id} className="p-3">
+                <VisualSolutionCardComponent
+                  solution={solution}
+                  index={index}
+                  isIntersecting={isIntersecting}
+                />
+              </div>
             ))}
           </div>
-        )}
+        </div>
+
+        {/* No dots/navigation needed for grid */}
       </div>
     </section>
   );
