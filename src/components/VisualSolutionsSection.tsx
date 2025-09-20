@@ -248,12 +248,10 @@ const VisualSolutionsSection = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-assistant font-bold text-primary mb-4 leading-tight max-w-4xl mx-auto">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-assistant font-bold text-primary mb-4 leading-tight max-w-4xl mx-auto drop-shadow-none">
             {config.sectionTitle}
           </h2>
-          <p className="text-xl text-muted-foreground font-open-sans max-w-2xl mx-auto">
-            {config.sectionSubtitle}
-          </p>
+          {/* Subtitle intentionally removed per request */}
         </motion.div>
 
         {/* Carousel Container */}
