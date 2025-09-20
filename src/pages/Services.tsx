@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import ServicesGrid from '@/components/services/ServicesGrid';
-import VisualSolutionsSection from '@/components/VisualSolutionsSection';
 import CTASection from '@/components/CTASection';
 
 const Services = () => {
@@ -12,7 +11,6 @@ const Services = () => {
       
       <main>
         <ServicesGrid />
-        <VisualSolutionsSection />
         <CTASection />
       </main>
       
