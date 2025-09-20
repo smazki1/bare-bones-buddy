@@ -194,9 +194,9 @@ export async function uploadSingleImage(
       throw new Error('הקובץ גדול מדי. מקסימום 10MB');
     }
     
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm'];
-    if (!allowedTypes.includes(file.type)) {
-      throw new Error('סוג קובץ לא נתמך. אנא השתמש ב-JPG, PNG, GIF, WebP או MP4');
+    const allowedImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedImageTypes.includes(file.type)) {
+      throw new Error('סוג קובץ לא נתמך לתמונות. אנא השתמש ב-JPG, PNG, GIF או WebP');
     }
     
     const result = await uploadAndProcessImage(file, bucket, folder);
@@ -215,6 +215,84 @@ export async function uploadSingleImage(
       userMessage = 'שגיאת רשת. אנא נסה שוב';
     } else if (error.message?.includes('size')) {
       userMessage = 'הקובץ גדול מדי';
+    } else if (error.message) {
+      userMessage = error.message;
+    }
+    
+    throw new Error(userMessage);
+  }
+}
+
+// Function for video uploads - simplified without image processing
+export async function uploadSingleVideo(
+  file: File,
+  bucket: string,
+  folder?: string
+): Promise<string> {
+  try {
+    console.log(`Starting video upload: ${file.name} to ${bucket}/${folder || ''}`);
+    
+    // Validate file
+    if (!file) {
+      throw new Error('לא נבחר קובץ וידאו');
+    }
+    
+    if (file.size > 50 * 1024 * 1024) { // 50MB limit for videos
+      throw new Error('קובץ הוידאו גדול מדי. מקסימום 50MB');
+    }
+    
+    const allowedVideoTypes = ['video/mp4', 'video/webm', 'video/avi', 'video/mov'];
+    if (!allowedVideoTypes.includes(file.type)) {
+      throw new Error('סוג קובץ וידאו לא נתמך. אנא השתמש ב-MP4, WebM, AVI או MOV');
+    }
+
+    // Generate unique filename
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${folder ? folder + '/' : ''}${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+    
+    console.log(`Generated video filename: ${fileName}`);
+
+    // Upload video file directly without processing
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from(bucket)
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (uploadError) {
+      console.error('Video upload error:', uploadError);
+      throw new Error(`שגיאה בהעלאה: ${uploadError.message}`);
+    }
+
+    if (!uploadData) {
+      throw new Error('לא התקבלה תגובה מהשרת');
+    }
+
+    console.log('Video uploaded successfully:', uploadData);
+
+    // Get video URL
+    const { data: { publicUrl } } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(fileName);
+
+    console.log('Video URL:', publicUrl);
+    return publicUrl;
+    
+  } catch (error: any) {
+    console.error('Video upload error:', error);
+    
+    // Provide user-friendly error messages
+    let userMessage = 'שגיאה בהעלאת הוידאו';
+    
+    if (error.message?.includes('permission')) {
+      userMessage = 'שגיאת הרשאה. אנא התחבר שוב';
+    } else if (error.message?.includes('network')) {
+      userMessage = 'שגיאת רשת. אנא נסה שוב';
+    } else if (error.message?.includes('size')) {
+      userMessage = 'קובץ הוידאו גדול מדי';
+    } else if (error.message?.includes('EntityTooLarge')) {
+      userMessage = 'קובץ הוידאו גדול מדי';
     } else if (error.message) {
       userMessage = error.message;
     }

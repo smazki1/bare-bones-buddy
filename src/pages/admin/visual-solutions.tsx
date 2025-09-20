@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
-import { uploadSingleImage } from '@/utils/imageProcessing';
+import { uploadSingleImage, uploadSingleVideo } from '@/utils/imageProcessing';
 import { Plus, Edit, Trash2, GripVertical, Upload, Eye, EyeOff } from 'lucide-react';
 import { visualSolutionsStore } from '@/data/visualSolutionsStore';
 import { VisualSolutionsConfig, VisualSolutionCard } from '@/types/visualSolutions';
@@ -452,7 +452,7 @@ function SolutionForm({ solution, onClose, onSave }: {
       if (videoFile) {
         try {
           console.log('Uploading video file:', videoFile.name);
-          videoSrc = await uploadSingleImage(videoFile, 'service-images', 'visual-solutions');
+          videoSrc = await uploadSingleVideo(videoFile, 'service-images', 'visual-solutions');
           console.log('Video uploaded successfully:', videoSrc);
         } catch (error) {
           console.error('Video upload failed:', error);
