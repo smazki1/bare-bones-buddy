@@ -46,7 +46,7 @@ const VisualSolutionCardComponent = ({ solution, index, isIntersecting }: Visual
       className="group cursor-pointer h-full"
       onClick={handleClick}
     >
-      <div className="relative overflow-hidden rounded-2xl shadow-elegant hover:shadow-warm transition-all duration-300 group-hover:scale-[1.02] aspect-[4/3] w-full">
+      <div className="relative overflow-hidden rounded-2xl shadow-elegant hover:shadow-warm transition-all duration-300 group-hover:scale-[1.02] aspect-[4/3] h-full">
         {solution.videoSrc ? (
           <video
             autoPlay
@@ -283,7 +283,7 @@ const VisualSolutionsSection = () => {
               className="flex flex-nowrap transition-transform duration-300 ease-out will-change-transform"
               style={{ 
                 transform: `translate3d(-${currentIndex * (100 / cardsPerView)}%, 0, 0)`,
-                width: `${Math.ceil(enabledSolutions.length / cardsPerView) * 100}%`
+                width: `${(enabledSolutions.length * 100) / cardsPerView}%`
               }}
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
@@ -293,7 +293,7 @@ const VisualSolutionsSection = () => {
                 <div
                   key={solution.id}
                   className="flex-none flex-shrink-0"
-                  style={{ width: `${100 / cardsPerView}%` }}
+                  style={{ width: `${100 / enabledSolutions.length}%` }}
                 >
                   <div className="h-full p-3">
                     <VisualSolutionCardComponent
