@@ -281,7 +281,7 @@ const VisualSolutionsSection = () => {
               className="flex transition-transform duration-300 ease-out will-change-transform"
               style={{ 
                 transform: `translate3d(-${currentIndex * (100 / cardsPerView)}%, 0, 0)`,
-                width: `${(enabledSolutions.length / cardsPerView) * 100}%`
+                width: `${Math.max(100, (enabledSolutions.length / cardsPerView) * 100)}%`
               }}
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
@@ -291,7 +291,7 @@ const VisualSolutionsSection = () => {
                 <div
                   key={solution.id}
                   className="flex-none px-3"
-                  style={{ width: `${100 / cardsPerView}%` }}
+                  style={{ width: `${100 / enabledSolutions.length}%` }}
                 >
                   <VisualSolutionCardComponent
                     solution={solution}
