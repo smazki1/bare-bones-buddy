@@ -209,7 +209,7 @@ const VisualSolutionsSection = () => {
       // Use requestAnimationFrame for smooth transition
       requestAnimationFrame(() => {
         if (carouselRef.current) {
-          const translateX = -(targetIndex * 100);
+          const translateX = -(targetIndex * (100 / cardsPerView));
           carouselRef.current.style.transform = `translate3d(${translateX}%, 0, 0)`;
         }
         
@@ -282,8 +282,8 @@ const VisualSolutionsSection = () => {
               ref={carouselRef}
               className="flex flex-nowrap transition-transform duration-300 ease-out will-change-transform"
               style={{ 
-                transform: `translate3d(-${currentIndex * 100}%, 0, 0)`,
-                width: `${enabledSolutions.length * (100 / cardsPerView)}%`
+                transform: `translate3d(-${currentIndex * (100 / cardsPerView)}%, 0, 0)`,
+                width: `${Math.ceil(enabledSolutions.length / cardsPerView) * 100}%`
               }}
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
@@ -293,7 +293,7 @@ const VisualSolutionsSection = () => {
                 <div
                   key={solution.id}
                   className="flex-none flex-shrink-0"
-                  style={{ width: `${100 / enabledSolutions.length}%` }}
+                  style={{ width: `${100 / cardsPerView}%` }}
                 >
                   <div className="h-full p-3">
                     <VisualSolutionCardComponent
