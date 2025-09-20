@@ -251,6 +251,17 @@ const VisualSolutionsSection = () => {
     }
   }, [touchStart, touchEnd, currentIndex, maxIndex, scrollNext, scrollPrev]);
 
+  console.log('Carousel Debug:', {
+    enabledSolutions: enabledSolutions.length,
+    cardsPerView,
+    currentIndex,
+    maxIndex,
+    totalSlides: Math.ceil(enabledSolutions.length / cardsPerView),
+    containerWidth: `${Math.ceil(enabledSolutions.length / cardsPerView) * 100}%`,
+    cardWidth: `${100 / enabledSolutions.length}%`,
+    transform: `translate3d(-${currentIndex * 100}%, 0, 0)`
+  });
+
   const canScrollNext = currentIndex < maxIndex;
   const canScrollPrev = currentIndex > 0;
 
@@ -293,7 +304,7 @@ const VisualSolutionsSection = () => {
                 <div
                   key={solution.id}
                   className="flex-none flex-shrink-0"
-                  style={{ width: `${100 / cardsPerView}%` }}
+                  style={{ width: `${100 / enabledSolutions.length}%` }}
                 >
                   <div className="h-full p-3">
                     <VisualSolutionCardComponent
