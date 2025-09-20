@@ -163,7 +163,7 @@ const HeroSection = () => {
           >
             <Button 
               size="lg" 
-              className="w-full sm:w-auto bg-secondary hover:bg-secondary/90 text-white px-6 sm:px-8 lg:px-10 py-4 sm:py-6 lg:py-7 text-sm sm:text-base lg:text-xl font-assistant font-bold shadow-warm transition-all duration-300 hover:scale-105"
+              className="w-full sm:w-auto bg-secondary hover:bg-secondary/90 text-white px-7 sm:px-9 lg:px-12 py-5 sm:py-7 lg:py-8 text-base sm:text-lg lg:text-2xl font-assistant font-bold shadow-warm transition-all duration-300 hover:scale-105"
               onClick={() => navigate('/services')}
             >
               {content.hero_cta_primary}
@@ -171,7 +171,7 @@ const HeroSection = () => {
             <Button 
               variant="outline" 
               size="lg"
-              className="w-full sm:w-auto bg-white/95 text-primary hover:bg-white px-6 sm:px-8 lg:px-10 py-4 sm:py-6 lg:py-7 text-sm sm:text-base lg:text-xl font-assistant font-bold border-0 shadow-lg transition-all duration-300 hover:scale-105"
+              className="w-full sm:w-auto bg-white/95 text-primary hover:bg-white px-7 sm:px-9 lg:px-12 py-5 sm:py-7 lg:py-8 text-base sm:text-lg lg:text-2xl font-assistant font-bold border-0 shadow-lg transition-all duration-300 hover:scale-105"
               onClick={() => navigate('/faq#top')}
             >
               {content.hero_cta_secondary}
