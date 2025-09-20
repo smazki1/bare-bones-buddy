@@ -46,7 +46,7 @@ const VisualSolutionCardComponent = ({ solution, index, isIntersecting }: Visual
       className="group cursor-pointer h-full"
       onClick={handleClick}
     >
-      <div className="relative overflow-hidden rounded-2xl shadow-elegant hover:shadow-warm transition-all duration-300 group-hover:scale-[1.02] aspect-[4/3] h-full">
+      <div className="relative overflow-hidden rounded-2xl shadow-elegant hover:shadow-warm transition-all duration-300 group-hover:scale-[1.02] aspect-[4/3] w-full">
         {solution.videoSrc ? (
           <video
             autoPlay
@@ -292,10 +292,10 @@ const VisualSolutionsSection = () => {
               {enabledSolutions.map((solution, index) => (
                 <div
                   key={solution.id}
-                  className="flex-none px-3"
+                  className="flex-none flex-shrink-0"
                   style={{ width: `${100 / cardsPerView}%` }}
                 >
-                  <div className="h-full">
+                  <div className="h-full p-3">
                     <VisualSolutionCardComponent
                       solution={solution}
                       index={index}
