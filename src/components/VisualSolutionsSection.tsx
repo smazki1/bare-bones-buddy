@@ -126,34 +126,38 @@ const VisualSolutionsSection = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, [getCardsPerView]);
 
-  // Load configuration
+  // Load configuration and sync with latest data
   useEffect(() => {
-    const loadConfig = () => {
-      const newConfig = visualSolutionsStore.safeGetConfigOrDefaults();
-      setConfig(newConfig);
+    const loadConfig = async () => {
+      try {
+        // First try to get from Supabase for latest data
+        const cloudConfig = await visualSolutionsStore.fetchFromSupabase();
+        if (cloudConfig) {
+          setConfig(cloudConfig);
+          return;
+        }
+      } catch (error) {
+        console.warn('Failed to fetch from Supabase:', error);
+      }
+      
+      // Fallback to local storage
+      const localConfig = visualSolutionsStore.safeGetConfigOrDefaults();
+      setConfig(localConfig);
     };
 
-    let didSetFromCloud = false;
-    (async () => {
-      try {
-        const cloud = await visualSolutionsStore.fetchFromSupabase();
-        if (cloud) {
-          setConfig(cloud);
-          didSetFromCloud = true;
-        }
-      } catch {}
-      if (!didSetFromCloud) loadConfig();
-    })();
+    loadConfig();
 
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'aiMaster:visualSolutions') {
-        loadConfig();
+        const newConfig = visualSolutionsStore.safeGetConfigOrDefaults();
+        setConfig(newConfig);
       }
     };
     window.addEventListener('storage', handleStorageChange);
 
-    const handleLocalUpdate = (e: CustomEvent) => {
-      loadConfig();
+    const handleLocalUpdate = () => {
+      const newConfig = visualSolutionsStore.safeGetConfigOrDefaults();
+      setConfig(newConfig);
     };
     window.addEventListener('visualSolutions:updated', handleLocalUpdate as EventListener);
 
