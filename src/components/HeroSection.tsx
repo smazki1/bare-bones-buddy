@@ -40,10 +40,10 @@ const HeroSection = () => {
       const { data } = await supabase
         .from('site_content')
         .select('key, value')
-        .in('key', ['hero_title', 'hero_subtitle', 'hero_cta_primary', 'hero_cta_secondary']);
+        .in('key', ['hero_title', 'hero_subtitle', 'hero_cta_secondary']);
 
       if (data) {
-        const allowedKeys = new Set(['hero_title', 'hero_subtitle', 'hero_cta_primary', 'hero_cta_secondary']);
+        const allowedKeys = new Set(['hero_title', 'hero_subtitle', 'hero_cta_secondary']);
         const contentMap = data.reduce((acc: Record<string, string>, item: { key: string; value: any }) => {
           if (
             allowedKeys.has(item.key) &&
