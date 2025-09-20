@@ -221,13 +221,7 @@ const Portfolio = () => {
                       </svg>
                     </motion.a>
                     
-                    <motion.a
-                      href="/faq"
-                      whileHover={{ scale: 1.02 }}
-                      className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-assistant font-semibold px-6 py-3 text-lg rounded-xl transition-all duration-300 inline-flex items-center gap-2"
-                    >
-                      איך זה עובד
-                    </motion.a>
+                    {/* Removed 'איך זה עובד' button on portfolio page per request */}
                     
                     <motion.a
                       href="/contact"

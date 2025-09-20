@@ -42,17 +42,6 @@ const PortfolioCTA = () => {
                 <ArrowLeft className="mr-2 h-5 w-5" />
               </a>
             </Button>
-            
-            <Button
-              variant="outline"
-              size="lg"
-              className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-assistant font-semibold px-6 py-3 text-lg transition-all duration-300"
-              asChild
-            >
-              <a href="/faq">
-                איך זה עובד
-              </a>
-            </Button>
           </motion.div>
         </motion.div>
       </div>
