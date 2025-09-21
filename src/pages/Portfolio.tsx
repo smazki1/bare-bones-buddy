@@ -216,7 +216,7 @@ const Portfolio = () => {
                   
                   <div className="flex flex-col gap-4 justify-center items-center">
                     <motion.a
-                      href="/contact"
+                      href="/services"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-assistant font-semibold px-8 py-4 text-lg rounded-xl shadow-warm hover:shadow-elegant transition-all duration-300 inline-flex items-center gap-2"
@@ -230,7 +230,7 @@ const Portfolio = () => {
                     {/* Removed 'איך זה עובד' button on portfolio page per request */}
                     
                     <motion.a
-                      href="/contact"
+                      href="/services"
                       whileHover={{ scale: 1.02 }}
                       className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-assistant font-semibold px-6 py-3 text-lg rounded-xl transition-all duration-300 inline-flex items-center gap-2"
                     >

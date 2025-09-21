@@ -21,9 +21,6 @@ const PortfolioCTA = () => {
           <h2 className="text-4xl md:text-5xl font-assistant font-bold text-primary mb-6">
             רוצה תוצאות כאלה למסעדה שלך?
           </h2>
-          <p className="text-xl text-muted-foreground font-open-sans mb-8 max-w-2xl mx-auto">
-            כל פרויקט מתחיל בשיחה אחת — בואו נתחיל גם את שלכם
-          </p>
           
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -37,7 +34,7 @@ const PortfolioCTA = () => {
               className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-assistant font-semibold px-8 py-4 text-lg shadow-warm hover:shadow-elegant transition-all duration-300"
               asChild
             >
-              <a href="/contact">
+              <a href="/services">
                 בואו ניצור קסם למסעדה / עסק שלכם
                 <ArrowLeft className="mr-2 h-5 w-5" />
               </a>

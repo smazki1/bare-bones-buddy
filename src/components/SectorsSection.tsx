@@ -95,28 +95,6 @@ const SectorsSection = () => {
           </div>
         </div>
 
-        {/* Contact Us Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isIntersecting ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
-          className="text-center mt-16"
-        >
-          <div className="bg-background/80 backdrop-blur-sm rounded-2xl p-8 border border-border/50 max-w-md mx-auto">
-            <p className="text-muted-foreground font-open-sans mb-6 text-lg" dir="rtl">
-              מחפשים שירות מותאם אישית?
-            </p>
-            <Button 
-              asChild
-              size="lg"
-              className="bg-secondary hover:bg-secondary/90 text-white font-assistant font-semibold px-8 py-4 rounded-xl transition-all duration-300 hover:scale-105 shadow-elegant hover:shadow-warm w-full"
-            >
-              <Link to="/contact#top">
-                ספרו לנו על העסק שלכם
-              </Link>
-            </Button>
-          </div>
-        </motion.div>
       </div>
     </section>
   );

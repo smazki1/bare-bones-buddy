@@ -14,7 +14,7 @@ export type MarketsConfig = {
 };
 
 export const DEFAULT_MARKETS_CONFIG: MarketsConfig = {
-  sectionTitle: "השירות שלנו מותאם לכל התעשיות",
+  sectionTitle: "השירות שלנו מותאם לכל עסק",
   sectionSubtitle: "בין אם אתה בעל מסעדה, מנהל בחנות אונליין, או מפיק אירועים - אנחנו יוצרים תמונות מקצועיות בשבריר מהמחיר לכל מטרה",
   items: [
     {
