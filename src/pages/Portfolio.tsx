@@ -25,6 +25,11 @@ const Portfolio = () => {
 
   const itemsPerPage = isMobile ? 4 : ITEMS_PER_PAGE;
 
+  // Ensure scroll to top on enter
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+  }, []);
+
   // Load projects from Supabase using Zustand store
   useEffect(() => {
     fetchProjects();

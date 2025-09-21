@@ -198,10 +198,10 @@ export default function AdminProjects() {
             >
               {savingOrder ? 'שומר...' : 'שמור סדר'}
             </Button>
-            <Button onClick={() => setShowForm(true)}>
-              <Plus className="w-4 h-4 ml-2" />
-              פרויקט חדש
-            </Button>
+          <Button onClick={() => setShowForm(true)}>
+            <Plus className="w-4 h-4 ml-2" />
+            פרויקט חדש
+          </Button>
           </div>
         </div>
 
@@ -223,8 +223,8 @@ export default function AdminProjects() {
         ) : (
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
             <SortableContext items={projects.map(p => p.id)} strategy={rectSortingStrategy}>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {projects.map((project) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {projects.map((project) => (
                   <SortableProjectCard
                     key={project.id}
                     id={project.id}
@@ -283,7 +283,7 @@ function SortableProjectCard({
 
   return (
     <Card ref={setNodeRef} style={style} className="overflow-hidden">
-      <div className="aspect-square relative">
+                <div className="aspect-square relative">
         <button
           type="button"
           className="absolute top-2 left-2 z-10 inline-flex items-center gap-1 rounded bg-background/80 px-2 py-1 text-xs border shadow-sm"
@@ -294,51 +294,51 @@ function SortableProjectCard({
           <GripVertical className="w-4 h-4" />
           גרור
         </button>
-        <img
-          src={project.image_after_thumb_url}
-          alt={project.title}
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.src = project.image_after_url;
-          }}
-        />
-      </div>
-      
-      <CardContent className="p-4">
-        <h3 className="font-semibold text-lg mb-2 font-assistant line-clamp-2">
-          {project.title}
-        </h3>
-        {project.description && (
-          <p className="text-muted-foreground text-sm mb-2 line-clamp-2 font-open-sans">
-            {project.description}
-          </p>
-        )}
-        <p className="text-xs text-muted-foreground mb-3 font-open-sans">
-          קטגוריות: {getCategoryNames(project.category_ids) || 'ללא קטגוריה'}
-        </p>
-        
-        <div className="flex justify-between items-center">
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
+                  <img
+                    src={project.image_after_thumb_url}
+                    alt={project.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = project.image_after_url;
+                    }}
+                  />
+                </div>
+                
+                <CardContent className="p-4">
+                  <h3 className="font-semibold text-lg mb-2 font-assistant line-clamp-2">
+                    {project.title}
+                  </h3>
+                  {project.description && (
+                    <p className="text-muted-foreground text-sm mb-2 line-clamp-2 font-open-sans">
+                      {project.description}
+                    </p>
+                  )}
+                  <p className="text-xs text-muted-foreground mb-3 font-open-sans">
+                    קטגוריות: {getCategoryNames(project.category_ids) || 'ללא קטגוריה'}
+                  </p>
+                  
+                  <div className="flex justify-between items-center">
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
               onClick={onEdit}
-            >
-              <Edit className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
               onClick={onDelete}
-              className="text-destructive hover:text-destructive"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
   );
 }
 
@@ -361,7 +361,7 @@ function ProjectForm({
     image_after_thumb_url: '',
     category_ids: [] as string[],
     order_index: 0,
-    size: 'medium' as 'small' | 'medium' | 'large'
+    size: 'large' as 'small' | 'medium' | 'large'
   });
   const [loading, setLoading] = useState(false);
   const [beforeImage, setBeforeImage] = useState<File | null>(null);
