@@ -99,6 +99,8 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
   error: null,
 
   fetchProjects: async () => {
+    // If already loaded, avoid re-fetch
+    if (get().projects.length > 0) return;
     set({ loading: true, error: null })
     
     try {

@@ -32,7 +32,8 @@ const Portfolio = () => {
 
   // Load projects from Supabase using Zustand store
   useEffect(() => {
-    fetchProjects();
+    // fetch projects immediately if not present, but don't block render
+    if (projects.length === 0) fetchProjects();
     
     // Listen for category updates and refresh projects
     const handleCategoryUpdate = () => {

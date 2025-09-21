@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { useNavigate } from 'react-router-dom';
 import Navigation from './Navigation';
 import { supabase } from '@/integrations/supabase/client';
+import { usePortfolioStore } from '@/data/portfolioStore';
 
 const HeroSection = () => {
   const [currentImage, setCurrentImage] = useState(0);
@@ -163,12 +164,23 @@ const HeroSection = () => {
           >
             <Button 
               size="lg" 
+<<<<<<< Updated upstream
               className="w-full sm:w-auto bg-secondary hover:bg-secondary/90 text-white px-7 sm:px-9 lg:px-12 py-5 sm:py-7 lg:py-8 text-base sm:text-lg lg:text-2xl font-assistant font-bold shadow-warm transition-all duration-300 hover:scale-105 pointer-events-auto"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 navigate('/portfolio');
               }}
+=======
+              className="w-full sm:w-auto bg-secondary hover:bg-secondary/90 text-white px-7 sm:px-9 lg:px-12 py-5 sm:py-7 lg:py-8 text-base sm:text-lg lg:text-2xl font-assistant font-bold shadow-warm transition-all duration-300 hover:scale-105"
+              onMouseEnter={() => {
+                try { usePortfolioStore.getState().fetchProjects(); } catch (_) {}
+              }}
+              onFocus={() => {
+                try { usePortfolioStore.getState().fetchProjects(); } catch (_) {}
+              }}
+              onClick={() => navigate('/portfolio')}
+>>>>>>> Stashed changes
             >
               {content.hero_cta_primary}
             </Button>
