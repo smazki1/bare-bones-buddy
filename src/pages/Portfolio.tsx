@@ -23,7 +23,7 @@ const Portfolio = () => {
   const [isLoading, setIsLoading] = useState(false);
   const isMobile = useIsMobile();
 
-  const itemsPerPage = isMobile ? 4 : ITEMS_PER_PAGE;
+  const itemsPerPage = isMobile ? 3 : ITEMS_PER_PAGE;
 
   // Ensure scroll to top on enter
   useEffect(() => {
@@ -111,7 +111,8 @@ const Portfolio = () => {
     p.businessName?.toLowerCase().includes(filter.toLowerCase()) ||
     p.category === filter
   );
-  const initialProjects = filteredData.slice(0, itemsPerPage * 2); // Load double amount
+  const initialCount = isMobile ? itemsPerPage : itemsPerPage * 2;
+  const initialProjects = filteredData.slice(0, initialCount);
   setVisibleProjects(initialProjects);
   setIsLoading(false);
   };
@@ -119,11 +120,12 @@ const Portfolio = () => {
   // Load initial projects when filtered projects change
   useEffect(() => {
     if (projects.length > 0) {
-      const initialProjects = filteredProjects.slice(0, itemsPerPage * 2); // Load more initially
+      const initialCount = isMobile ? itemsPerPage : itemsPerPage * 2; // Less on mobile
+      const initialProjects = filteredProjects.slice(0, initialCount);
       setVisibleProjects(initialProjects);
-      setCurrentPage(2); // Start from page 2 since we loaded more
+      setCurrentPage(isMobile ? 1 : 2);
     }
-  }, [filteredProjects, projects, itemsPerPage]);
+  }, [filteredProjects, projects, itemsPerPage, isMobile]);
 
   // Update filter from URL param on mount
   useEffect(() => {
@@ -133,13 +135,13 @@ const Portfolio = () => {
     }
   }, [searchParams]);
 
-  // Get first 6 projects for preloading
-  const projectsToPreload = visibleProjects.slice(0, 6);
+  // Get first 3 projects for preloading (less on mobile)
+  const projectsToPreload = visibleProjects.slice(0, isMobile ? 3 : 6);
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
         <Helmet>
-          {/* Preload first 6 images above the fold */}
+          {/* Preload first images above the fold */}
           {projectsToPreload.map(project => (
             project.imageAfter && (
               <link 
@@ -147,6 +149,7 @@ const Portfolio = () => {
                 rel="preload" 
                 as="image" 
                 href={project.imageAfter}
+                fetchPriority="high"
               />
             )
           ))}

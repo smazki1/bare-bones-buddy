@@ -22,7 +22,7 @@ const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridPro
     }));
   };
 
-  // Portfolio card size system with inline styles
+  // Portfolio card size system with responsive inline styles
   const getCardStyles = (size: Project['size']) => {
     const baseStyles = {
       position: 'relative' as const,
@@ -33,6 +33,20 @@ const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridPro
       transition: 'all 0.3s ease',
     };
 
+    // Mobile-first responsive sizing
+    const isMobile = window.innerWidth < 640;
+    
+    if (isMobile) {
+      // All cards same size on mobile for consistency and speed
+      return {
+        ...baseStyles,
+        width: '100%',
+        maxWidth: '400px',
+        height: '300px',
+      };
+    }
+
+    // Desktop sizing
     switch(size) {
       case 'small':
         return {
@@ -76,7 +90,7 @@ const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridPro
   return (
     <div className="w-full max-w-6xl mx-auto px-4">
       {/* Portfolio Grid */}
-      <div className="flex flex-wrap gap-6 justify-center">
+      <div className="flex flex-wrap gap-4 sm:gap-6 justify-center">
         {/* Render Projects */}
         {projects.map((project, index) => {
           const showBefore = toggleStates[project.id] || false;
@@ -104,7 +118,7 @@ const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridPro
               {/* Image Container */}
               <div style={{ width: '100%', height: '100%', position: 'relative' }}>
                 <img
-                  key={`${project.id}-${showBefore}`} // Force re-render for smooth transition
+                  key={`${project.id}-${showBefore}`}
                   src={currentImage}
                   alt={`${project.businessName} - ${showBefore ? 'לפני' : 'אחרי'}`}
                   style={{
@@ -114,7 +128,9 @@ const MasonryGrid = ({ projects, isLoading, hasReachedMaxItems }: MasonryGridPro
                     objectPosition: 'center',
                     transition: 'opacity 0.3s ease',
                   }}
-                  loading={index < 6 ? 'eager' : 'lazy'}
+                  loading={index < 3 ? 'eager' : 'lazy'}
+                  fetchPriority={index < 3 ? 'high' : 'auto'}
+                  decoding="async"
                 />
                 
                 {/* Gradient Overlay */}
