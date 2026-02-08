@@ -10,64 +10,25 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "14.1"
   }
   public: {
     Tables: {
       admin_users: {
         Row: {
           created_at: string
-          email: string
           id: string
           user_id: string
         }
         Insert: {
           created_at?: string
-          email: string
           id?: string
           user_id: string
         }
         Update: {
           created_at?: string
-          email?: string
           id?: string
           user_id?: string
-        }
-        Relationships: []
-      }
-      audit_log: {
-        Row: {
-          created_at: string | null
-          id: string
-          new_values: Json | null
-          old_values: Json | null
-          operation: string
-          record_id: string | null
-          table_name: string
-          user_email: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          new_values?: Json | null
-          old_values?: Json | null
-          operation: string
-          record_id?: string | null
-          table_name: string
-          user_email?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          new_values?: Json | null
-          old_values?: Json | null
-          operation?: string
-          record_id?: string | null
-          table_name?: string
-          user_email?: string | null
-          user_id?: string | null
         }
         Relationships: []
       }
@@ -84,8 +45,8 @@ export type Database = {
           active?: boolean | null
           created_at?: string
           id?: string
-          language: string
-          title: string
+          language?: string
+          title?: string
           url: string
         }
         Update: {
@@ -101,273 +62,136 @@ export type Database = {
       categories: {
         Row: {
           created_at: string
-          description: string | null
-          icon_url: string | null
+          description: string
+          icon_url: string
           id: string
-          is_active: boolean | null
+          is_active: boolean
           name: string
-          order_index: number | null
+          order_index: number
           slug: string
-          updated_at: string
         }
         Insert: {
           created_at?: string
-          description?: string | null
-          icon_url?: string | null
+          description?: string
+          icon_url?: string
           id?: string
-          is_active?: boolean | null
+          is_active?: boolean
           name: string
-          order_index?: number | null
+          order_index?: number
           slug: string
-          updated_at?: string
         }
         Update: {
           created_at?: string
-          description?: string | null
-          icon_url?: string | null
+          description?: string
+          icon_url?: string
           id?: string
-          is_active?: boolean | null
+          is_active?: boolean
           name?: string
-          order_index?: number | null
+          order_index?: number
           slug?: string
-          updated_at?: string
         }
         Relationships: []
-      }
-      client_images: {
-        Row: {
-          category: string
-          client_id: string
-          created_at: string | null
-          dish_name: string
-          id: string
-          image_after: string
-          image_before: string | null
-          service_type: string
-          updated_at: string | null
-        }
-        Insert: {
-          category?: string
-          client_id: string
-          created_at?: string | null
-          dish_name: string
-          id?: string
-          image_after: string
-          image_before?: string | null
-          service_type?: string
-          updated_at?: string | null
-        }
-        Update: {
-          category?: string
-          client_id?: string
-          created_at?: string | null
-          dish_name?: string
-          id?: string
-          image_after?: string
-          image_before?: string | null
-          service_type?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_images_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       clients: {
         Row: {
           business_name: string
-          business_type: string
-          contact_person: string | null
-          created_at: string | null
-          email: string | null
+          created_at: string
+          email: string
           id: string
-          monthly_savings: number | null
-          notes: string | null
-          package_type: string
-          phone: string | null
-          signup_date: string | null
+          name: string
+          phone: string
           status: string
-          updated_at: string | null
         }
         Insert: {
-          business_name: string
-          business_type: string
-          contact_person?: string | null
-          created_at?: string | null
-          email?: string | null
+          business_name?: string
+          created_at?: string
+          email?: string
           id?: string
-          monthly_savings?: number | null
-          notes?: string | null
-          package_type?: string
-          phone?: string | null
-          signup_date?: string | null
+          name?: string
+          phone?: string
           status?: string
-          updated_at?: string | null
         }
         Update: {
           business_name?: string
-          business_type?: string
-          contact_person?: string | null
-          created_at?: string | null
-          email?: string | null
+          created_at?: string
+          email?: string
           id?: string
-          monthly_savings?: number | null
-          notes?: string | null
-          package_type?: string
-          phone?: string | null
-          signup_date?: string | null
+          name?: string
+          phone?: string
           status?: string
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      dishes: {
-        Row: {
-          after_url: string | null
-          before_url: string | null
-          caption: string | null
-          combined_before_after_url: string | null
-          created_at: string
-          display_order: number | null
-          id: string
-          img_full: string
-          img_thumb: string
-          is_featured: boolean | null
-          keywords: string[] | null
-          title: string
-        }
-        Insert: {
-          after_url?: string | null
-          before_url?: string | null
-          caption?: string | null
-          combined_before_after_url?: string | null
-          created_at?: string
-          display_order?: number | null
-          id?: string
-          img_full: string
-          img_thumb: string
-          is_featured?: boolean | null
-          keywords?: string[] | null
-          title: string
-        }
-        Update: {
-          after_url?: string | null
-          before_url?: string | null
-          caption?: string | null
-          combined_before_after_url?: string | null
-          created_at?: string
-          display_order?: number | null
-          id?: string
-          img_full?: string
-          img_thumb?: string
-          is_featured?: boolean | null
-          keywords?: string[] | null
-          title?: string
         }
         Relationships: []
       }
       faq: {
         Row: {
           answer: string
-          category: string | null
+          category: string
           created_at: string
           id: string
-          is_active: boolean | null
-          order_index: number | null
+          is_active: boolean
+          order_index: number
           question: string
-          updated_at: string
         }
         Insert: {
           answer: string
-          category?: string | null
+          category?: string
           created_at?: string
           id?: string
-          is_active?: boolean | null
-          order_index?: number | null
+          is_active?: boolean
+          order_index?: number
           question: string
-          updated_at?: string
         }
         Update: {
           answer?: string
-          category?: string | null
+          category?: string
           created_at?: string
           id?: string
-          is_active?: boolean | null
-          order_index?: number | null
+          is_active?: boolean
+          order_index?: number
           question?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      landing_texts: {
-        Row: {
-          id: string
-          lang: string
-          name: string
-          updated_at: string | null
-          value: string
-        }
-        Insert: {
-          id?: string
-          lang?: string
-          name: string
-          updated_at?: string | null
-          value: string
-        }
-        Update: {
-          id?: string
-          lang?: string
-          name?: string
-          updated_at?: string | null
-          value?: string
         }
         Relationships: []
       }
       projects: {
         Row: {
-          category_ids: string[] | null
+          category_ids: string[]
           created_at: string
           description: string | null
           id: string
           image_after_thumb_url: string
           image_after_url: string
           image_before_url: string
-          is_featured: boolean | null
-          order_index: number | null
-          size: string | null
+          is_featured: boolean
+          order_index: number
+          size: string
           title: string
           updated_at: string
         }
         Insert: {
-          category_ids?: string[] | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          image_after_thumb_url: string
-          image_after_url: string
-          image_before_url: string
-          is_featured?: boolean | null
-          order_index?: number | null
-          size?: string | null
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          category_ids?: string[] | null
+          category_ids?: string[]
           created_at?: string
           description?: string | null
           id?: string
           image_after_thumb_url?: string
           image_after_url?: string
           image_before_url?: string
-          is_featured?: boolean | null
-          order_index?: number | null
-          size?: string | null
+          is_featured?: boolean
+          order_index?: number
+          size?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category_ids?: string[]
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_after_thumb_url?: string
+          image_after_url?: string
+          image_before_url?: string
+          is_featured?: boolean
+          order_index?: number
+          size?: string
           title?: string
           updated_at?: string
         }
@@ -376,64 +200,43 @@ export type Database = {
       services: {
         Row: {
           created_at: string
-          cta_link: string | null
-          cta_text: string | null
-          description: string | null
+          cta_link: string
+          cta_text: string
+          description: string
           id: string
-          image_url: string | null
-          is_active: boolean | null
+          image_url: string
+          is_active: boolean
           name: string
-          order_index: number | null
-          updated_at: string
+          order_index: number
         }
         Insert: {
           created_at?: string
-          cta_link?: string | null
-          cta_text?: string | null
-          description?: string | null
+          cta_link?: string
+          cta_text?: string
+          description?: string
           id?: string
-          image_url?: string | null
-          is_active?: boolean | null
+          image_url?: string
+          is_active?: boolean
           name: string
-          order_index?: number | null
-          updated_at?: string
+          order_index?: number
         }
         Update: {
           created_at?: string
-          cta_link?: string | null
-          cta_text?: string | null
-          description?: string | null
+          cta_link?: string
+          cta_text?: string
+          description?: string
           id?: string
-          image_url?: string | null
-          is_active?: boolean | null
+          image_url?: string
+          is_active?: boolean
           name?: string
-          order_index?: number | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      site_configs: {
-        Row: {
-          content: Json
-          key: string
-          updated_at: string
-        }
-        Insert: {
-          content: Json
-          key: string
-          updated_at?: string
-        }
-        Update: {
-          content?: Json
-          key?: string
-          updated_at?: string
+          order_index?: number
         }
         Relationships: []
       }
       site_content: {
         Row: {
           created_at: string
-          description: string | null
+          description: string
           id: string
           key: string
           updated_at: string
@@ -441,15 +244,15 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          description?: string | null
+          description?: string
           id?: string
           key: string
           updated_at?: string
-          value: string
+          value?: string
         }
         Update: {
           created_at?: string
-          description?: string | null
+          description?: string
           id?: string
           key?: string
           updated_at?: string
@@ -459,37 +262,34 @@ export type Database = {
       }
       testimonials: {
         Row: {
-          client_business: string | null
+          client_business: string
           client_name: string
           content: string
           created_at: string
           id: string
-          is_featured: boolean | null
-          order_index: number | null
-          rating: number | null
-          updated_at: string
+          is_featured: boolean
+          order_index: number
+          rating: number
         }
         Insert: {
-          client_business?: string | null
+          client_business?: string
           client_name: string
           content: string
           created_at?: string
           id?: string
-          is_featured?: boolean | null
-          order_index?: number | null
-          rating?: number | null
-          updated_at?: string
+          is_featured?: boolean
+          order_index?: number
+          rating?: number
         }
         Update: {
-          client_business?: string | null
+          client_business?: string
           client_name?: string
           content?: string
           created_at?: string
           id?: string
-          is_featured?: boolean | null
-          order_index?: number | null
-          rating?: number | null
-          updated_at?: string
+          is_featured?: boolean
+          order_index?: number
+          rating?: number
         }
         Relationships: []
       }
@@ -501,18 +301,10 @@ export type Database = {
       get_admin_user: {
         Args: { user_id_param: string }
         Returns: {
-          email: string
           user_id: string
         }[]
       }
-      link_admin_user: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      verify_admin_user: {
-        Args: { user_id_param: string }
-        Returns: boolean
-      }
+      link_admin_user: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
